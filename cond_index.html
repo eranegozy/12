@@ -39,45 +39,28 @@
       var gPlayers;
       var gCondData;
 
-      // receiving a message:
-      gSocket.on('allData', function(data) {
-         eeutils.print("allData:" + JSON.stringify(data));
-         gSongData = data[0];
-         gPlayers = data[1];
-         gCondData = data[2];
-         updateDisplay();
-      });
-
+      // Message handling:
       gSocket.on('songData', function(data) {
          eeutils.print("songData:" + JSON.stringify(data));
          gSongData = data;
-         updateDisplay();
+         updateSongDisplay();
       });
 
       gSocket.on('players', function(data) {
          eeutils.print("players:" + JSON.stringify(data));
          gPlayers = data;
-         updateDisplay();
+         updatePlayersDisplay();
       });
 
       gSocket.on('condData', function(data) {
          eeutils.print("condData:" + JSON.stringify(data));
          gCondData = data;
-         updateDisplay();
+         updateCondDisplay();
       });
 
-      var updateDisplay = function() {
-         // update song data
+      var updateSongDisplay = function() {
+         // update data from gSongData
          document.getElementById("songName").innerHTML = "Song: " + gSongData.name;
-
-         // update display from gCondData
-         var txt;
-         txt = gCondData.enabled ? "Enabled" : "Disabled";
-         document.getElementById("enabled").innerHTML = "Status: " + txt;
-         //txt = gCondData.sectionIdx >=0 ? gSongData.sections[gCondData.sectionIdx].name : "None";
-         txt = gCondData.sectionIdx >=0 ? gCondData.sectionIdx : "None";
-         document.getElementById("section").innerHTML = "Current Section: " + txt;
-
          // update the sections display from gSongData
          var parent = document.getElementById("displaySections");
          while(parent.childNodes.length > 0)
@@ -99,8 +82,10 @@
          element.innerHTML = "OFF"
          element.onclick = buttonFunc(-1);
          parent.appendChild(element);
-
-         // update players:
+      }
+      
+      var updatePlayersDisplay = function() {
+         // update display from gPlayers data
          var parent = document.getElementById("displayPlayers");
          while(parent.childNodes.length > 0)
             parent.removeChild(parent.childNodes[0]);
@@ -113,6 +98,18 @@
             parent.appendChild(element);
          }
       }
+
+      var updateCondDisplay = function() {
+         // update display from gCondData
+         var txt;
+         txt = gCondData.enabled ? "Enabled" : "Disabled";
+         document.getElementById("enabled").innerHTML = "Status: " + txt;
+         //txt = gCondData.sectionIdx >=0 ? gSongData.sections[gCondData.sectionIdx].name : "None";
+         txt = gCondData.sectionIdx >=0 ? gCondData.sectionIdx : "None";
+         document.getElementById("section").innerHTML = "Current Section: " + txt;
+      }
+
+
 
       var setEnabled = function(b)
       {

@@ -132,7 +132,10 @@ var gCondData =
 var gCondNS = io.of('/cond');
 gCondNS.on('connection', function(socket) {
   console.log('Conductor connected');
-  socket.emit('allData', [gSongData, gPlayers, gCondData]);
+  // socket.emit('allData', [gSongData, gPlayers, gCondData]);
+  socket.emit('songData', gSongData);
+  socket.emit('players', gPlayers);
+  socket.emit('condData', gCondData);
 
   socket.on('disconnect', function() {
     console.log('Conductor disconnected');
