@@ -1,0 +1,188 @@
+<!DOCTYPE html>
+<html>
+<head>
+   <title>12 Mobile Player</title>
+   <script src="eeutils.js" type="text/javascript"></script>
+   <script src="/socket.io/socket.io.js"></script>
+</head>
+
+<body onload='eeutils.init("output");'>
+
+   <h1>OSC Mobile Player</h1>
+
+
+   <div id="page1" style="display:none">
+      <form id="form1" onsubmit="setName(this.name.value); return false;">
+         Enter Your Name: <input type="text" id="name" autocomplete="off">
+        <input type="submit" value="Next">
+      </form>
+   </div>
+
+   <div id="page2" style="display:none">
+      <select id="ddlSection" onchange="setSection(this.value)">
+         <option value="-1">Pick a Section</option>
+      </select>
+
+      <br>
+      <button type="button" onclick="gotoPage(1)">Back</button>
+      <br>
+      <button type="button" onclick="if(gPlayerData.sectionIdx >= 0) gotoPage(3)">Next</button>
+   </div>
+
+   <div id="page3" style="display:none">
+      <p id="displayName"></p>
+      <p id="displaySection"></p>
+      <p id="displayCurSection"></p>
+
+      <button type="button" onclick="gotoPage(2)">Back</button>
+      <hr>
+
+      <div id="inst_buttons" style="display:none">
+         <h2>Buttons Instrument</h2>
+         <button type="button" onclick="control(0,1)">Control 1</button>
+         <button type="button" onclick="control(0,2)">Control 2</button>
+         <button type="button" onclick="control(0,3)">Control 3</button>
+      </div>
+
+      <div id="inst_1d" style="display:none">
+         <h2>1D Slider Instrument</h2>
+         <input id="slider1" type="range" min="0" max="500">Slider1</input>
+      </div>
+
+      <div id="inst_2d" style="display:none">
+         <h2>2D Instrument</h2>
+      </div>
+
+   </div>
+
+   <hr>
+   <p id="output"><b>Output:</b><br></p>
+
+   <script>
+      eeutils.print(location.host);
+      var gSocket = io(location.host + '/player');
+      var gPlayerData = {name:"", sectionIdx:0};
+      var gSongData;
+      var gStatusData;
+
+      var gDevID = getCookie("devID");
+      if (gDevID == '')
+      {
+         gDevID = Math.random();
+         eeutils.print("no cookie found. Creating:" + gDevID);
+         setCookie("devID", gDevID, 1);
+      }
+      else
+      {
+         eeutils.print("cookie found:" + gDevID);
+      }
+
+      // message handling:
+      gSocket.on('songData', function(data) {
+         eeutils.print("received songData:" + JSON.stringify(data));
+         gSongData = data;
+         setSectionOptions(data.sections);
+      });
+
+      gSocket.on('statusData', function(data) {
+         eeutils.print("received statusData:" + JSON.stringify(data));
+         gStatusData = data;
+         configureInstrument();
+      });
+
+      var gCurPage = 0;
+      var gotoPage = function(p)
+      {
+         if (gCurPage)
+            document.getElementById('page' + gCurPage).style.display='none';
+         gCurPage = p;
+         enterPage(p);
+         document.getElementById('page' + gCurPage).style.display='';
+      }
+
+      // this is a little hacky. Should really be distributed and associated with a page's code.
+      var enterPage = function(p)
+      {
+         if (p == 3)
+         {
+            // display name and section from gPlayerData
+            document.getElementById("displayName").innerHTML = gPlayerData.name;
+            var name = gSongData.sections[gPlayerData.sectionIdx].name;
+            document.getElementById("displaySection").innerHTML = 'Section: ' + name;
+
+            // send gPlayerData to server:
+            gSocket.emit('playerData', gPlayerData);
+         }
+      }
+
+      var setName = function(val)
+      {
+         if (!val)
+            return;
+         eeutils.print("setName: " + val);
+         gPlayerData.name = val;
+         gotoPage(2);
+      }
+
+      var setSection = function(val)
+      {
+         eeutils.print("setSection:" + val);
+         gPlayerData.sectionIdx = parseInt(val); // convert to int from string
+      }
+
+
+      var control = function(i)
+      {
+         eeutils.print("sending control");
+         gSocket.emit('control', i);
+      }
+
+      var gCurInst;
+      var configureInstrument = function()
+      {
+         // first, hide the old inst:
+         if (gCurInst)
+            document.getElementById('inst_' + gCurInst).style.display='none';
+
+         // now, show the new inst
+         var inst = gSongData.sections[gPlayerData.sectionIdx].instruments[gStatusData.instIdx];
+         eeutils.print("configing" + JSON.stringify(inst));
+         
+         gCurInst = inst.type;
+         document.getElementById('inst_' + gCurInst).style.display='';
+
+         switch(inst.type)
+         {
+            case 'buttons':
+            break;
+
+            case '1d':
+            break;
+
+            case '2d':
+            break;
+         }
+      }
+
+      var setSectionOptions = function(sections)
+      {
+         var x = document.getElementById("ddlSection");
+         // remove all but the first one (which is the title of the selection UI):
+         while(x.options.length > 1)
+            x.remove(1);
+
+         // add the sections.
+         for(var i=0; i < sections.length; ++i)
+         {
+            var option = document.createElement("option");
+            option.text = sections[i].name;
+            option.value = i;
+            x.add(option, x.options.length);
+         }
+      }
+
+      gotoPage(1);
+
+   </script>
+</body>
+</html> 

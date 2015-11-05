@@ -1,0 +1,61 @@
+// config.json
+{
+   "name" : "*12*",
+   "sections" : [
+   {
+      "name": "Part one. Pices. Flute, Clarinet, Oboe",
+      "instruments":[
+         {  "name": "one",
+            "type": "buttons",
+            "num": 8
+         },
+         {  "name": "two",
+            "type": "buttons",
+            "samples": [
+               "audio/beep.wav", "audio/frog.wav", "audio/hit.wav"
+            ]
+         },
+         {  "name": "three",
+            "type": "1d",
+            "num": 3
+         },
+         {  "name": "four",
+            "type": "2d",
+         }
+      ],
+      "chords": [
+         "100100001000",
+         "101010101010",
+         "100100001000",
+      ]
+   },
+
+   {
+      "name": "Part two. Scorpion. Violin, Viola",
+      "instruments":[
+         {  "name": "one",
+            "type": "buttons",
+            "num": 8
+         },
+         {  "name": "two",
+            "type": "buttons",
+            "num": 8
+         },
+         {  "name": "three",
+            "type": "1d",
+            "num": 3
+         },
+         {  "name": "four",
+            "type": "2d",
+         },
+      ],
+      "chords": [
+         "100100001000",
+         "101010101010",
+         "100100001000",
+      ]
+   },
+
+   ]
+
+}

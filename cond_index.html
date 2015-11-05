@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html>
+<head>
+   <title>Conductor</title>
+   <script src="eeutils.js" type="text/javascript"></script>
+   <script src="/socket.io/socket.io.js"></script>
+</head>
+
+<body onload='eeutils.init("output");'>
+
+   <h1>Conductor</h1>
+
+   <h2 id="songName"></h2>
+   <button type="button" onclick="setEnabled(true)">Enable</button>
+   <button type="button" onclick="setEnabled(false)">Disable</button>
+   <p id="enabled"></p>
+   
+   <h2>Sections</h2>
+   <div id="displaySections">
+      <button type="button" onclick="setSection(0)">Section OFF</button>
+      <button type="button" onclick="setSection(1)">Section 1</button>
+      <button type="button" onclick="setSection(2)">Section 2</button>
+      <button type="button" onclick="setSection(3)">Section 3</button>
+   </div>
+   <p id="section"></p>
+
+   <h2>Players</h2>
+      <ul id="displayPlayers">
+         <li>Harry</li>
+         <li>George</li>
+      </ul>
+   <hr>
+   <p id="output"><b>Output:</b><br/></p>
+
+   <script>
+      eeutils.print(location.host);
+      var gSocket = io(location.host + '/cond');
+      var gSongData;
+      var gPlayers;
+      var gCondData;
+
+      // receiving a message:
+      gSocket.on('allData', function(data) {
+         eeutils.print("allData:" + JSON.stringify(data));
+         gSongData = data[0];
+         gPlayers = data[1];
+         gCondData = data[2];
+         updateDisplay();
+      });
+
+      gSocket.on('songData', function(data) {
+         eeutils.print("songData:" + JSON.stringify(data));
+         gSongData = data;
+         updateDisplay();
+      });
+
+      gSocket.on('players', function(data) {
+         eeutils.print("players:" + JSON.stringify(data));
+         gPlayers = data;
+         updateDisplay();
+      });
+
+      gSocket.on('condData', function(data) {
+         eeutils.print("condData:" + JSON.stringify(data));
+         gCondData = data;
+         updateDisplay();
+      });
+
+      var updateDisplay = function() {
+         // update song data
+         document.getElementById("songName").innerHTML = "Song: " + gSongData.name;
+
+         // update display from gCondData
+         var txt;
+         txt = gCondData.enabled ? "Enabled" : "Disabled";
+         document.getElementById("enabled").innerHTML = "Status: " + txt;
+         //txt = gCondData.sectionIdx >=0 ? gSongData.sections[gCondData.sectionIdx].name : "None";
+         txt = gCondData.sectionIdx >=0 ? gCondData.sectionIdx : "None";
+         document.getElementById("section").innerHTML = "Current Section: " + txt;
+
+         // update the sections display from gSongData
+         var parent = document.getElementById("displaySections");
+         while(parent.childNodes.length > 0)
+            parent.removeChild(parent.childNodes[0]);
+
+         var buttonFunc = function(b) { return function() { setSection(b); } };
+         var sections = gSongData.sections;
+         for(var i=0; i < sections.length; ++i)
+         {
+            var element = document.createElement("button");
+            element.type = 'button';
+            element.innerHTML = sections[i].name;
+            element.onclick = buttonFunc(i);
+            parent.appendChild(element);
+         }
+         // add the OFF button:
+         var element = document.createElement("button");
+         element.type = 'button';
+         element.innerHTML = "OFF"
+         element.onclick = buttonFunc(-1);
+         parent.appendChild(element);
+
+         // update players:
+         var parent = document.getElementById("displayPlayers");
+         while(parent.childNodes.length > 0)
+            parent.removeChild(parent.childNodes[0]);
+
+         for(var i=0; i < gPlayers.length; ++i)
+         {
+            var element = document.createElement("LI");
+            var p = gPlayers[i]
+            element.innerHTML = p.name + ' section:' + p.sectionIdx + ' inst:' + p.instIdx;
+            parent.appendChild(element);
+         }
+      }
+
+      var setEnabled = function(b)
+      {
+         gSocket.emit('set', ['enabled', b]);
+      }
+
+      var setSection = function(i)
+      {
+         gSocket.emit('set', ['sectionIdx', i]);
+      }
+
+   </script>
+</body>
+</html> 
