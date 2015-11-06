@@ -2,6 +2,8 @@
 <html>
 <head>
    <title>12 Mobile Player</title>
+   <meta name="viewport" content="initial-scale=1.0,minimum-scale=1.0,maximum-scale=1.0,width=device-width,height=device-height,user-scalable=no">
+   <meta name="apple-mobile-web-app-capable" content="yes">
    <script src="eeutils.js" type="text/javascript"></script>
    <script src="/socket.io/socket.io.js"></script>
 </head>
@@ -11,6 +13,7 @@
    <h1>OSC Mobile Player</h1>
 
 
+   <!-- Page 1: Enter Name Form -->
    <div id="page1" style="display:none">
       <form id="form1" onsubmit="setName(this.name.value); return false;">
          Enter Your Name: <input type="text" id="name" autocomplete="off">
@@ -18,30 +21,31 @@
       </form>
    </div>
 
+   <!-- Page 2: Enter Section -->
    <div id="page2" style="display:none">
       <select id="ddlSection" onchange="setSection(this.value)">
-         <option value="-1">Pick a Section</option>
+         <option value="null">Pick a Section</option>
       </select>
 
       <br>
       <button type="button" onclick="gotoPage(1)">Back</button>
       <br>
-      <button type="button" onclick="if(gPlayerData.sectionIdx >= 0) gotoPage(3)">Next</button>
+      <button type="button" onclick="if(gPlayerData.sectionIdx != null) gotoPage(3)">Next</button>
    </div>
 
+   <!-- Page 3: Live Display of Instrument / Status -->
    <div id="page3" style="display:none">
       <p id="displayName"></p>
       <p id="displaySection"></p>
-      <p id="displayCurSection"></p>
-
+      <p id="instEnabled"></p>
       <button type="button" onclick="gotoPage(2)">Back</button>
       <hr>
 
       <div id="inst_buttons" style="display:none">
          <h2>Buttons Instrument</h2>
-         <button type="button" onclick="control(0,1)">Control 1</button>
-         <button type="button" onclick="control(0,2)">Control 2</button>
-         <button type="button" onclick="control(0,3)">Control 3</button>
+         <button class="inst" type="button" onclick="control(1)">Control 1</button>
+         <button class="inst" type="button" onclick="control(2)">Control 2</button>
+         <button class="inst" type="button" onclick="control(3)">Control 3</button>
       </div>
 
       <div id="inst_1d" style="display:none">
@@ -61,9 +65,9 @@
    <script>
       eeutils.print(location.host);
       var gSocket = io(location.host + '/player');
-      var gPlayerData = {name:"", sectionIdx:0};
+      var gPlayerData = {};
       var gSongData;
-      var gStatusData;
+      var gCondData;
 
       var gDevID = getCookie("devID");
       if (gDevID == '')
@@ -78,16 +82,41 @@
       }
 
       // message handling:
+      gSocket.on('allData', function(data) {
+         eeutils.print("allData:" + JSON.stringify(data));
+         gPlayerData = data[0];
+         gSongData = data[1];
+         gCondData = data[2];
+
+         updateSectionPickerDisplay();
+         updatePlayerDisplay();
+         updateInstrumentDisplay();
+         updateInstrumentEnabledDisplay();
+      });
+
+      gSocket.on('playerData', function(data) {
+         eeutils.print("received playerData:" + JSON.stringify(data));
+         gPlayerData = data;
+
+         updatePlayerDisplay();
+         updateInstrumentDisplay();
+         updateInstrumentEnabledDisplay();
+      });
+
       gSocket.on('songData', function(data) {
          eeutils.print("received songData:" + JSON.stringify(data));
          gSongData = data;
-         setSectionOptions(data.sections);
+
+         updateSectionPickerDisplay();
+         updatePlayerDisplay();
+         updateInstrumentDisplay();
       });
 
-      gSocket.on('statusData', function(data) {
-         eeutils.print("received statusData:" + JSON.stringify(data));
-         gStatusData = data;
-         configureInstrument();
+      gSocket.on('condData', function(data) {
+         eeutils.print("received condData:" + JSON.stringify(data));
+         gCondData = data;
+
+         updateInstrumentEnabledDisplay();
       });
 
       var gCurPage = 0;
@@ -96,23 +125,7 @@
          if (gCurPage)
             document.getElementById('page' + gCurPage).style.display='none';
          gCurPage = p;
-         enterPage(p);
          document.getElementById('page' + gCurPage).style.display='';
-      }
-
-      // this is a little hacky. Should really be distributed and associated with a page's code.
-      var enterPage = function(p)
-      {
-         if (p == 3)
-         {
-            // display name and section from gPlayerData
-            document.getElementById("displayName").innerHTML = gPlayerData.name;
-            var name = gSongData.sections[gPlayerData.sectionIdx].name;
-            document.getElementById("displaySection").innerHTML = 'Section: ' + name;
-
-            // send gPlayerData to server:
-            gSocket.emit('playerData', gPlayerData);
-         }
       }
 
       var setName = function(val)
@@ -120,32 +133,70 @@
          if (!val)
             return;
          eeutils.print("setName: " + val);
-         gPlayerData.name = val;
+
+         // send name choice to server:
+         gSocket.emit('set', ['name', val]);
+
          gotoPage(2);
       }
 
       var setSection = function(val)
       {
          eeutils.print("setSection:" + val);
-         gPlayerData.sectionIdx = parseInt(val); // convert to int from string
+         var sec = val;
+         if (sec != null) sec = parseInt(val);
+         // send name choice to server:
+         gSocket.emit('set', ['sectionIdx', sec]);
       }
 
+      // var control = function(i)
+      // {
+      //    eeutils.print("sending control");
+      //    gSocket.emit('control', i);
+      // }
 
-      var control = function(i)
+      var updateSectionPickerDisplay = function()
       {
-         eeutils.print("sending control");
-         gSocket.emit('control', i);
+         // update section drop-drown list
+         var x = document.getElementById("ddlSection");
+         // remove all but the first one (which is the title of the selection UI):
+         while(x.options.length > 1)
+            x.remove(1);
+
+         // add the sections.
+         for(var i=0; i < gSongData.sections.length; ++i)
+         {
+            var option = document.createElement("option");
+            option.text = gSongData.sections[i].name;
+            option.value = i;
+            x.add(option, x.options.length);
+         }
+      }
+
+      var updatePlayerDisplay = function()
+      {
+         // display name and section from gPlayerData
+         document.getElementById("displayName").innerHTML = 'Name: ' + gPlayerData.name;
+         if (gPlayerData.sectionIdx != null) 
+         {
+            var name = gSongData.sections[gPlayerData.sectionIdx].name;
+            document.getElementById("displaySection").innerHTML = 'Your Section: ' + name;
+         }
       }
 
       var gCurInst;
-      var configureInstrument = function()
+      var updateInstrumentDisplay = function()
       {
          // first, hide the old inst:
          if (gCurInst)
             document.getElementById('inst_' + gCurInst).style.display='none';
 
+         // check if an instrument is selected...
+         if (gPlayerData.sectionIdx == null || gPlayerData.instIdx == null)
+            return;
+
          // now, show the new inst
-         var inst = gSongData.sections[gPlayerData.sectionIdx].instruments[gStatusData.instIdx];
+         var inst = gSongData.sections[gPlayerData.sectionIdx].instruments[gPlayerData.instIdx];
          eeutils.print("configing" + JSON.stringify(inst));
          
          gCurInst = inst.type;
@@ -164,21 +215,19 @@
          }
       }
 
-      var setSectionOptions = function(sections)
+      var updateInstrumentEnabledDisplay = function()
       {
-         var x = document.getElementById("ddlSection");
-         // remove all but the first one (which is the title of the selection UI):
-         while(x.options.length > 1)
-            x.remove(1);
+         // update if the instrument is enabled now based on what section we are in.
+         var enabled = gPlayerData.sectionIdx == gCondData.sectionIdx;
+         var txt =  enabled ? "ENABLED" : "OFF";
+         document.getElementById("instEnabled").innerHTML = "Instrument Status: " + txt;
 
-         // add the sections.
-         for(var i=0; i < sections.length; ++i)
-         {
-            var option = document.createElement("option");
-            option.text = sections[i].name;
-            option.value = i;
-            x.add(option, x.options.length);
-         }
+         // enable / disable buttons:
+         var disabled_txt = enabled ? "" : "disabled";
+         var elems = document.getElementsByClassName("inst");
+         for (var i = 0; i < elems.length; i++) {
+            elems[i].disabled = disabled_txt;
+         };
       }
 
       gotoPage(1);

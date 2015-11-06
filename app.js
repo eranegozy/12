@@ -113,7 +113,7 @@ var onMaxMsg = function(msg)
     {
       console.log("removing gMaxSender");
       gMaxSender.kill();
-      gMaxSender = undefined;
+      gMaxSender = null;
     }
   }
 }
@@ -125,17 +125,13 @@ var onMaxMsg = function(msg)
 //
 var gCondData =
 {
-  'enabled': false,
-  'sectionIdx': -1,
+  'sectionIdx': null,
 }
 
 var gCondNS = io.of('/cond');
 gCondNS.on('connection', function(socket) {
   console.log('Conductor connected');
-  // socket.emit('allData', [gSongData, gPlayers, gCondData]);
-  socket.emit('songData', gSongData);
-  socket.emit('players', gPlayers);
-  socket.emit('condData', gCondData);
+  socket.emit('allData', [gSongData, gPlayers, gCondData]);
 
   socket.on('disconnect', function() {
     console.log('Conductor disconnected');
@@ -145,14 +141,19 @@ gCondNS.on('connection', function(socket) {
     console.log(msg);
     var key = msg[0];
     gCondData[key] = msg[1];
-    gCondNS.emit('condData', gCondData)
+    gCondNS.emit('condData', gCondData);
+    gPlayerNS.emit('condData', gCondData);
   });
 });
 
 
-// assign an instrument to this player, based on his chosen section
-var assignInstrument = function(p)
+// find an instrument for this player, based on his chosen section
+// return the index to the instrument, or null
+var selectInstrument = function(p)
 {
+  if (p.sectionIdx == null)
+    return null;
+
   // first find all instruments assigned to all player except for player p
   var sec = p.sectionIdx;
   var maxSlots = gSongData.sections[sec].instruments.length;
@@ -162,7 +163,7 @@ var assignInstrument = function(p)
   // fill in curInsts will the number of instruments per slot.
   for (var i=0; i < gPlayers.length; ++i)
   {
-    if (gPlayers[i] != p && gPlayers[i].sectionIdx == sec && gPlayers[i].instIdx >= 0)
+    if (gPlayers[i] != p && gPlayers[i].sectionIdx == sec && gPlayers[i].instIdx != null)
       curInsts[gPlayers[i].instIdx] += 1;
   }
 
@@ -178,8 +179,8 @@ var assignInstrument = function(p)
       minIdx = i;
     }
   }
-  p.instIdx = minIdx;
-  console.log("inst assigned:", p.instIdx);
+  console.log("inst assigned:", minIdx);
+  return minIdx;
 }
 
 //------------------------------------
@@ -190,14 +191,21 @@ var gPlayerNS = io.of('/player');
 gPlayerNS.on('connection', function(socket) {
   console.log('Player connected');
 
-  var player = { id: gPlayerID, name:"", sectionIdx:undefined, instIdx:undefined };
+  // add player to gPlayers list
+  var player = { id: gPlayerID, name:"", sectionIdx:null, instIdx:null };
   gPlayerID += 1;
   gPlayers.push(player);
   console.log('players:', gPlayers);
 
-  socket.emit('songData', gSongData);
+  // tell this new player about everything:
+  socket.emit('allData', [player, gSongData, gCondData]);
+
+  // tell conductor about latest gPlayers with new player that joined.
   gCondNS.emit('players', gPlayers)
 
+  // Message handling for players:
+
+  // Disconnect
   socket.on('disconnect', function() {
     console.log('Player disconnected');
     var idx = gPlayers.indexOf(player);
@@ -213,21 +221,22 @@ gPlayerNS.on('connection', function(socket) {
     console.log('players:', gPlayers);
   });
 
-  // player is updating his playerData.
-  socket.on('playerData', function(data) {
-    console.log('received playerData:', data);
-    player.name = data.name;
-    player.sectionIdx = data.sectionIdx;
-    console.log(gPlayers);
+  // player is setting parameters.
+  socket.on('set', function(msg) {
+    console.log('player set', msg);
+    var key = msg[0];
+    player[key] = msg[1];
 
-    // assign an instrument and send out info to that player.
-    assignInstrument(player);
-    var data = { instIdx: player.instIdx };
-    socket.emit('statusData', data);
+    // assign an instrument (instIdx) to the player. 
+    player.instIdx = selectInstrument(player);
+
+    // Send updates to player and conductor
     gCondNS.emit('players', gPlayers)
+    socket.emit('playerData', player);
 
   });
 
+  // TBD....
   socket.on('control', function(msg) {
     console.log('control:' + msg);
     if (gMaxSender)

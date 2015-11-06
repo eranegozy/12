@@ -11,9 +11,6 @@
    <h1>Conductor</h1>
 
    <h2 id="songName"></h2>
-   <button type="button" onclick="setEnabled(true)">Enable</button>
-   <button type="button" onclick="setEnabled(false)">Disable</button>
-   <p id="enabled"></p>
    
    <h2>Sections</h2>
    <div id="displaySections">
@@ -39,7 +36,18 @@
       var gPlayers;
       var gCondData;
 
-      // Message handling:
+      // receiving a message:
+      gSocket.on('allData', function(data) {
+         eeutils.print("allData:" + JSON.stringify(data));
+         gSongData = data[0];
+         gPlayers = data[1];
+         gCondData = data[2];
+
+         updateSongDisplay();
+         updatePlayersDisplay();
+         updateCondDisplay();
+      });
+
       gSocket.on('songData', function(data) {
          eeutils.print("songData:" + JSON.stringify(data));
          gSongData = data;
@@ -58,7 +66,9 @@
          updateCondDisplay();
       });
 
-      var updateSongDisplay = function() {
+
+      var updateSongDisplay = function() 
+      {
          // update data from gSongData
          document.getElementById("songName").innerHTML = "Song: " + gSongData.name;
          // update the sections display from gSongData
@@ -68,6 +78,14 @@
 
          var buttonFunc = function(b) { return function() { setSection(b); } };
          var sections = gSongData.sections;
+
+         // add the OFF button:
+         var element = document.createElement("button");
+         element.type = 'button';
+         element.innerHTML = "OFF"
+         element.onclick = buttonFunc(null);
+         parent.appendChild(element);
+
          for(var i=0; i < sections.length; ++i)
          {
             var element = document.createElement("button");
@@ -76,15 +94,10 @@
             element.onclick = buttonFunc(i);
             parent.appendChild(element);
          }
-         // add the OFF button:
-         var element = document.createElement("button");
-         element.type = 'button';
-         element.innerHTML = "OFF"
-         element.onclick = buttonFunc(-1);
-         parent.appendChild(element);
       }
       
-      var updatePlayersDisplay = function() {
+      var updatePlayersDisplay = function() 
+      {
          // update display from gPlayers data
          var parent = document.getElementById("displayPlayers");
          while(parent.childNodes.length > 0)
@@ -94,26 +107,17 @@
          {
             var element = document.createElement("LI");
             var p = gPlayers[i]
-            element.innerHTML = p.name + ' section:' + p.sectionIdx + ' inst:' + p.instIdx;
+            var playername = p.name == "" ? "[NO NAME]" : p.name;
+            var secname = p.sectionIdx == null ? "[NO Section]" : gSongData.sections[p.sectionIdx].name;
+            element.innerHTML = playername + ' section:' + secname + ' inst:' + p.instIdx;
             parent.appendChild(element);
          }
       }
 
-      var updateCondDisplay = function() {
-         // update display from gCondData
-         var txt;
-         txt = gCondData.enabled ? "Enabled" : "Disabled";
-         document.getElementById("enabled").innerHTML = "Status: " + txt;
-         //txt = gCondData.sectionIdx >=0 ? gSongData.sections[gCondData.sectionIdx].name : "None";
-         txt = gCondData.sectionIdx >=0 ? gCondData.sectionIdx : "None";
-         document.getElementById("section").innerHTML = "Current Section: " + txt;
-      }
-
-
-
-      var setEnabled = function(b)
+      var updateCondDisplay = function() 
       {
-         gSocket.emit('set', ['enabled', b]);
+         var txt = gCondData.sectionIdx == null ? "None" : gSongData.sections[gCondData.sectionIdx].name;
+         document.getElementById("section").innerHTML = "Current Section: " + txt;
       }
 
       var setSection = function(i)
