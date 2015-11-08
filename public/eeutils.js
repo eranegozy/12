@@ -5,37 +5,30 @@
 //-------------------------------
 
 
-// TODO - do scoping of this better. Probably using a function or something.
 
-//---------------------------------
-var eeutils =
-{
-   outID: 'output',
+utl = (function() {
+  var outID = null;
 
-   init: function( _outID )
-   {
-      eeutils.outID = _outID;
-      eeutils.print("init");
-   },
+  init = function ( _outID )
+  {
+    outID = _outID;
+    print("init!!");
+  }
 
-   print: function (s)
-   {
-      var x = document.getElementById(eeutils.outID).innerHTML;
-      x += s + '<br/>'
-      document.getElementById(eeutils.outID).innerHTML = x;
-   }
+  print = function(s) {
+    var x = document.getElementById(outID).innerHTML;
+    x += s + '<br/>'
+    document.getElementById(outID).innerHTML = x;
+  }
 
-
-}
-
-function setCookie(cname, cvalue, exdays) {
+  setCookie = function (cname, cvalue, exdays) {
     var d = new Date();
     d.setTime(d.getTime() + (exdays*24*60*60*1000));
     var expires = "expires="+d.toUTCString();
     document.cookie = cname + "=" + cvalue + "; " + expires;
-}
+  }
 
-function getCookie(cname) {
+  getCookie = function (cname) {
     var name = cname + "=";
     var ca = document.cookie.split(';');
     for(var i=0; i<ca.length; i++) {
@@ -44,5 +37,7 @@ function getCookie(cname) {
         if (c.indexOf(name) == 0) return c.substring(name.length, c.length);
     }
     return "";
-}
+  }
 
+  return { init:init, print:print, setCookie:setCookie, getCookie:getCookie};
+}());

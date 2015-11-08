@@ -50,6 +50,11 @@ app.get('/cond', function(req, res) {
   res.sendFile(path.join(__dirname, 'cond_index.html'));
 });
 
+// this serves up a page of html for the conductor page.
+app.get('/m', function(req, res) {
+  console.log('requesting mobile');
+  res.sendFile(path.join(__dirname, 'mobile_index.html'));
+});
 
 var startup = function () 
 {

@@ -8,7 +8,7 @@
    <script src="/socket.io/socket.io.js"></script>
 </head>
 
-<body onload='eeutils.init("output");'>
+<body>
 
    <h1>OSC Mobile Player</h1>
 
@@ -63,27 +63,28 @@
    <p id="output"><b>Output:</b><br></p>
 
    <script>
-      eeutils.print(location.host);
+      utl.init("output");
+      utl.print(location.host);
       var gSocket = io(location.host + '/player');
       var gPlayerData = {};
       var gSongData;
       var gCondData;
 
-      var gDevID = getCookie("devID");
+      var gDevID = utl.getCookie("devID");
       if (gDevID == '')
       {
          gDevID = Math.random();
-         eeutils.print("no cookie found. Creating:" + gDevID);
-         setCookie("devID", gDevID, 1);
+         utl.print("no cookie found. Creating:" + gDevID);
+         utl.setCookie("devID", gDevID, 1);
       }
       else
       {
-         eeutils.print("cookie found:" + gDevID);
+         utl.print("cookie found:" + gDevID);
       }
 
       // message handling:
       gSocket.on('allData', function(data) {
-         eeutils.print("allData:" + JSON.stringify(data));
+         utl.print("allData:" + JSON.stringify(data));
          gPlayerData = data[0];
          gSongData = data[1];
          gCondData = data[2];
@@ -95,7 +96,7 @@
       });
 
       gSocket.on('playerData', function(data) {
-         eeutils.print("received playerData:" + JSON.stringify(data));
+         utl.print("received playerData:" + JSON.stringify(data));
          gPlayerData = data;
 
          updatePlayerDisplay();
@@ -104,7 +105,7 @@
       });
 
       gSocket.on('songData', function(data) {
-         eeutils.print("received songData:" + JSON.stringify(data));
+         utl.print("received songData:" + JSON.stringify(data));
          gSongData = data;
 
          updateSectionPickerDisplay();
@@ -113,7 +114,7 @@
       });
 
       gSocket.on('condData', function(data) {
-         eeutils.print("received condData:" + JSON.stringify(data));
+         utl.print("received condData:" + JSON.stringify(data));
          gCondData = data;
 
          updateInstrumentEnabledDisplay();
@@ -132,7 +133,7 @@
       {
          if (!val)
             return;
-         eeutils.print("setName: " + val);
+         utl.print("setName: " + val);
 
          // send name choice to server:
          gSocket.emit('set', ['name', val]);
@@ -142,7 +143,7 @@
 
       var setSection = function(val)
       {
-         eeutils.print("setSection:" + val);
+         utl.print("setSection:" + val);
          var sec = val;
          if (sec != null) sec = parseInt(val);
          // send name choice to server:
@@ -151,7 +152,7 @@
 
       // var control = function(i)
       // {
-      //    eeutils.print("sending control");
+      //    utl.print("sending control");
       //    gSocket.emit('control', i);
       // }
 
@@ -197,7 +198,7 @@
 
          // now, show the new inst
          var inst = gSongData.sections[gPlayerData.sectionIdx].instruments[gPlayerData.instIdx];
-         eeutils.print("configing" + JSON.stringify(inst));
+         utl.print("configing" + JSON.stringify(inst));
          
          gCurInst = inst.type;
          document.getElementById('inst_' + gCurInst).style.display='';

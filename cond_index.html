@@ -6,7 +6,7 @@
    <script src="/socket.io/socket.io.js"></script>
 </head>
 
-<body onload='eeutils.init("output");'>
+<body>
 
    <h1>Conductor</h1>
 
@@ -30,7 +30,8 @@
    <p id="output"><b>Output:</b><br/></p>
 
    <script>
-      eeutils.print(location.host);
+      utl.init("output");
+      utl.print(location.host);
       var gSocket = io(location.host + '/cond');
       var gSongData;
       var gPlayers;
@@ -38,7 +39,7 @@
 
       // receiving a message:
       gSocket.on('allData', function(data) {
-         eeutils.print("allData:" + JSON.stringify(data));
+         utl.print("allData:" + JSON.stringify(data));
          gSongData = data[0];
          gPlayers = data[1];
          gCondData = data[2];
@@ -49,19 +50,19 @@
       });
 
       gSocket.on('songData', function(data) {
-         eeutils.print("songData:" + JSON.stringify(data));
+         utl.print("songData:" + JSON.stringify(data));
          gSongData = data;
          updateSongDisplay();
       });
 
       gSocket.on('players', function(data) {
-         eeutils.print("players:" + JSON.stringify(data));
+         utl.print("players:" + JSON.stringify(data));
          gPlayers = data;
          updatePlayersDisplay();
       });
 
       gSocket.on('condData', function(data) {
-         eeutils.print("condData:" + JSON.stringify(data));
+         utl.print("condData:" + JSON.stringify(data));
          gCondData = data;
          updateCondDisplay();
       });
