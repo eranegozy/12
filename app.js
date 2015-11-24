@@ -20,18 +20,24 @@ var gPlayers = [];
 var gSongData = { 
   name: "*12*",
   sections: [
-    {name:"1: Pices",
-     instruments: [{name:'plook', type:'buttons', size:4},
-                   {name:'yikes', type:'1d', size:2}]},
-    {name:"2: Sagitarius",
-     instruments: [{name:'fish', type:'buttons', size:3},
-                   {name:'cow',  type:'buttons', size:4},
-                   {name:'bird', type:'buttons', size:5}]},
-    {name:"3:Scorpio",
-     instruments: [{name:'broom', type:'1d', size:1},
-                   {name:'slurp', type:'1d', size:3},
-                   {name:'saw',   type:'2d'},
-                   {name:'soap',  type:'2d'}]},
+    { name: "ScorpioTest 1",
+      instruments: [
+        {name:'woodblock', type:'buttons', size:1},
+        {name:'guiro', type:'1d', size:2},
+        {name:'piano', type:'1d', size:2}]},
+
+    { name:"ScorpioTest 2",
+      instruments: [
+        {name:'woodblock', type:'buttons', size:5},
+        {name:'guiro', type:'1d', size:2},
+        {name:'piano', type:'1d', size:2}]},
+
+    { name:"ScorpioTest 3",
+      instruments: [
+        {name:'broom', type:'1d', size:1},
+        {name:'slurp', type:'1d', size:3},
+        {name:'saw',   type:'2d'},
+        {name:'soap',  type:'2d'}]},
   ]
 };
 
@@ -111,6 +117,8 @@ var onMaxMsg = function(msg)
     if (gMaxSender)
       gMaxSender.kill();
     gMaxSender = new osc.Client(ip, port);
+    sendMaxCondData();
+
   }
 
   if (msg[1] == 'bye') {
@@ -123,6 +131,20 @@ var onMaxMsg = function(msg)
   }
 }
 
+
+var sendMaxCondData = function() {
+  if (gMaxSender) 
+  {
+    idx = gCondData.sectionIdx == null ? 'null' : gCondData.sectionIdx;
+    gMaxSender.send('/sectionIdx', [idx]);
+  }
+}
+
+var sendToMax = function(tag, msg) {
+  console.log('toMax', tag, msg);
+  if (gMaxSender)
+    gMaxSender.send(tag, msg)
+}
 
 
 //------------------------------------
@@ -148,6 +170,7 @@ gCondNS.on('connection', function(socket) {
     gCondData[key] = msg[1];
     gCondNS.emit('condData', gCondData);
     gPlayerNS.emit('condData', gCondData);
+    sendMaxCondData();
   });
 });
 
@@ -241,11 +264,9 @@ gPlayerNS.on('connection', function(socket) {
 
   });
 
-  // TBD....
-  socket.on('control', function(msg) {
-    console.log('control:' + msg);
-    if (gMaxSender)
-      gMaxSender.send('/ctrl', msg)
+  // real time instrument control
+  socket.on('ctrl', function(msg) {
+    sendToMax('/ctrl', msg);
   });
 
   socket.on('maxsetup', function(msg) {

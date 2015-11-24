@@ -41,7 +41,9 @@
       <button type="button" onclick="gotoPage(2)">Back</button>
       <hr>
 
-      <div id="inst_buttons" style="display:none">
+      <div id="inst_control">
+      </div>
+<!--       <div id="inst_buttons" style="display:none">
          <h2>Buttons Instrument</h2>
          <button class="inst" type="button" onclick="control(1)">Control 1</button>
          <button class="inst" type="button" onclick="control(2)">Control 2</button>
@@ -56,7 +58,7 @@
       <div id="inst_2d" style="display:none">
          <h2>2D Instrument</h2>
       </div>
-
+ -->
    </div>
 
    <hr>
@@ -150,12 +152,6 @@
          gSocket.emit('set', ['sectionIdx', sec]);
       }
 
-      // var control = function(i)
-      // {
-      //    utl.print("sending control");
-      //    gSocket.emit('control', i);
-      // }
-
       var updateSectionPickerDisplay = function()
       {
          // update section drop-drown list
@@ -185,37 +181,94 @@
          }
       }
 
-      var gCurInst;
+      // var gCurInst;
       var updateInstrumentDisplay = function()
       {
-         // first, hide the old inst:
-         if (gCurInst)
-            document.getElementById('inst_' + gCurInst).style.display='none';
+         // remove all current elements
+         var parent = document.getElementById('inst_control');
+         while(parent.childNodes.length > 0)
+            parent.removeChild(parent.childNodes[0]);
 
          // check if an instrument is selected...
          if (gPlayerData.sectionIdx == null || gPlayerData.instIdx == null)
             return;
 
-         // now, show the new inst
+         // now, configure the new inst
          var inst = gSongData.sections[gPlayerData.sectionIdx].instruments[gPlayerData.instIdx];
          utl.print("configing" + JSON.stringify(inst));
          
-         gCurInst = inst.type;
-         document.getElementById('inst_' + gCurInst).style.display='';
-
          switch(inst.type)
          {
             case 'buttons':
+            createButtonsControl(parent, inst);
             break;
 
             case '1d':
+            create1DControl(parent, inst);
             break;
 
             case '2d':
+            create2DControl(parent, inst);
             break;
          }
       }
 
+      var createButtonsControl = function(parent, inst)
+      {
+         var h2 = document.createElement('h2');
+         h2.innerHTML = inst.name;
+         parent.appendChild(h2);
+
+         var buttonFunc = function(b) { return function() { 
+            gSocket.emit('ctrl', [gPlayerData.instIdx, 'btn', b]); } };
+
+         for(var i=0; i < inst.size; ++i)
+         {
+            var element = document.createElement("button");
+            element.type = 'button';
+            element.class = 'inst';
+            element.onclick = buttonFunc(i);
+            element.innerHTML = "Btn " + (i+1);
+            parent.appendChild(element);
+         }
+      }
+
+      var create1DControl = function(parent, inst)
+      {
+         var h2 = document.createElement('h2');
+         h2.innerHTML = inst.name;
+         parent.appendChild(h2);
+
+         var buttonFunc = function(b) { return function() { 
+            gSocket.emit('ctrl', [gPlayerData.instIdx, 'play', b]); 
+            console.log(b);
+         } };
+
+         var slideFunc = function(elem) { return function() { 
+            gSocket.emit('ctrl', [gPlayerData.instIdx, 'speed', elem.value * 0.01]); 
+            console.log(elem.value);
+         } };
+
+
+         for(var i=0; i < inst.size; ++i)
+         {
+            var element = document.createElement("input");
+            element.type = 'range';
+            element.class = 'inst';
+            element.min = 75;
+            element.max = 150;
+            element.oninput = slideFunc(element, i);
+            element.onmousedown = buttonFunc(i+1);
+            element.onmouseup = buttonFunc(0);
+            element.innerHTML = "Slider " + (i+1);
+            parent.appendChild(element);
+         }
+      }
+
+      var create2DControl = function(parent, inst)
+      {
+
+      }
       var updateInstrumentEnabledDisplay = function()
       {
          // update if the instrument is enabled now based on what section we are in.
@@ -225,9 +278,12 @@
 
          // enable / disable buttons:
          var disabled_txt = enabled ? "" : "disabled";
-         var elems = document.getElementsByClassName("inst");
+
+         // for some reason, getElementsByClassName('inst') is not working, so do it this way instead...
+         var elems = document.getElementsByTagName('*');
          for (var i = 0; i < elems.length; i++) {
-            elems[i].disabled = disabled_txt;
+            if (elems[i].class == 'inst')
+               elems[i].disabled = disabled_txt;
          };
       }
 

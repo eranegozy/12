@@ -77,7 +77,8 @@
          while(parent.childNodes.length > 0)
             parent.removeChild(parent.childNodes[0]);
 
-         var buttonFunc = function(b) { return function() { setSection(b); } };
+         var buttonFunc = function(b) { return function() {
+            gSocket.emit('set', ['sectionIdx', b]); } };
          var sections = gSongData.sections;
 
          // add the OFF button:
@@ -123,7 +124,6 @@
 
       var setSection = function(i)
       {
-         gSocket.emit('set', ['sectionIdx', i]);
       }
 
    </script>
