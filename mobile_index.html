@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta name="viewport" content="initial-scale=1.0, minimum-scale=1.0, maximum-scale=1.0, width=device-width, height=device-height, user-scalable=no">
+  <script type="text/javascript" src="p5.js">      </script>
+  <script type="text/javascript" src="p5.dom.js">  </script>
+  <script type="text/javascript" src="eeutils.js"> </script>
+  <script type="text/javascript" src="p5.ui.js">   </script>
+
+  <!-- this line removes any default padding and style. you might only need one of these values set. -->
+  <style> body {padding: 0; margin: 0;} </style>
+</head>
+
+<body>
+
+   <p id="output"><b>Output:</b><br></p>
+   <hr>
+
+  <script>
+  utl.init("output");
+  utl.print(location.host);
+
+  // document.body.addEventListener('touchmove', function(e){ e.preventDefault(); });
+
+  function setup() {
+    createCanvas(displayWidth, displayHeight);
+
+    var btn1 = new ui.Button('b1', 100, 100, 50, [200, 50, 50], btnCB);
+    var btn2 = new ui.Button('b2', 300, 100, 50, [50, 200, 50], btnCB);
+    var sld1 = new ui.Slider('s1', 100, 300, 200, [200, 50, 50], btnCB);
+  }
+
+  function btnCB(name, value) {
+    console.log('button ' + name + ': ' + value);
+  }
+
+  // function touchMoved() {
+  //   // line(touchX, touchY, ptouchX, ptouchY);
+  //   line(touchX, touchY, prevX, prevY);
+  //   prevX = touchX;
+  //   prevY = touchY;
+  //   return false;
+  // }
+
+  function mousePressed() {
+    // console.log("press");
+    ui.down();
+    return false;
+  }
+
+  function mouseReleased() {
+    // console.log("release");
+    ui.up();
+    return false;
+  }
+
+  function draw() {
+    background(255);
+    ui.draw();
+  }
+
+  </script>
+
+</body>
+</html>
