@@ -128,8 +128,11 @@
     }
 
     var pageTransition = function (fromPage, toPage) {
-      if (toPage == 3)
+      if (toPage == 3) {
+        window.scrollTo(0, 0);
         gP5Enabled = true;
+      }
+
       if (fromPage == 3)
         gP5Enabled = false;
     }
@@ -223,13 +226,20 @@
     {
       var xLen = width;
       var buttonsPerRow = 2;
-      var y0 = 100, dy = 200;
+      var y0 = 100, dy = 150;
+      var butSize = 50;      
+      if (inst.size == 1) {
+        buttonsPerRow = 1;
+        butSize = 100;
+        y0 = 200;
+      }
+
       for(var i=0; i < inst.size; ++i) {
         var col = i % buttonsPerRow;
         var x = (1+col) * xLen / (1+buttonsPerRow);
         var row = Math.floor(i/buttonsPerRow);
         var y = y0 + (row * dy);
-        var btn = new ui.Button(i+1, x, y, 50, [200, 50, 50], buttonControlCB);
+        var btn = new ui.Button(i+1, x, y, butSize, [200, 50, 50], buttonControlCB);
         gInstWidgets.push(btn);
       }
     }
@@ -325,7 +335,7 @@
     fill(0);
     textAlign(LEFT);
     textSize(20);
-    text(gPlayerNameTxt, 10, height - 100);
+    text(gPlayerNameTxt, 10, height - 25);
     
     // section and instrument names
     if (!gInstEnabled) {
@@ -334,7 +344,7 @@
     }
     textAlign(CENTER);
     textSize(32);
-    text(gSectionNameTxt + ': ' + gInstNameTxt, width/2, 40);
+    text(gSectionNameTxt + ': ' + gInstNameTxt, width/2, 30);
 
     // ui draw
     if (utl.supportsTouch())
