@@ -7,7 +7,9 @@ ui = (function() {
   //-----------------------
   // global vars
   var gWidgets = [];
-
+  var pointerX = 0;
+  var pointerY = 0;
+  
   //-----------------------
   // functions
   var removeWidget = function(w) {
@@ -17,19 +19,25 @@ ui = (function() {
       gWidgets.splice(index, 1);
   }
 
-  var down = function () {
+  var down = function (px, py) {
+    pointerX = px;
+    pointerY = py;
     for (var i = 0; i < gWidgets.length; i++) {
       gWidgets[i].down();
     }
   }
 
-  var up = function () {
+  var up = function (px, py) {
+    pointerX = px;
+    pointerY = py;
     for (var i = 0; i < gWidgets.length; i++) {
       gWidgets[i].up();
     }
   }
 
-  var draw = function () {        
+  var draw = function (px, py) {        
+    pointerX = px;
+    pointerY = py;
     for (var i = 0; i < gWidgets.length; i++) {
       gWidgets[i].draw();
     }
@@ -71,7 +79,7 @@ ui = (function() {
   }
 
   Button.prototype.down = function() {
-    var d2 = Math.pow(mouseX - this.x, 2) + Math.pow(mouseY - this.y, 2);
+    var d2 = Math.pow(pointerX - this.x, 2) + Math.pow(pointerY - this.y, 2);
     if (d2 < (this.r * this.r) && this.enabled) {
       this.pressed = true;
       this.func(this.name, 'down');
@@ -122,7 +130,7 @@ ui = (function() {
 
     // move button position:
     if (this.pressed && this.enabled) {
-      var newY = constrain(mouseY - this.deltaY, this.y, this.y + this.len);
+      var newY = constrain(pointerY - this.deltaY, this.y, this.y + this.len);
       if (newY != this.button.y) {
         this.button.y = newY;
         this.func(this.name, (this.button.y - this.y) / this.len);
@@ -133,8 +141,8 @@ ui = (function() {
   Slider.prototype.btnCB = function(name, value) {
     if (value == 'down') {
       this.pressed = true;
-      this.deltaX = mouseX - this.button.x;
-      this.deltaY = mouseY - this.button.y;
+      this.deltaX = pointerX - this.button.x;
+      this.deltaY = pointerY - this.button.y;
       this.func(this.name, 'down');
       this.func(this.name, (this.button.y - this.y) / this.len);
     }

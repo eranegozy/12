@@ -7,24 +7,32 @@
 
 
 utl = (function() {
-  var outID = null;
-  var supportsTouch = false;
+  var gOutID = null;  // null, 'console', or elementID string.
+  var gTouchDetected = false;
+
+  supportsTouch = function () {
+    return gTouchDetected;
+  }
 
   init = function ( _outID )
   {
-    outID = _outID;
-    supportsTouch = 'ontouchstart' in window || navigator.msMaxTouchPoints;
-    print("init. touch = " + (supportsTouch?'yes':'no'));
+    gOutID = _outID;
+    gTouchDetected = 'ontouchstart' in window || navigator.msMaxTouchPoints;
+    print("init. touch = " + (supportsTouch()?'yes':'no'));
   }
 
   print = function(s) {
-    if (outID != null) {
-      var x = document.getElementById(outID).innerHTML;
-      x += s + '<br/>'
-      document.getElementById(outID).innerHTML = x;
-    }
-    else {
+    if (gOutID == null)
+      return;
+
+    if (gOutID == 'console') {
       console.log(s);
+    }
+
+    else {
+      var x = document.getElementById(gOutID).innerHTML;
+      x += s + '<br/>'
+      document.getElementById(gOutID).innerHTML = x;
     }
   }
 
@@ -46,5 +54,5 @@ utl = (function() {
     return "";
   }
 
-  return { init:init, print:print, setCookie:setCookie, getCookie:getCookie};
+  return { init:init, print:print, setCookie:setCookie, getCookie:getCookie, supportsTouch:supportsTouch};
 }());

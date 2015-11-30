@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html>
 <head>
-  <title>12 Mobile Player</title>
+  <title>Mobile Instrument</title>
   <meta name="viewport" content="initial-scale=1.0,minimum-scale=1.0,maximum-scale=1.0,width=device-width,height=device-height,user-scalable=no">
   <meta name="apple-mobile-web-app-capable" content="yes">
   <script type="text/javascript" src="p5.js">      </script>
@@ -9,12 +9,17 @@
   <script type="text/javascript" src="eeutils.js"> </script>
   <script type="text/javascript" src="p5.ui.js">   </script>
   <script src="/socket.io/socket.io.js"></script>
+  <style>
+    form, input, button, option, select {
+      font-size: 32px;
+    }
+  </style>
 </head>
 
 <body>
   <!-- Page 1: Enter Name Form -->
   <div id="page1" style="display:none">
-    <h1>OSC Mobile Player</h1>
+    <h1>Mobile Instrument</h1>
     <form id="form1" onsubmit="setName(this.name.value); return false;">
       Enter Your Name: <input type="text" id="name" autocomplete="off">
       <input type="submit" value="Next">
@@ -23,8 +28,8 @@
 
   <!-- Page 2: Enter Section -->
   <div id="page2" style="display:none">
-    <h1>OSC Mobile Player</h1>
-    <select id="ddlSection" onchange="setSection(this.value)">
+    <h1>Mobile Instrument</h1>
+    <select class="selectClass" id="ddlSection" onchange="setSection(this.value)">
       <option value="null">Pick a Section</option>
     </select>
 
@@ -49,7 +54,9 @@
   <p id="output"><b>Output:</b><br></p>
 
   <script>
-    utl.init('output');
+    utl.init(null);
+    // utl.init('console');
+    // utl.init('output');
     utl.print(location.host);
     var gSocket = io(location.host + '/player');
     var gPlayerData = {};
@@ -220,8 +227,6 @@
       for(var i=0; i < inst.size; ++i) {
         var col = i % buttonsPerRow;
         var x = (1+col) * xLen / (1+buttonsPerRow);
-        // console.log('pos:', i, col, x);
-
         var row = Math.floor(i/buttonsPerRow);
         var y = y0 + (row * dy);
         var btn = new ui.Button(i+1, x, y, 50, [200, 50, 50], buttonControlCB);
@@ -278,56 +283,68 @@
     var cnv = createCanvas(windowWidth, windowHeight);
     cnv.parent('page3');
 
-    var btn2 = new ui.Button('back', width-100, height-100, 50, [50, 100, 250], function(n, v) {
+    var btn2 = new ui.Button('back', width-50, height-50, 40, [50, 100, 250], function(n, v) {
       if (v=='up') gotoPage(2); } );
 
   };
 
-
-  mousePressed = function() {
+  touchStarted = function() {
+    utl.print('touchStarted1 ' + touchX + ' ' + touchY);
     if (!gP5Enabled)
       return true;
 
-    ui.down();
+    utl.print('touchStarted2 ' + touchX + ' ' + touchY);
+
+    if (utl.supportsTouch())
+      ui.down(touchX, touchY);
+    else
+      ui.down(mouseX, mouseY);
     return false;
   }
 
-  mouseReleased = function() {
+  touchEnded = function() {
     if (!gP5Enabled)
       return true;
 
-    ui.up();
+    if (utl.supportsTouch())
+      ui.up(touchX, touchY);
+    else
+      ui.up(mouseX, mouseY);
     return false;
   }
 
   draw = function() {
     if (!gP5Enabled)
-      return true;
+      return;
 
     background(255);
-    strokeWeight(0);
 
+    // player name
+    strokeWeight(0);
     stroke(0);
     fill(0);
-
     textAlign(LEFT);
     textSize(20);
     text(gPlayerNameTxt, 10, height - 100);
     
+    // section and instrument names
     if (!gInstEnabled) {
       stroke(150);
       fill(150);
     }
-
     textAlign(CENTER);
     textSize(32);
     text(gSectionNameTxt + ': ' + gInstNameTxt, width/2, 40);
-    ui.draw();
 
+    // ui draw
+    if (utl.supportsTouch())
+      ui.draw(touchX, touchY);
+    else
+      ui.draw(mouseX, mouseY);
   }
 
   function btnCB(name, value) {
-    console.log('button ' + name + ': ' + value);
+    utl.print('button ' + name + ': ' + value);
   }
 
     gotoPage(1);
