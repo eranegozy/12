@@ -8,17 +8,24 @@
 
 utl = (function() {
   var outID = null;
+  var supportsTouch = false;
 
   init = function ( _outID )
   {
     outID = _outID;
-    print("init!!");
+    supportsTouch = 'ontouchstart' in window || navigator.msMaxTouchPoints;
+    print("init. touch = " + (supportsTouch?'yes':'no'));
   }
 
   print = function(s) {
-    var x = document.getElementById(outID).innerHTML;
-    x += s + '<br/>'
-    document.getElementById(outID).innerHTML = x;
+    if (outID != null) {
+      var x = document.getElementById(outID).innerHTML;
+      x += s + '<br/>'
+      document.getElementById(outID).innerHTML = x;
+    }
+    else {
+      console.log(s);
+    }
   }
 
   setCookie = function (cname, cvalue, exdays) {

@@ -13,51 +13,88 @@
 
 <body>
 
-   <p id="output"><b>Output:</b><br></p>
-   <hr>
+  <div id='p5area'></div>
+  <hr>
+  <p id="output"><b>Output:</b><br></p>
 
   <script>
+
   utl.init("output");
   utl.print(location.host);
 
-  // document.body.addEventListener('touchmove', function(e){ e.preventDefault(); });
-
-  function setup() {
-    createCanvas(displayWidth, displayHeight);
+  setup = function () {
+    var cnv = createCanvas(displayWidth, displayHeight);
+    cnv.parent('p5area');
 
     var btn1 = new ui.Button('b1', 100, 100, 50, [200, 50, 50], btnCB);
     var btn2 = new ui.Button('b2', 300, 100, 50, [50, 200, 50], btnCB);
     var sld1 = new ui.Slider('s1', 100, 300, 200, [200, 50, 50], btnCB);
+  };
+
+  mousePressed = function() {
+    // console.log("press");
+    ui.down();
+
+    document.getElementById('p5area').style.display='none';
+
+
+    return false;
   }
+
+  mouseReleased = function() {
+    // console.log("release");
+    ui.up();
+
+    document.getElementById('p5area').style.display='';
+
+    return false;
+  }
+
+  draw = function() {
+    background(255);
+    ui.draw();
+  }
+
+  // var node = document.getElementById("p5area");
+  // new p5(sketch, node);
+
+
+  // var sketch = function (p) {
+
+  //   p.setup = function () {
+  //     p.createCanvas(p.displayWidth, p.displayHeight);
+
+  //     var btn1 = new ui.Button('b1', 100, 100, 50, [200, 50, 50], btnCB);
+  //     var btn2 = new ui.Button('b2', 300, 100, 50, [50, 200, 50], btnCB);
+  //     var sld1 = new ui.Slider('s1', 100, 300, 200, [200, 50, 50], btnCB);
+  //   };
+
+  //   p.mousePressed = function() {
+  //     // console.log("press");
+  //     ui.down();
+  //     return false;
+  //   }
+
+  //   p.mouseReleased = function() {
+  //     // console.log("release");
+  //     ui.up();
+  //     return false;
+  //   }
+
+  //   p.draw = function() {
+  //     p.background(255);
+  //     ui.draw();
+  //   }
+  // };
+
+  // var node = document.getElementById("p5area");
+  // new p5(sketch, node);
+
 
   function btnCB(name, value) {
     console.log('button ' + name + ': ' + value);
   }
 
-  // function touchMoved() {
-  //   // line(touchX, touchY, ptouchX, ptouchY);
-  //   line(touchX, touchY, prevX, prevY);
-  //   prevX = touchX;
-  //   prevY = touchY;
-  //   return false;
-  // }
-
-  function mousePressed() {
-    // console.log("press");
-    ui.down();
-    return false;
-  }
-
-  function mouseReleased() {
-    // console.log("release");
-    ui.up();
-    return false;
-  }
-
-  function draw() {
-    background(255);
-    ui.draw();
-  }
 
   </script>
 
