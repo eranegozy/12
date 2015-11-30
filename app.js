@@ -12,7 +12,7 @@ var osc = require('node-osc');
 
 
 var gMaxSender;
-var gListenPort = 12346;
+var gOscListenPort = 12346;
 var gOscServer;
 
 var gPlayers = [];
@@ -86,8 +86,8 @@ var server = http.listen(3000, function() {
   console.log('Http: listening at', host, port);
 
   // listen to OSC messages (which come from Max/Msp)
-  gOscServer = new osc.Server(gListenPort, '0.0.0.0');
-  console.log('OSC: listening at', gListenPort);
+  gOscServer = new osc.Server(gOscListenPort, '0.0.0.0');
+  console.log('OSC: listening at', gOscListenPort);
 
   // receive messages from max, tagged as /max
   gOscServer.on('message', function(msg, rinfo) {
