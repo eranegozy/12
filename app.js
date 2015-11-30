@@ -34,10 +34,9 @@ var gSongData = {
 
     { name:"ScorpioTest 3",
       instruments: [
-        {name:'broom', type:'1d', size:1},
-        {name:'slurp', type:'1d', size:3},
-        {name:'saw',   type:'2d'},
-        {name:'soap',  type:'2d'}]},
+        {name:'woodblock', type:'2d'},
+        {name:'guiro', type:'1d', size:2},
+        {name:'piano', type:'1d', size:2}]},
   ]
 };
 

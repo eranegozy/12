@@ -9,7 +9,7 @@ ui = (function() {
   var gWidgets = [];
   var pointerX = 0;
   var pointerY = 0;
-  
+
   //-----------------------
   // functions
   var removeWidget = function(w) {
@@ -114,7 +114,7 @@ ui = (function() {
 
     // draw ourselves before the button we own:
     gWidgets.push(this);
-    this.button = new Button(this.name, x, (y+len)/2, 50, clr, this.btnCB.bind(this));
+    this.button = new Button(this.name, x, y+len/2, 50, clr, this.btnCB.bind(this));
   }
 
   Slider.prototype.draw = function() {
@@ -161,7 +161,71 @@ ui = (function() {
 
 
 
+  //--------------------------
+  // Grid
+  //
+  var Grid = function(name, x, y, w, h, clr, func) {
+    this.name = name;
+    this.x = x;
+    this.y = y;
+    this.w = w;
+    this.h = h;
+    this.func = func;
 
-  return { down:down, up:up, draw:draw, Button:Button, Slider:Slider, removeWidget:removeWidget };
+    this.pressed = false;
+    this.enabled = true;
+
+    this.deltaX = 0;
+    this.deltaY = 0;
+
+    // draw ourselves before the button we own:
+    gWidgets.push(this);
+    this.button = new Button(this.name, x+w/2, y+h/2, 50, clr, this.btnCB.bind(this));
+  }
+
+  Grid.prototype.draw = function() {
+    this.button.enabled = this.enabled;
+    strokeWeight(2);
+
+    var clr = this.enabled ? 0 : 150;
+    stroke(clr);
+    noFill();
+    rect(this.x, this.y, this.w, this.h);
+
+    // move button position:
+    if (this.pressed && this.enabled) {
+      var newX = constrain(pointerX - this.deltaX, this.x, this.x + this.w);
+      var newY = constrain(pointerY - this.deltaY, this.y, this.y + this.h);
+      if (newY != this.button.y || newX != this.button.x) {
+        this.button.y = newY;
+        this.button.x = newX;
+        this.func(this.name, [(this.button.x - this.x) / this.w, (this.button.y - this.y) / this.h]);
+      }
+    }
+  }
+
+  Grid.prototype.btnCB = function(name, value) {
+    if (value == 'down') {
+      this.pressed = true;
+      this.deltaX = pointerX - this.button.x;
+      this.deltaY = pointerY - this.button.y;
+      this.func(this.name, 'down');
+      this.func(this.name, [(this.button.x - this.x) / this.w, (this.button.y - this.y) / this.h]);
+    }
+    else if (value == 'up') {
+      this.pressed = false;
+      this.func(this.name, 'up');
+    }
+  }
+
+  Grid.prototype.remove = function() {
+    removeWidget(this.button);
+  }
+
+  Grid.prototype.down = function() {}
+  Grid.prototype.up = function() {}
+
+
+  return { down:down, up:up, draw:draw, Button:Button, Slider:Slider, Grid:Grid, removeWidget:removeWidget };
 
 }());
