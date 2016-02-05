@@ -42,6 +42,7 @@ var gSongData = {
 
 // create public access to files
 app.use(express.static('public'));
+app.use(express.static('viz'));
 app.use(cookieParser());
 
 // this serves up a page of html for the instrument when a request comes in.
@@ -55,11 +56,20 @@ app.get('/cond', function(req, res) {
   res.sendFile(path.join(__dirname, 'cond_index.html'));
 });
 
+// this serves up a page for the visual display
+app.get('/viz', function(req, res) {
+  console.log('requesting visuals');
+  res.sendFile(path.join(__dirname, 'viz_index.html'));
+});
+
+
 // this serves up a page of html for the conductor page.
 app.get('/m', function(req, res) {
   console.log('requesting mobile');
   res.sendFile(path.join(__dirname, 'mobile_index.html'));
 });
+
+
 
 var startup = function () 
 {
@@ -120,13 +130,19 @@ var onMaxMsg = function(msg)
 
   }
 
-  if (msg[1] == 'bye') {
+  else if (msg[1] == 'bye') {
     if (gMaxSender)
     {
       console.log("removing gMaxSender");
       gMaxSender.kill();
       gMaxSender = null;
     }
+  }
+
+  else if (msg[1] == 'note') {
+    console.log("note from Max");
+    var noteMsg = {playerIdx: msg[2], note:msg[3]}
+    gVizNS.emit('note', noteMsg);
   }
 }
 
@@ -169,7 +185,22 @@ gCondNS.on('connection', function(socket) {
     gCondData[key] = msg[1];
     gCondNS.emit('condData', gCondData);
     gPlayerNS.emit('condData', gCondData);
+    gVizNS.emit('condData', gCondData);
     sendMaxCondData();
+  });
+});
+
+
+//------------------------------------
+// Connection to Vizulization
+//
+var gVizNS = io.of('/viz');
+gVizNS.on('connection', function(socket) {
+  console.log('Viz connected');
+  socket.emit('allData', [gSongData, gPlayers, gCondData]);
+
+  socket.on('disconnect', function() {
+    console.log('Viz disconnected');
   });
 });
 
@@ -209,6 +240,7 @@ var selectInstrument = function(p)
   console.log("inst assigned:", minIdx);
   return minIdx;
 }
+
 
 //------------------------------------
 // Connection to Players
