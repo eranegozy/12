@@ -54,244 +54,245 @@
   <p id="output"><b>Output:</b><br></p>
 
   <script>
-    utl.init(null);
-    // utl.init('console');
-    // utl.init('output');
-    utl.print(location.host);
-    var gSocket = io(location.host + '/player');
-    var gPlayerData = {};
-    var gSongData;
-    var gCondData;
+  
+  utl.init(null);
+  // utl.init('console');
+  // utl.init('output');
+  utl.print(location.host);
+  var gSocket = io(location.host + '/player');
+  var gPlayerData = {};
+  var gSongData;
+  var gCondData;
 
-    var gP5Enabled = false;
-    var gInstEnabled = false;
+  var gP5Enabled = false;
+  var gInstEnabled = false;
 
-    var gDevID = utl.getCookie("devID");
-    if (gDevID == '')
-    {
-      gDevID = Math.random();
-      utl.print("no cookie found. Creating:" + gDevID);
-      utl.setCookie("devID", gDevID, 1);
+  var gDevID = utl.getCookie("devID");
+  if (gDevID == '')
+  {
+    gDevID = Math.random();
+    utl.print("no cookie found. Creating:" + gDevID);
+    utl.setCookie("devID", gDevID, 1);
+  }
+  else
+  {
+    utl.print("cookie found:" + gDevID);
+  }
+
+  // message handling:
+  gSocket.on('allData', function(data) {
+    utl.print("allData:" + JSON.stringify(data));
+    gPlayerData = data[0];
+    gSongData = data[1];
+    gCondData = data[2];
+
+    updateSectionPickerDisplay();
+    updatePlayerDisplay();
+    updateInstrumentDisplay();
+    updateInstrumentEnabledDisplay();
+  });
+
+  gSocket.on('playerData', function(data) {
+    utl.print("received playerData:" + JSON.stringify(data));
+    gPlayerData = data;
+
+    updatePlayerDisplay();
+    updateInstrumentDisplay();
+    updateInstrumentEnabledDisplay();
+  });
+
+  gSocket.on('songData', function(data) {
+    utl.print("received songData:" + JSON.stringify(data));
+    gSongData = data;
+
+    updateSectionPickerDisplay();
+    updatePlayerDisplay();
+    updateInstrumentDisplay();
+  });
+
+  gSocket.on('condData', function(data) {
+    utl.print("received condData:" + JSON.stringify(data));
+    gCondData = data;
+
+    updateInstrumentEnabledDisplay();
+  });
+
+  var gCurPage = 0;
+  var gotoPage = function(p)
+  {
+    utl.print('gotoPage:' + p);
+    pageTransition(gCurPage, p);
+    if (gCurPage)
+      document.getElementById('page' + gCurPage).style.display='none';
+    gCurPage = p;
+    document.getElementById('page' + gCurPage).style.display='';
+  }
+
+  var pageTransition = function (fromPage, toPage) {
+    if (toPage == 3) {
+      window.scrollTo(0, 0);
+      gP5Enabled = true;
     }
+
+    if (fromPage == 3)
+      gP5Enabled = false;
+  }
+
+
+  var setName = function(val)
+  {
+    if (!val)
+      return;
+    utl.print("setName: " + val);
+
+    // send name choice to server:
+    gSocket.emit('set', ['name', val]);
+
+    gotoPage(2);
+  }
+
+  var setSection = function(val)
+  {
+    utl.print("setSection:" + val);
+    var sec = val;
+    if (sec != null) sec = parseInt(val);
+    // send name choice to server:
+    gSocket.emit('set', ['sectionIdx', sec]);
+  }
+
+  var updateSectionPickerDisplay = function()
+  {
+    // update section drop-drown list
+    var x = document.getElementById("ddlSection");
+    // remove all but the first one (which is the title of the selection UI):
+    while(x.options.length > 1)
+      x.remove(1);
+
+    // add the sections.
+    for(var i=0; i < gSongData.sections.length; ++i)
+    {
+      var option = document.createElement("option");
+      option.text = gSongData.sections[i].name;
+      option.value = i;
+      x.add(option, x.options.length);
+    }
+  }
+
+  var updatePlayerDisplay = function()
+  {
+    gPlayerNameTxt = gPlayerData.name;
+    if (gPlayerData.sectionIdx != null) 
+      gSectionNameTxt = gSongData.sections[gPlayerData.sectionIdx].name;
     else
+      gSectionNameTxt = '';
+  }
+
+  var gInstWidgets = [];
+  var updateInstrumentDisplay = function()
+  {
+    // check if an instrument is selected...
+    if (gPlayerData.sectionIdx == null || gPlayerData.instIdx == null)
+      return;
+
+    // now, configure the new inst
+    var inst = gSongData.sections[gPlayerData.sectionIdx].instruments[gPlayerData.instIdx];
+    utl.print("configing" + JSON.stringify(inst));
+
+    gInstNameTxt = inst.name;
+
+    // clear out existing UI elements
+    for (var i = 0; i < gInstWidgets.length; i++) {
+      ui.removeWidget(gInstWidgets[i]);
+    };
+    gInstWidgets = [];
+
+    // create new UI elements
+    switch(inst.type)
     {
-      utl.print("cookie found:" + gDevID);
+      case 'buttons':
+      createButtonsControl(inst);
+      break;
+
+      case '1d':
+      create1DControl(inst);
+      break;
+
+      case '2d':
+      create2DControl(inst);
+      break;
+    }
+  }
+
+  var createButtonsControl = function(inst)
+  {
+    var xLen = width;
+    var buttonsPerRow = 2;
+    var y0 = 100, dy = 150;
+    var butSize = 50;      
+    if (inst.size == 1) {
+      buttonsPerRow = 1;
+      butSize = 100;
+      y0 = 200;
     }
 
-    // message handling:
-    gSocket.on('allData', function(data) {
-      utl.print("allData:" + JSON.stringify(data));
-      gPlayerData = data[0];
-      gSongData = data[1];
-      gCondData = data[2];
-
-      updateSectionPickerDisplay();
-      updatePlayerDisplay();
-      updateInstrumentDisplay();
-      updateInstrumentEnabledDisplay();
-    });
-
-    gSocket.on('playerData', function(data) {
-      utl.print("received playerData:" + JSON.stringify(data));
-      gPlayerData = data;
-
-      updatePlayerDisplay();
-      updateInstrumentDisplay();
-      updateInstrumentEnabledDisplay();
-    });
-
-    gSocket.on('songData', function(data) {
-      utl.print("received songData:" + JSON.stringify(data));
-      gSongData = data;
-
-      updateSectionPickerDisplay();
-      updatePlayerDisplay();
-      updateInstrumentDisplay();
-    });
-
-    gSocket.on('condData', function(data) {
-      utl.print("received condData:" + JSON.stringify(data));
-      gCondData = data;
-
-      updateInstrumentEnabledDisplay();
-    });
-
-    var gCurPage = 0;
-    var gotoPage = function(p)
-    {
-      utl.print('gotoPage:' + p);
-      pageTransition(gCurPage, p);
-      if (gCurPage)
-        document.getElementById('page' + gCurPage).style.display='none';
-      gCurPage = p;
-      document.getElementById('page' + gCurPage).style.display='';
+    for(var i=0; i < inst.size; ++i) {
+      var col = i % buttonsPerRow;
+      var x = (1+col) * xLen / (1+buttonsPerRow);
+      var row = Math.floor(i/buttonsPerRow);
+      var y = y0 + (row * dy);
+      var btn = new ui.Button(i+1, x, y, butSize, [200, 50, 50], buttonControlCB);
+      gInstWidgets.push(btn);
     }
+  }
 
-    var pageTransition = function (fromPage, toPage) {
-      if (toPage == 3) {
-        window.scrollTo(0, 0);
-        gP5Enabled = true;
-      }
+  var buttonControlCB = function(id, val) { 
+    if (val == 'down')
+      gSocket.emit('ctrl', [gPlayerData.instIdx, 'btn', id]);
+  }
 
-      if (fromPage == 3)
-        gP5Enabled = false;
+  var create1DControl = function(inst)
+  {
+    var len = height - 200;
+    var y = 100;
+    for(var i=0; i < inst.size; ++i) {
+      var x = (i+1) * width / (inst.size + 1);
+      var slider = new ui.Slider(i+1, x, y, len, [200, 50, 50], sliderControlCB);
+      gInstWidgets.push(slider);
     }
+  }
 
+  var sliderControlCB = function(id, val) {
+     if (val == 'down')
+       gSocket.emit('ctrl', [gPlayerData.instIdx, 'play', id]);
+     else if (val == 'up')
+       gSocket.emit('ctrl', [gPlayerData.instIdx, 'play', 0]);
+     else
+       gSocket.emit('ctrl', [gPlayerData.instIdx, 'x', 1.0 - val]);
+  }
 
-    var setName = function(val)
-    {
-      if (!val)
-        return;
-      utl.print("setName: " + val);
+  var create2DControl = function(inst) {
+    var grid = new ui.Grid(1, 50, 100, width-100, height-200, [200, 50, 50], gridControlCB);
+    gInstWidgets.push(grid);
+  }
 
-      // send name choice to server:
-      gSocket.emit('set', ['name', val]);
+  var gridControlCB = function(id, val) {
+     if (val == 'down')
+       gSocket.emit('ctrl', [gPlayerData.instIdx, 'play', 1]);
+     else if (val == 'up')
+       gSocket.emit('ctrl', [gPlayerData.instIdx, 'play', 0]);
+     else {
+       gSocket.emit('ctrl', [gPlayerData.instIdx, 'xy', val[0], 1.0 - val[1]]);
+     }
+  }
 
-      gotoPage(2);
-    }
-
-    var setSection = function(val)
-    {
-      utl.print("setSection:" + val);
-      var sec = val;
-      if (sec != null) sec = parseInt(val);
-      // send name choice to server:
-      gSocket.emit('set', ['sectionIdx', sec]);
-    }
-
-    var updateSectionPickerDisplay = function()
-    {
-      // update section drop-drown list
-      var x = document.getElementById("ddlSection");
-      // remove all but the first one (which is the title of the selection UI):
-      while(x.options.length > 1)
-        x.remove(1);
-
-      // add the sections.
-      for(var i=0; i < gSongData.sections.length; ++i)
-      {
-        var option = document.createElement("option");
-        option.text = gSongData.sections[i].name;
-        option.value = i;
-        x.add(option, x.options.length);
-      }
-    }
-
-    var updatePlayerDisplay = function()
-    {
-      gPlayerNameTxt = gPlayerData.name;
-      if (gPlayerData.sectionIdx != null) 
-        gSectionNameTxt = gSongData.sections[gPlayerData.sectionIdx].name;
-      else
-        gSectionNameTxt = '';
-    }
-
-    var gInstWidgets = [];
-    var updateInstrumentDisplay = function()
-    {
-      // check if an instrument is selected...
-      if (gPlayerData.sectionIdx == null || gPlayerData.instIdx == null)
-        return;
-
-      // now, configure the new inst
-      var inst = gSongData.sections[gPlayerData.sectionIdx].instruments[gPlayerData.instIdx];
-      utl.print("configing" + JSON.stringify(inst));
-
-      gInstNameTxt = inst.name;
-
-      // clear out existing UI elements
-      for (var i = 0; i < gInstWidgets.length; i++) {
-        ui.removeWidget(gInstWidgets[i]);
-      };
-      gInstWidgets = [];
-
-      // create new UI elements
-      switch(inst.type)
-      {
-        case 'buttons':
-        createButtonsControl(inst);
-        break;
-
-        case '1d':
-        create1DControl(inst);
-        break;
-
-        case '2d':
-        create2DControl(inst);
-        break;
-      }
-    }
-
-    var createButtonsControl = function(inst)
-    {
-      var xLen = width;
-      var buttonsPerRow = 2;
-      var y0 = 100, dy = 150;
-      var butSize = 50;      
-      if (inst.size == 1) {
-        buttonsPerRow = 1;
-        butSize = 100;
-        y0 = 200;
-      }
-
-      for(var i=0; i < inst.size; ++i) {
-        var col = i % buttonsPerRow;
-        var x = (1+col) * xLen / (1+buttonsPerRow);
-        var row = Math.floor(i/buttonsPerRow);
-        var y = y0 + (row * dy);
-        var btn = new ui.Button(i+1, x, y, butSize, [200, 50, 50], buttonControlCB);
-        gInstWidgets.push(btn);
-      }
-    }
-
-    var buttonControlCB = function(id, val) { 
-      if (val == 'down')
-        gSocket.emit('ctrl', [gPlayerData.instIdx, 'btn', id]);
-    }
-
-    var create1DControl = function(inst)
-    {
-      var len = height - 200;
-      var y = 100;
-      for(var i=0; i < inst.size; ++i) {
-        var x = (i+1) * width / (inst.size + 1);
-        var slider = new ui.Slider(i+1, x, y, len, [200, 50, 50], sliderControlCB);
-        gInstWidgets.push(slider);
-      }
-    }
-
-    var sliderControlCB = function(id, val) {
-       if (val == 'down')
-         gSocket.emit('ctrl', [gPlayerData.instIdx, 'play', id]);
-       else if (val == 'up')
-         gSocket.emit('ctrl', [gPlayerData.instIdx, 'play', 0]);
-       else
-         gSocket.emit('ctrl', [gPlayerData.instIdx, 'x', 1.0 - val]);
-    }
-
-    var create2DControl = function(inst) {
-      var grid = new ui.Grid(1, 50, 100, width-100, height-200, [200, 50, 50], gridControlCB);
-      gInstWidgets.push(grid);
-    }
-
-    var gridControlCB = function(id, val) {
-       if (val == 'down')
-         gSocket.emit('ctrl', [gPlayerData.instIdx, 'play', 1]);
-       else if (val == 'up')
-         gSocket.emit('ctrl', [gPlayerData.instIdx, 'play', 0]);
-       else {
-         gSocket.emit('ctrl', [gPlayerData.instIdx, 'xy', val[0], 1.0 - val[1]]);
-       }
-    }
-
-    var updateInstrumentEnabledDisplay = function()
-    {
-      // update if the instrument is enabled now based on what section we are in.
-      gInstEnabled = gPlayerData.sectionIdx == gCondData.sectionIdx;
-      for (var i = 0; i < gInstWidgets.length; i++) {
-        gInstWidgets[i].enabled = gInstEnabled;
-      };
-    }
+  var updateInstrumentEnabledDisplay = function()
+  {
+    // update if the instrument is enabled now based on what section we are in.
+    gInstEnabled = gPlayerData.sectionIdx == gCondData.sectionIdx;
+    for (var i = 0; i < gInstWidgets.length; i++) {
+      gInstWidgets[i].enabled = gInstEnabled;
+    };
+  }
 
 
   var gPlayerNameTxt = 'player name';
