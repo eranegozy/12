@@ -3,7 +3,6 @@
 //
 
 var express = require('express');
-var cookieParser = require('cookie-parser')
 var app = express();
 var http = require('http').Server(app);
 var io = require('socket.io')(http);
@@ -16,6 +15,7 @@ var gOscListenPort = 12346;
 var gOscServer;
 
 var gPlayers = [];
+var gPlayerCache = {};
 
 var gSongData = { 
   name: "*12*",
@@ -43,11 +43,9 @@ var gSongData = {
 // create public access to files
 app.use(express.static('public'));
 app.use(express.static('viz'));
-app.use(cookieParser());
 
 // this serves up a page of html for the instrument when a request comes in.
 app.get('/', function(req, res) {
-  console.log("cookies:", req.cookies);
   res.sendFile(path.join(__dirname, 'index.html'));
 });
 
@@ -127,7 +125,6 @@ var onMaxMsg = function(msg)
       gMaxSender.kill();
     gMaxSender = new osc.Client(ip, port);
     sendMaxCondData();
-
   }
 
   else if (msg[1] == 'bye') {
@@ -205,42 +202,6 @@ gVizNS.on('connection', function(socket) {
 });
 
 
-// find an instrument for this player, based on his chosen section
-// return the index to the instrument, or null
-var selectInstrument = function(p)
-{
-  if (p.sectionIdx == null)
-    return null;
-
-  // first find all instruments assigned to all player except for player p
-  var sec = p.sectionIdx;
-  var maxSlots = gSongData.sections[sec].instruments.length;
-  var curInsts = Array(maxSlots);
-  for (var i = 0; i < maxSlots; i++) { curInsts[i] =0; }
-
-  // fill in curInsts will the number of instruments per slot.
-  for (var i=0; i < gPlayers.length; ++i)
-  {
-    if (gPlayers[i] != p && gPlayers[i].sectionIdx == sec && gPlayers[i].instIdx != null)
-      curInsts[gPlayers[i].instIdx] += 1;
-  }
-
-  // now, assign the instrument that is "least popular".
-  // console.log("curInsts ", curInsts);
-  var minVal = 100000;
-  var minIdx = 0;
-  for(var i=0; i < curInsts.length; ++i)
-  {
-    if(curInsts[i] < minVal)
-    {
-      minVal = curInsts[i];
-      minIdx = i;
-    }
-  }
-  console.log("inst assigned:", minIdx);
-  return minIdx;
-}
-
 
 //------------------------------------
 // Connection to Players
@@ -250,19 +211,42 @@ var gPlayerNS = io.of('/player');
 gPlayerNS.on('connection', function(socket) {
   console.log('Player connected');
 
-  // add player to gPlayers list
-  var player = { id: gPlayerID, name:"", sectionIdx:null, instIdx:null };
-  gPlayerID += 1;
-  gPlayers.push(player);
-  console.log('players:', gPlayers);
+  var player = null;
+  //------------------------------------------
+  //      Message handling for players
 
-  // tell this new player about everything:
-  socket.emit('allData', [player, gSongData, gCondData]);
 
-  // tell conductor about latest gPlayers with new player that joined.
-  gCondNS.emit('players', gPlayers)
+  // hello / initial connect
+  socket.on('hello', function(devID) {
+    console.log('hello:', devID);
+    // add player to gPlayers list
 
-  // Message handling for players:
+    // if cached data does not exist, create it
+    if (devID in gPlayerCache == false) {
+      console.log('not found');
+      gPlayerCache[devID] = { id: 0, name:"", sectionIdx:null, instIdx:null };
+    }
+    else
+    {
+      console.log('found it!!');
+    }
+
+    console.log('cache', gPlayerCache);
+
+    // load saved data for this player. Give it a unique ID.
+    player = gPlayerCache[devID];
+    player.id = gPlayerID;
+    gPlayerID += 1;
+
+    gPlayers.push(player);
+    console.log('players:', gPlayers);
+
+    // tell this new player about everything:
+    socket.emit('allData', [player, gSongData, gCondData]);
+
+    // tell conductor about latest gPlayers with new player that joined.
+    gCondNS.emit('players', gPlayers);
+  });
 
   // Disconnect
   socket.on('disconnect', function() {
@@ -271,39 +255,36 @@ gPlayerNS.on('connection', function(socket) {
     if (idx != -1)
     {
       gPlayers.splice(idx, 1);
-      gCondNS.emit('players', gPlayers)
+      gCondNS.emit('players', gPlayers);
     }
     else
     {
       console.log("Ooops: player that disconnected not found");
     }
     console.log('players:', gPlayers);
+    player = null;
   });
 
   // player is setting parameters.
   socket.on('set', function(msg) {
     console.log('player set', msg);
-    var key = msg[0];
-    player[key] = msg[1];
+    if (player) {
+      var key = msg[0];
+      player[key] = msg[1];
 
-    // assign an instrument (instIdx) to the player. 
-    player.instIdx = selectInstrument(player);
+      // if player is choosing a section, reset the instrument:
+      if (key == 'sectionIdx')
+        player.instIdx = null;
 
-    // Send updates to player and conductor
-    gCondNS.emit('players', gPlayers)
-    socket.emit('playerData', player);
-
+      // Send updates to player and conductor
+      gCondNS.emit('players', gPlayers)
+      socket.emit('playerData', player);
+    }
   });
 
   // real time instrument control
   socket.on('ctrl', function(msg) {
     sendToMax('/ctrl', msg);
-  });
-
-  socket.on('maxsetup', function(msg) {
-    console.log('maxsetup');
-    if (gMaxSender)
-      gMaxSender.send('/inst', ["buttons", "audio/beep.wav", "audio/frog.wav", "audio/hit.wav"])
   });
 
 });

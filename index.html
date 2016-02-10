@@ -20,28 +20,42 @@
   <!-- Page 1: Enter Name Form -->
   <div id="page1" style="display:none">
     <h1>Mobile Instrument</h1>
-    <form id="form1" onsubmit="setName(this.name.value); return false;">
-      Enter Your Name: <input type="text" id="name" autocomplete="off">
+    <form id="form1" onsubmit="setName(this.input_name.value); return false;">
+      Enter Your Name: <input type="text" id="input_name" autocomplete="off">
       <input type="submit" value="Next">
     </form>
   </div>
 
-  <!-- Page 2: Enter Section -->
+  <!-- Page 2: Choose Section -->
   <div id="page2" style="display:none">
     <h1>Mobile Instrument</h1>
-    <select class="selectClass" id="ddlSection" onchange="setSection(this.value)">
-      <option value="null">Pick a Section</option>
-    </select>
+    Pick a Section:<br>
+    <form id='sectionSelect'>
+    </form>
 
     <br>
-    <button type="button" onclick="gotoPage(1)">Back</button>
-    <br>
     <button type="button" onclick="if(gPlayerData.sectionIdx != null) gotoPage(3)">Next</button>
+    <br>
+    <button type="button" onclick="gotoPage(1)">Back</button>
+  </div>
+
+  <!-- Page 3: Choose Instrument -->
+  <div id="page3" style="display:none">
+    <h1>Mobile Instrument</h1>
+    Pick an Instrument:<br>
+    <form id='instSelect'>
+    </form>
+
+    <br>
+    <button type="button" onclick="if(gPlayerData.instIdx != null) gotoPage(4)">Next</button>
+    <br>
+    <button type="button" onclick="gotoPage(2)">Back</button>
   </div>
 
   <!-- Page 3: Live Display of Instrument / Status -->
-  <div id="page3" style="display:none">
-<!--     <p id="displayName"></p>
+  <div id="page4" style="display:none">
+<!-- 
+    <p id="displayName"></p>
     <p id="displaySection"></p>
     <p id="instEnabled"></p>
     <button type="button" onclick="gotoPage(2)">Back</button>
@@ -79,6 +93,9 @@
     utl.print("cookie found:" + gDevID);
   }
 
+  gSocket.emit('hello', gDevID);
+
+
   // message handling:
   gSocket.on('allData', function(data) {
     utl.print("allData:" + JSON.stringify(data));
@@ -87,6 +104,7 @@
     gCondData = data[2];
 
     updateSectionPickerDisplay();
+    updateInstPickerDisplay();
     updatePlayerDisplay();
     updateInstrumentDisplay();
     updateInstrumentEnabledDisplay();
@@ -96,6 +114,8 @@
     utl.print("received playerData:" + JSON.stringify(data));
     gPlayerData = data;
 
+    updateSectionPickerDisplay();
+    updateInstPickerDisplay();
     updatePlayerDisplay();
     updateInstrumentDisplay();
     updateInstrumentEnabledDisplay();
@@ -106,6 +126,7 @@
     gSongData = data;
 
     updateSectionPickerDisplay();
+    updateInstPickerDisplay();
     updatePlayerDisplay();
     updateInstrumentDisplay();
   });
@@ -129,15 +150,14 @@
   }
 
   var pageTransition = function (fromPage, toPage) {
-    if (toPage == 3) {
+    if (toPage == 4) {
       window.scrollTo(0, 0);
       gP5Enabled = true;
     }
 
-    if (fromPage == 3)
+    if (fromPage == 4)
       gP5Enabled = false;
   }
-
 
   var setName = function(val)
   {
@@ -151,35 +171,90 @@
     gotoPage(2);
   }
 
-  var setSection = function(val)
-  {
-    utl.print("setSection:" + val);
-    var sec = val;
-    if (sec != null) sec = parseInt(val);
-    // send name choice to server:
-    gSocket.emit('set', ['sectionIdx', sec]);
-  }
 
   var updateSectionPickerDisplay = function()
   {
-    // update section drop-drown list
-    var x = document.getElementById("ddlSection");
-    // remove all but the first one (which is the title of the selection UI):
-    while(x.options.length > 1)
-      x.remove(1);
+    console.log('updateSectionPickerDisplay')
+    var parent = document.getElementById("sectionSelect");
+    while(parent.childNodes.length > 0)
+      parent.removeChild(parent.childNodes[0]);
 
-    // add the sections.
-    for(var i=0; i < gSongData.sections.length; ++i)
+
+    var buttonFunc = function(b) { return function() {
+      gSocket.emit('set', ['sectionIdx', b]); } };
+
+    // add a radio button per section.
+    var sections = gSongData.sections;
+    for(var i=0; i < sections.length; ++i)
     {
-      var option = document.createElement("option");
-      option.text = gSongData.sections[i].name;
-      option.value = i;
-      x.add(option, x.options.length);
+      var element = document.createElement("input");
+      element.type = 'radio';
+      element.value = i;
+      element.name = 'section';
+      element.onclick = buttonFunc(i);
+      if (i == gPlayerData.sectionIdx)
+        element.checked = true;
+
+      parent.appendChild(element);
+
+      element = document.createElement("label");
+      element.innerHTML = sections[i].name;
+      parent.appendChild(element);
+
+      element = document.createElement("br");
+      parent.appendChild(element);
+    }
+  }
+
+  var getInstStatusText = function(instIdx) {
+    // TODO finish this, but it needs access to all other instrument data...
+    return '';
+  }
+
+
+  var updateInstPickerDisplay = function()
+  {
+    console.log('updateInstPickerDisplay')
+
+    if (gPlayerData.sectionIdx == null)
+      return;
+
+    // remove old options
+    var parent = document.getElementById("instSelect");
+    while(parent.childNodes.length > 0)
+      parent.removeChild(parent.childNodes[0]);
+
+    // function to set inst
+    var buttonFunc = function(b) { return function() {
+      gSocket.emit('set', ['instIdx', b]); } };
+
+    // add a radio button per inst
+    var instruments = gSongData.sections[gPlayerData.sectionIdx].instruments;
+    for(var i=0; i < instruments.length; ++i)
+    {
+      var element = document.createElement("input");
+      element.type = 'radio';
+      element.value = i;
+      element.name = 'inst';
+      element.onclick = buttonFunc(i);
+      if (i == gPlayerData.instIdx)
+        element.checked = true;
+      parent.appendChild(element);
+
+      element = document.createElement("label");
+      element.innerHTML = instruments[i].name + getInstStatusText(i);
+      parent.appendChild(element);
+
+      element = document.createElement("br");
+      parent.appendChild(element);
     }
   }
 
   var updatePlayerDisplay = function()
   {
+    var elem = document.getElementById("input_name");
+    elem.value = gPlayerData.name;
+
     gPlayerNameTxt = gPlayerData.name;
     if (gPlayerData.sectionIdx != null) 
       gSectionNameTxt = gSongData.sections[gPlayerData.sectionIdx].name;
@@ -302,10 +377,11 @@
   setup = function () {
     // var cnv = createCanvas(displayWidth, displayHeight);
     var cnv = createCanvas(windowWidth, windowHeight);
-    cnv.parent('page3');
+    cnv.parent('page4');
 
-    var btn2 = new ui.Button('back', width-50, height-50, 40, [50, 100, 250], function(n, v) {
-      if (v=='up') gotoPage(2); } );
+    // create back button
+    var btn2 = new ui.Button('back', width-50, height-50, 40, [50, 100, 250], 
+                             function(n, v) { if (v=='up') gotoPage(3); } );
 
   };
 
