@@ -161,7 +161,7 @@ ui = (function() {
 
 
 
-  //--------------------------
+  //--------------------------------------------------
   // Grid
   //
   var Grid = function(name, x, y, w, h, clr, func) {
@@ -226,6 +226,70 @@ ui = (function() {
   Grid.prototype.up = function() {}
 
 
-  return { down:down, up:up, draw:draw, Button:Button, Slider:Slider, Grid:Grid, removeWidget:removeWidget };
+  //--------------------------------------------------
+  // Surface
+  //
+  var Surface = function(name, x, y, w, h, clr, func) {
+    this.name = name;
+    this.x = x;
+    this.y = y;
+    this.w = w;
+    this.h = h;
+    this.clr = clr;
+    this.func = func;
+
+    this.lastX = 0;
+    this.lastY = 0;
+
+    this.rad = (w+h) * 0.05;
+
+    this.pressed = false;
+    this.enabled = true;    
+    gWidgets.push(this);
+  }
+
+  Surface.prototype.draw = function() {
+    strokeWeight(1);
+    stroke(0);
+    noFill();
+    rect(this.x, this.y, this.w, this.h);
+
+    if (this.pressed) {
+      var newX = constrain(pointerX, this.x + this.rad, this.x + this.w - this.rad);
+      var newY = constrain(pointerY, this.y + this.rad, this.y + this.h - this.rad);
+
+      if (newX != this.lastX || newY != this.lastY) {
+        this.func(this.name, [(newX - this.x) / this.w, 1 - (newY - this.y) / this.h]);
+        this.lastX = newX;
+        this.lastY = newY;
+      }
+
+      strokeWeight(3);
+      stroke(this.clr);
+      ellipse(newX, newY, this.rad*2, this.rad*2);
+    }
+  }
+
+  Surface.prototype.remove = function() {
+  }
+
+  Surface.prototype.down = function() {
+    var xHit = this.x < pointerX && pointerX < this.x + this.w;
+    var yHit = this.y < pointerY && pointerY < this.y + this.h;
+    // console.log('down(' + this.name + '):' + xHit + ' ' + yHit);
+    if (!this.pressed && xHit && yHit) {
+      this.pressed = true;
+      this.func(this.name, "down");
+    }
+  }
+
+  Surface.prototype.up = function() {
+    if (this.pressed) {
+      this.func(this.name, "up");
+    }
+    this.pressed = false;
+  }
+
+  return { down:down, up:up, draw:draw, Button:Button, Slider:Slider, Grid:Grid, Surface:Surface, removeWidget:removeWidget };
 
 }());

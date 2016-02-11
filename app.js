@@ -22,7 +22,7 @@ var gSongData = {
   sections: [
     { name: "ScorpioTest 1",
       instruments: [
-        {name:'woodblock', type:'buttons', size:1},
+        {name:'woodblock', type:'surface', size:2},
         {name:'guiro', type:'1d', size:2},
         {name:'piano', type:'1d', size:2}]},
 

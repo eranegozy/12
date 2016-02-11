@@ -2,7 +2,7 @@
 <html>
 <head>
   <title>Mobile Instrument</title>
-  <meta name="viewport" content="initial-scale=1.0,minimum-scale=1.0,maximum-scale=1.0,width=device-width,height=device-height,user-scalable=no">
+  <meta name="viewport" content="initial-scale=1.0,minimum-scale=1.0,maximum-scale=1.0,user-scalable=0">
   <meta name="apple-mobile-web-app-capable" content="yes">
   <script type="text/javascript" src="p5.js">      </script>
   <script type="text/javascript" src="p5.dom.js">  </script>
@@ -13,6 +13,12 @@
     form, input, button, option, select {
       font-size: 32px;
     }
+
+    div, body {
+      padding: 0; 
+      margin: 0;
+    }
+
   </style>
 </head>
 
@@ -64,9 +70,9 @@
  -->  
   </div>
 
-  <hr>
+<!--   <hr>
   <p id="output"><b>Output:</b><br></p>
-
+ -->
   <script>
   
   utl.init(null);
@@ -174,7 +180,7 @@
 
   var updateSectionPickerDisplay = function()
   {
-    console.log('updateSectionPickerDisplay')
+    // console.log('updateSectionPickerDisplay')
     var parent = document.getElementById("sectionSelect");
     while(parent.childNodes.length > 0)
       parent.removeChild(parent.childNodes[0]);
@@ -214,7 +220,7 @@
 
   var updateInstPickerDisplay = function()
   {
-    console.log('updateInstPickerDisplay')
+    // console.log('updateInstPickerDisplay')
 
     if (gPlayerData.sectionIdx == null)
       return;
@@ -284,6 +290,10 @@
     // create new UI elements
     switch(inst.type)
     {
+      case 'surface':
+      createSurfaceControl(inst);
+      break;
+
       case 'buttons':
       createButtonsControl(inst);
       break;
@@ -360,6 +370,27 @@
      }
   }
 
+  var createSurfaceControl = function(inst) {
+    var w = width/inst.size;
+    var x = 0;
+    for (var i = 0; i < inst.size; i++) {
+      var surface = new ui.Surface(i, x, 0, w, height, [200, 50, 50], 
+                                    surfaceControlCB );
+      gInstWidgets.push(surface);
+      x += w;
+    };
+  }
+
+  var surfaceControlCB = function(id, val) {
+     if (val == 'down')
+       gSocket.emit('ctrl', [gPlayerData.instIdx, 'play', id, 1]);
+     else if (val == 'up')
+       gSocket.emit('ctrl', [gPlayerData.instIdx, 'play', id, 0]);
+     else {
+       gSocket.emit('ctrl', [gPlayerData.instIdx, 'xy', id, val[0], val[1]]);
+     }
+  }
+
   var updateInstrumentEnabledDisplay = function()
   {
     // update if the instrument is enabled now based on what section we are in.
@@ -374,9 +405,26 @@
   var gInstNameTxt = 'instrument';
   var gSectionNameTxt = 'section';
 
+  window.onresize = function() {
+    var display = checkOrientation();
+    // resizeCanvas(display.width, display.height);
+    // updateInstrumentDisplay();
+
+  };
+
+  var checkOrientation = function() {
+    console.log('window W/H: ' + windowWidth + ' ' + windowHeight);
+    console.log('display W/H: ' +  displayWidth + ' ' + displayHeight);
+    console.log('window inner: ' + window.innerWidth + ' ' + window.innerHeight);
+    var w = window.innerWidth;
+    var h = window.innerHeight;
+    return {width:w, height:h};
+  }
+
   setup = function () {
-    // var cnv = createCanvas(displayWidth, displayHeight);
-    var cnv = createCanvas(windowWidth, windowHeight);
+    var display = checkOrientation();
+    
+    var cnv = createCanvas(display.width, display.height);
     cnv.parent('page4');
 
     // create back button
