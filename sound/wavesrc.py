@@ -46,11 +46,14 @@ class WaveFile(object):
 # Same interface as WaveFile, but holds all that data in memory.
 # Gets the data from a wave file
 class WaveBuffer(object):
-   def __init__(self, filepath, start_frame, num_frames):
+   def __init__(self, filepath, start_frame = 0, num_frames = -1):
       super(WaveBuffer, self).__init__()
 
       # get a local copy of the audio data from WaveFile
       wr = WaveFile(filepath)
+      if num_frames == -1:
+         num_frames = wr.end - start_frame
+
       self.data = wr.get_frames(start_frame, start_frame + num_frames)
       self.num_channels = wr.num_channels
       

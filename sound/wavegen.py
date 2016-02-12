@@ -55,7 +55,7 @@ class WaveGenerator(object):
          output *= self.gain
 
          # check for end-of-buffer condition:
-         actual_num_frames = len(output) / num_channels
+         actual_num_frames = len(output) / self.source.num_channels
          continue_flag = actual_num_frames == num_frames
 
          # advance current-frame
@@ -67,10 +67,23 @@ class WaveGenerator(object):
             continue_flag = True
             remainder = num_frames - actual_num_frames
             output = np.append(output, self.source.get_frames(0, remainder))
+            actual_num_frames += remainder
             self.frame = remainder
 
          if self._release:
             continue_flag = False
+
+         # convert mono to stereo:
+         if self.source.num_channels == 1 and num_channels == 2:
+            stereo = np.zeros(actual_num_frames * num_channels)
+            stereo[0::2] = output
+            stereo[1::2] = output
+            output = stereo
+
+         # TODO - convert from stereo to mono
+         if self.source.num_channels == 2 and num_channels == 1:
+            assert(False)
+
 
          # return
          return (output, continue_flag)
