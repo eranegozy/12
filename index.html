@@ -383,11 +383,11 @@
 
   var surfaceControlCB = function(id, val) {
      if (val == 'down')
-       gSocket.emit('ctrl', [gPlayerData.instIdx, 'play', id, 1]);
+       gSocket.emit('ctrl', [gPlayerData.instIdx, id, 'play']);
      else if (val == 'up')
-       gSocket.emit('ctrl', [gPlayerData.instIdx, 'play', id, 0]);
+       gSocket.emit('ctrl', [gPlayerData.instIdx, id, 'stop']);
      else {
-       gSocket.emit('ctrl', [gPlayerData.instIdx, 'xy', id, val[0], val[1]]);
+       gSocket.emit('ctrl', [gPlayerData.instIdx, id, 'xy', val[0], val[1]]);
      }
   }
 
