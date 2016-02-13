@@ -10,6 +10,7 @@
 
 
 import numpy as np
+from audio import kSampleRate
 
 # generates audio data by asking an audio-source (ie, WaveFile) for that data.
 class WaveGenerator(object):
@@ -19,7 +20,7 @@ class WaveGenerator(object):
       self.loop = loop
       self.frame = 0
       self.paused = False
-      self._release = False
+      self._release = None
       self.gain = 1.0
 
    def reset(self):
@@ -35,8 +36,11 @@ class WaveGenerator(object):
    def pause(self):
       self.paused = True
 
-   def release(self):
-      self._release = True
+   def release(self, time = 0):
+      if time == 0:
+         time = 0.001
+
+      self._release = ReleaseEnvelope(time)
 
    def set_gain(self, g):
       self.gain = g
@@ -49,46 +53,70 @@ class WaveGenerator(object):
          output = np.zeros(num_frames * num_channels)
          return (output, True)
 
-      else:
-         # get data based on our position and requested # of frames
-         output = self.source.get_frames(self.frame, self.frame + num_frames)
-         output *= self.gain
+      # get data based on our position and requested # of frames
+      output = self.source.get_frames(self.frame, self.frame + num_frames)
+      output *= self.gain
 
-         # check for end-of-buffer condition:
-         actual_num_frames = len(output) / self.source.num_channels
-         continue_flag = actual_num_frames == num_frames
+      # check for end-of-buffer condition:
+      actual_num_frames = len(output) / self.source.num_channels
+      continue_flag = actual_num_frames == num_frames
 
-         # advance current-frame
-         self.frame += actual_num_frames
+      # advance current-frame
+      self.frame += actual_num_frames
 
-         # looping. If we got to the end of the buffer, don't actually end.
-         # Instead, read some more from the beginning
-         if self.loop and not continue_flag:
-            continue_flag = True
-            remainder = num_frames - actual_num_frames
-            output = np.append(output, self.source.get_frames(0, remainder))
-            actual_num_frames += remainder
-            self.frame = remainder
+      # looping. If we got to the end of the buffer, don't actually end.
+      # Instead, read some more from the beginning
+      if self.loop and not continue_flag:
+         continue_flag = True
+         remainder = num_frames - actual_num_frames
+         output = np.append(output, self.source.get_frames(0, remainder))
+         actual_num_frames += remainder
+         self.frame = remainder
 
-         if self._release:
+      # release envelope
+      if self._release:
+         env = self._release.generate(actual_num_frames, self.source.num_channels)
+         env_frames = len(env) / self.source.num_channels
+         if env_frames < actual_num_frames:
+            actual_num_frames = env_frames
             continue_flag = False
+            output = env * output[:env_frames * self.source.num_channels]
+         else:
+            output *= env
 
-         # convert mono to stereo:
-         if self.source.num_channels == 1 and num_channels == 2:
-            stereo = np.zeros(actual_num_frames * num_channels)
-            stereo[0::2] = output
-            stereo[1::2] = output
-            output = stereo
+      # convert mono to stereo:
+      if self.source.num_channels == 1 and num_channels == 2:
+         output = mono_to_stereo(output)
 
-         # TODO - convert from stereo to mono
-         if self.source.num_channels == 2 and num_channels == 1:
-            assert(False)
+      # convert stereo to mono
+      if self.source.num_channels == 2 and num_channels == 1:
+         output = stereo_to_mono(output)
 
-
-         # return
-         return (output, continue_flag)
+      # return
+      return (output, continue_flag)
 
 
+
+class ReleaseEnvelope(object):
+   def __init__(self, release_time):
+      super(ReleaseEnvelope, self).__init__()
+      self.relase = release_time * kSampleRate
+      self.frame = 0
+
+   # linear decay
+   def generate(self, num_frames, num_channels):
+      m = -1.0 / (self.relase)
+      if self.frame + num_frames > self.relase:
+         num_frames = self.relase - self.frame
+      end_frame = self.frame + num_frames
+      x = np.arange(self.frame, end_frame)
+      y = m * x + 1.0
+      self.frame = end_frame
+
+      if num_channels == 2:
+         return mono_to_stereo(y)
+      else:
+         return y
 
 class SpeedModulator(object):
    def __init__(self, generator, speed = 1.0):
@@ -125,3 +153,14 @@ class SpeedModulator(object):
          output[n::num_channels] = resampled[n]
 
       return (output, continue_flag)
+
+
+# Some utitlity functions
+
+def mono_to_stereo(buf):
+   sz = len(buf)
+   stereo = np.empty(sz * 2)
+   stereo[0::2] = buf
+   stereo[1::2] = buf
+   return stereo
+
