@@ -10,77 +10,88 @@ from mixer import *
 from wavegen import *
 from wavesrc import *
 from clock import *
+from writer import *
 
 from messanger import Messanger
 from kivy.uix.label import Label
 
 
-kAqua1a = { 'allow_stop': False,
-            'sched' : 1,
-            'tempo': (60, 120, 1) }
+kAqua1a = { 'allow_stop': False, 'sched': 1, 'tempo': (60, 120, 1) }
+kAqua1b = { 'allow_stop': True,  'sched': 2, 'tempo': (60, 120, 1) }
+kAqua2a = { 'allow_stop': True, 'release': 1.0, 'volume': (-12, 0, 1) }
 
-kAqua1b = { 'allow_stop': True,
-            'sched' : 2,
-            'tempo': (60, 120, 1) }
+
+gAquarius = {
+   'name': 'Aquarius',
+   'instruments': (
+      {  'name': 'glockenspiel',
+         'synth': ('wavedir', 'aqua1'),
+         'player': ('multi', 
+                     ('cycle', ('seq', kAqua1a, ((60, 0), (60, 1), (60, 2))),
+                               ('seq', kAqua1a, ((60, 0), (60, 2), (60, 1))),
+                               ('seq', kAqua1a, ((60, 4), (60, 3), (60, 2))),),
+
+                     ('cycle', ('seq', kAqua1b, ((360, 10), (420, 10), (240, 10))), 
+                               ('seq', kAqua1b, ((360, 14), (420, 14), (240, 14))),), )
+      },
+      {  'name': 'rolling pecans and sand',
+         'synth': ('wavedir', 'aqua2'),
+         'player': ('multi',
+                     ('cycle', ('sample', kAqua2a, 0),
+                               ('sample', kAqua2a, 1), 
+                               ('sample', kAqua2a, 2),),
+                   ) 
+      },
+      {  'name': 'toy hose',
+         'synth': ('waveset', 'woodblock_samples.wav', 5),
+         'player': ('index_player',) 
+      },
+      )}
+
+kTaurus1a = { 'allow_stop': True, 'loop': True, 'sched': 1, 'tempo': 130 }
+kPaperSeq = ((720, 0), (480, 0), (240, 0), (720, 0), (480, 0), (240, 0),
+   (480, 0), (480, 0), (720, 0),  )
+
+kLogDrumSeq = ((240, 2), (240, 3), (480, 1), (120, 2), (120, 2), (240, 3),
+   (480, 1), (120, 2), (360, 3),  )
+
+gTaurus = {
+   'name':"Taurus",
+   'instruments': (
+      {  'name': 'scratchy paper',
+         'synth': ('wavedir', 'taurus1'),
+         'player': ('seq', kTaurus1a, kPaperSeq) }
+      ,
+      {  'name': 'maracs',
+         'synth': ('waveset', 'woodblock_samples.wav', 5),
+         'player': ('step_player', (0,1,4,3,1,2,1,0,0))
+      }
+      ,
+      {  'name': 'log drum',
+         'synth': ('waveset', 'woodblock_samples.wav', 5),
+         'player': ('seq', kTaurus1a, kLogDrumSeq )
+      })}
+
+gScorpio = {
+   'name':"ScorpioTest 3",
+   'instruments': (
+      {  'name': 'woodblock3',
+         'synth': ('waveset', 'woodblock_samples.wav', 5),
+         'player': ('auto_player', ((0, 1, 200), (1, 1, 200), (4, 1, 200), (3, 1, 200), (1, 1, 200), (2, 1, 200))) }
+      ,
+      {  'name': 'woodblock1',
+         'synth': ('waveset', 'woodblock_samples.wav', 5),
+         'player': ('index_player',) }
+      ,
+      {  'name': 'woodblock2',
+         'synth': ('waveset', 'woodblock_samples.wav', 5),
+         'player': ('step_player', (0,1,4,3,1,2,1,0,0)) }
+      )}
 
 
 gConfig = {
-  'sections': (
-    { 'name': 'Aquarius',
-      'instruments': (
-         {  'name': 'glockenspiel',
-            'synth': ('wavedir', 'aqua1'),
-            'player': ('multi', 
-                        ('cycle', ('seq', kAqua1a, ((60, 0), (60, 1), (60, 2))),
-                                  ('seq', kAqua1a, ((60, 0), (60, 2), (60, 1))),
-                                  ('seq', kAqua1a, ((60, 4), (60, 3), (60, 2))),),
-
-                        ('cycle', ('seq', kAqua1b, ((360, 10), (420, 10), (240, 10))), 
-                                  ('seq', kAqua1b, ((360, 14), (420, 14), (240, 14))),), )
-         },
-         {  'name': 'rolling pecans and sand',
-            'synth': ('waveset', 'woodblock_samples.wav', 5),
-            'player': ('index_player',) 
-         },
-         {  'name': 'toy hose',
-            'synth': ('waveset', 'woodblock_samples.wav', 5),
-            'player': ('index_player',) 
-         },
-         )},
-
-    { 'name':"Scorpio",
-      'instruments': (
-         {  'name': 'woodblock1',
-            'synth': ('waveset', 'woodblock_samples.wav', 5),
-            'player': ('index_player',) }
-         ,
-         {  'name': 'woodblock2',
-            'synth': ('waveset', 'woodblock_samples.wav', 5),
-            'player': ('step_player', (0,1,4,3,1,2,1,0,0))
-         }
-         ,
-         {  'name': 'woodblock3',
-            'synth': ('waveset', 'woodblock_samples.wav', 5),
-            'player': ('auto_player', ((200, 0, 1), (200, 1, 1), (200, 4, 1), (200, 3, 1), (200, 1, 1), (200, 2, 1), (400, None, 0))) }
-         )},
-
-    { 'name':"ScorpioTest 3",
-      'instruments': (
-         {  'name': 'woodblock3',
-            'synth': ('waveset', 'woodblock_samples.wav', 5),
-            'player': ('auto_player', ((0, 1, 200), (1, 1, 200), (4, 1, 200), (3, 1, 200), (1, 1, 200), (2, 1, 200))) }
-         ,
-         {  'name': 'woodblock1',
-            'synth': ('waveset', 'woodblock_samples.wav', 5),
-            'player': ('index_player',) }
-         ,
-         {  'name': 'woodblock2',
-            'synth': ('waveset', 'woodblock_samples.wav', 5),
-            'player': ('step_player', (0,1,4,3,1,2,1,0,0)) }
-         )}
-  )
-}
-
+  'sections': (gAquarius, gTaurus, gScorpio)
+  }
 
 def getParam(params, key, default):
    if not params.has_key(key):
@@ -111,6 +122,7 @@ class WaveSetSynth(object):
    def stop(self, idx) :
       pass
 
+
 class WaveDirSynth(object):
    def __init__(self, dirname, mixer):
       super(WaveDirSynth, self).__init__()
@@ -124,17 +136,34 @@ class WaveDirSynth(object):
             b = WaveBuffer(filepath)
             self.buffers.append(b)
 
+      self.notes_on = []
+      self.gain = 1.0
+
+   # adjust gain of all currenlty playing notes
+   # (not great, because released notes will be non-adjustable...)
+   def set_gain(self, gain):
+      self.gain = gain
+      for n in self.notes_on:
+         ng = n[1]
+         n[2].set_gain(ng * gain)
+
    def play(self, idx, gain) :
-      print 'play', idx, gain
       buf = self.buffers[idx]
       gen = WaveGenerator(buf)
-      gen.set_gain(gain)
+      gen.set_gain(gain * self.gain)
       self.mixer.add(gen)
+      self.notes_on.append((idx, gain, gen))
 
-   def stop(self, idx) :
-      pass
+   def stop(self, idx, rtime = 0) :
+      for n in self.notes_on:
+         if n[0] == idx:
+            n[2].release(rtime)
+            self.notes_on.remove(n)
+            return
 
-
+# -----------------------------------------------
+# Controllers
+#
 class TempoController(object):
    def __init__(self, params, sched):
       super(TempoController, self).__init__()
@@ -156,6 +185,21 @@ class TempoController(object):
          now_time = self.sched.get_time()
          self.sched.tempo_map.set_tempo(bpm, now_time)
 
+
+class VolumeController(object):
+   def __init__(self, params, synth):
+      super(VolumeController, self).__init__()
+      self.synth = synth
+      self.volume_range = np.array((params[0], params[1]))
+      self.input_range = np.array((0, 1))
+      self.input_axis = params[2]
+   
+   def control(self, msg):
+      if msg[2] == 'xy':
+         vol = np.interp(msg[3+self.input_axis], self.input_range, self.volume_range)
+         gain = 10.0 ** (vol/20.0)
+         self.synth.set_gain(gain)
+
 # --------------------------------------------------
 # Players:
 #
@@ -169,7 +213,6 @@ class MultiPlayer(object):
 
    # dispatch to correct sub-player
    def control(self, msg):
-      print msg
       btn = msg[1]
       self.players[btn].control(msg)
 
@@ -189,6 +232,36 @@ class CyclePlayer(object):
       cmd = msg[2]
       if cmd == 'stop':
          self.idx = (self.idx + 1) % len(self.players)
+
+
+
+class SamplePlayer(object):
+   def __init__(self, params, note, synth):
+      super(SamplePlayer, self).__init__()
+      self.note = note
+      self.synth = synth
+      self.allow_stop   = getParam(params, 'allow_stop', False)
+      self.release_time = getParam(params, 'release', 0.1)
+      self.playing = False
+
+      self.volume_ctrl = None
+      vp = getParam(params, 'volume', None)
+      if vp:
+         self.volume_ctrl = VolumeController(vp, synth)
+
+   def control(self, msg):
+      if msg[2] == 'play' and not self.playing:
+         self.playing = True
+         self.synth.play(self.note, 1.0)
+
+      elif msg[2] == 'stop' and self.allow_stop and self.playing:
+         self.playing = False
+         self.synth.stop(self.note, self.release_time)
+
+      elif msg[2] == 'xy':
+         if self.volume_ctrl:
+            self.volume_ctrl.control(msg)
+
 
 
 class IndexPlayer(object):
@@ -234,7 +307,6 @@ class SequencePlayer(object):
       self.playing = False
       self.cmd = None
 
-
    def control(self, msg):
       if msg[2] == 'play' and not self.playing:
          self.playing = True
@@ -274,6 +346,7 @@ class SequencePlayer(object):
 
 # player factory
 def make_player(config, synth, sound):
+
    if config[0] == 'multi':
       player = MultiPlayer()
       for c in config[1:]:
@@ -286,6 +359,9 @@ def make_player(config, synth, sound):
 
    elif config[0] == 'seq':
       player = SequencePlayer(config[1], config[2], synth, sound)
+
+   elif config[0] == 'sample':
+      player = SamplePlayer(config[1], config[2], synth)
 
    elif config[0] == 'index_player':
       player = IndexPlayer(synth)
@@ -310,7 +386,8 @@ class Sound(object):
       super(Sound, self).__init__()
       self.config = config
 
-      self.audio = Audio(2)
+      self.writer = AudioWriter('data')
+      self.audio = Audio(2, self.writer.add_audio)
       self.mixer = Mixer()      
       self.sched1 = AudioScheduler(SimpleTempoMap(60))
       self.sched2 = AudioScheduler(SimpleTempoMap(120))
@@ -343,6 +420,8 @@ class Sound(object):
       inst_configs   = section_config['instruments']
       self.instruments = [self._make_instrument(c) for c in inst_configs]
 
+      # self.writer.toggle()
+
    def on_control(self, msg):
       if self.instruments == None:
          return
@@ -354,6 +433,7 @@ class Sound(object):
    def get_info_txt(self):
       text = 'load:%.2f\n' % self.audio.get_cpu_load()
       text += 'gain:%.2f\n' % self.mixer.get_gain()
+      text += 'gens:%d\n' % self.mixer.get_num_generators()
       return text
 
 
