@@ -20,11 +20,11 @@ var gPlayerCache = {};
 var gSongData = { 
   name: "*12*",
   sections: [
-    { name: "ScorpioTest 1",
+    { name: "Aquarius",
       instruments: [
-        {name:'woodblock', type:'surface', size:2},
-        {name:'guiro', type:'1d', size:2},
-        {name:'piano', type:'1d', size:2}]},
+        {name:'glockenspiel', type:'surface', size:2},
+        {name:'pecans', type:'surface', size:1},
+        {name:'toy hose', type:'surface', size:1}]},
 
     { name:"ScorpioTest 2",
       instruments: [
@@ -99,7 +99,7 @@ var server = http.listen(3000, function() {
 
   // receive messages from max, tagged as /max
   gOscServer.on('message', function(msg, rinfo) {
-    console.log(msg, rinfo);
+    console.log('osc:', msg, rinfo);
     if (msg[0] == '/max')
       onMaxMsg(msg);
   });
