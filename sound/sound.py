@@ -68,9 +68,9 @@ class WaveDirSynth(object):
          ng = n[1]
          n[2].set_gain(ng * gain)
 
-   def play(self, idx, gain) :
+   def play(self, idx, gain, loop = False, atime = 0) :
       buf = self.buffers[idx]
-      gen = WaveGenerator(buf)
+      gen = WaveGenerator(buf, loop, atime)
       gen.set_gain(gain * self.gain)
       self.mixer.add(gen)
       self.notes_on.append((idx, gain, gen))
@@ -98,11 +98,11 @@ class TempoController(object):
          self.sched = sched
          self.tempo_range = np.array((params[0], params[1]))
          self.input_range = np.array((0, 1))
-         self.input_axis = params[2]
+         self.axis_num = params[2]
 
    def control(self, msg):
       if self.sched and msg[2] == 'xy':
-         bpm = np.interp(msg[3+self.input_axis], self.input_range, self.tempo_range)
+         bpm = np.interp(msg[3+self.axis_num], self.input_range, self.tempo_range)
          now_time = self.sched.get_time()
          self.sched.tempo_map.set_tempo(bpm, now_time)
 
@@ -113,11 +113,11 @@ class VolumeController(object):
       self.synth = synth
       self.volume_range = np.array((params[0], params[1]))
       self.input_range = np.array((0, 1))
-      self.input_axis = params[2]
+      self.axis_num = params[2]
    
    def control(self, msg):
       if msg[2] == 'xy':
-         vol = np.interp(msg[3+self.input_axis], self.input_range, self.volume_range)
+         vol = np.interp(msg[3+self.axis_num], self.input_range, self.volume_range)
          gain = 10.0 ** (vol/20.0)
          self.synth.set_gain(gain)
 
@@ -155,6 +155,50 @@ class CyclePlayer(object):
          self.idx = (self.idx + 1) % len(self.players)
 
 
+class AxisPickerPlayer(object):
+   def __init__(self, axis_num):
+      super(AxisPickerPlayer, self).__init__()
+      self.players = []
+      self.axis_num = axis_num
+      self.cur_player = None
+
+      self.play_idx = 0
+
+   def add(self, p):
+      self.players.append(p)
+
+   # dispatch to correct player. advance index after 'stop' cmd is seend
+   def control(self, msg):
+      if msg[2] == 'play':
+         self._start_player(self.play_idx, msg)
+
+      elif msg[2] == 'stop':
+         self._stop_player(msg)
+
+      # TODO - hysteresis
+      elif msg[2] == 'xy':
+         x = msg[3+self.axis_num]
+         num = len(self.players)
+         idx = min(num-1, int(x * num))
+         if idx != self.play_idx:
+            self.play_idx = idx
+            self._start_player(self.play_idx, msg)
+         # pass on xy msg to player to possibly handle other stuff
+         self.cur_player.control(msg)
+
+   def _start_player(self, p, msg):
+      if self.cur_player:
+         self._stop_player(msg)
+      new_msg = (msg[0], msg[1], 'play')
+      self.cur_player = self.players[p]
+      self.cur_player.control(new_msg)
+      
+   def _stop_player(self, msg):
+      if self.cur_player:
+         new_msg = (msg[0], msg[1], 'stop')
+         self.cur_player.control(new_msg)
+         self.cur_player = None
+
 
 class SamplePlayer(object):
    def __init__(self, params, note, synth):
@@ -162,18 +206,21 @@ class SamplePlayer(object):
       self.note = note
       self.synth = synth
       self.allow_stop   = getParam(params, 'allow_stop', False)
-      self.release_time = getParam(params, 'release', 0.1)
-      self.playing = False
+      self.release_time = getParam(params, 'release', 0)
+      self.attack_time  = getParam(params, 'attack', 0)
+      self.loop         = getParam(params, 'loop', False)
 
       self.volume_ctrl = None
       vp = getParam(params, 'volume', None)
       if vp:
          self.volume_ctrl = VolumeController(vp, synth)
 
+      self.playing = False
+
    def control(self, msg):
       if msg[2] == 'play' and not self.playing:
          self.playing = True
-         self.synth.play(self.note, 1.0)
+         self.synth.play(self.note, 1.0, self.loop, self.attack_time)
 
       elif msg[2] == 'stop' and self.allow_stop and self.playing:
          self.playing = False
@@ -276,6 +323,11 @@ def make_player(config, synth, sound):
    elif config[0] == 'cycle':
       player = CyclePlayer()
       for c in config[1:]:
+         player.add(make_player(c, synth, sound))
+
+   elif config[0] == 'axispicker':
+      player = AxisPickerPlayer(config[1])
+      for c in config[2:]:
          player.add(make_player(c, synth, sound))
 
    elif config[0] == 'seq':

@@ -15,6 +15,7 @@ from kivy.uix.label import Label
 kAqua1a = { 'allow_stop': False, 'sched': 1, 'tempo': (60, 120, 1) }
 kAqua1b = { 'allow_stop': True,  'sched': 2, 'tempo': (60, 120, 1) }
 kAqua2a = { 'allow_stop': True, 'release': 1.0, 'volume': (-12, 0, 1) }
+kAqua3a = { 'allow_stop': True, 'loop':True, 'attack': 0.1, 'release': 0.5, 'volume': (-18, 0, 1) }
 
 gAquarius = {
    'name': 'Aquarius',
@@ -38,8 +39,8 @@ gAquarius = {
                    ) 
       },
       {  'name': 'toy hose',
-         'synth': ('waveset', 'woodblock_samples.wav', 5),
-         'player': ('index_player',) 
+         'synth': ('wavedir', 'aqua3'),
+         'player': ('axispicker', 0, ('sample', kAqua3a, 0), ('sample', kAqua3a, 1))
       },
       )}
 

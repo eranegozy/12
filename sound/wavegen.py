@@ -14,14 +14,18 @@ from audio import kSampleRate
 
 # generates audio data by asking an audio-source (ie, WaveFile) for that data.
 class WaveGenerator(object):
-   def __init__(self, wave_source, loop=False):
+   def __init__(self, wave_source, loop=False, attack_time=0):
       super(WaveGenerator, self).__init__()
       self.source = wave_source
       self.loop = loop
       self.frame = 0
       self.paused = False
+      self._attack = None
       self._release = None
       self.gain = 1.0
+
+      if attack_time > 0:
+         self._attack = VolumeEnvelope(attack_time, -80.0, 0.0)
 
    def reset(self):
       self.paused = True
@@ -40,7 +44,7 @@ class WaveGenerator(object):
       if time == 0:
          time = 0.001
 
-      self._release = ReleaseEnvelope(time)
+      self._release = VolumeEnvelope(time, 0.0, -80.0)
 
    def set_gain(self, g):
       self.gain = g
@@ -57,8 +61,14 @@ class WaveGenerator(object):
       output = self.source.get_frames(self.frame, self.frame + num_frames)
       output *= self.gain
 
+      # convert stereo to mono
+      source_num_channels = self.source.num_channels
+      if source_num_channels == 2 and num_channels == 1:
+         output = stereo_to_mono(output)
+         source_num_channels = 1
+
       # check for end-of-buffer condition:
-      actual_num_frames = len(output) / self.source.num_channels
+      actual_num_frames = len(output) / source_num_channels
       continue_flag = actual_num_frames == num_frames
 
       # advance current-frame
@@ -73,50 +83,58 @@ class WaveGenerator(object):
          actual_num_frames += remainder
          self.frame = remainder
 
+      # attack envelope:
+      if self._attack:
+         env = self._attack.generate(actual_num_frames)
+         env_frames = len(env)
+         if source_num_channels == 2:
+            env = mono_to_stereo(env)
+
+         output[0:env_frames * source_num_channels] *= env
+
+         if env_frames < actual_num_frames:         
+            self._attack = None
+
       # release envelope
       if self._release:
-         env = self._release.generate(actual_num_frames, self.source.num_channels)
-         env_frames = len(env) / self.source.num_channels
+         env = self._release.generate(actual_num_frames)
+         env_frames = len(env)
          if env_frames < actual_num_frames:
             actual_num_frames = env_frames
             continue_flag = False
-            output = env * output[:env_frames * self.source.num_channels]
-         else:
-            output *= env
+            output = output[0:env_frames * source_num_channels]
+         if source_num_channels == 2:
+            env = mono_to_stereo(env)
+
+         output *= env
 
       # convert mono to stereo:
-      if self.source.num_channels == 1 and num_channels == 2:
+      if source_num_channels == 1 and num_channels == 2:
          output = mono_to_stereo(output)
-
-      # convert stereo to mono
-      if self.source.num_channels == 2 and num_channels == 1:
-         output = stereo_to_mono(output)
 
       # return
       return (output, continue_flag)
 
 
 
-class ReleaseEnvelope(object):
-   def __init__(self, release_time):
-      super(ReleaseEnvelope, self).__init__()
-      self.relase = release_time * kSampleRate
+class VolumeEnvelope(object):
+   def __init__(self, duration, start_vol, end_vol):
+      super(VolumeEnvelope, self).__init__()
+      self.duration = duration * kSampleRate
+      self.m = (end_vol - start_vol) / float(self.duration)
+      self.b = float(start_vol)
       self.frame = 0
 
    # linear decay
-   def generate(self, num_frames, num_channels):
-      m = -1.0 / (self.relase)
-      if self.frame + num_frames > self.relase:
-         num_frames = self.relase - self.frame
+   def generate(self, num_frames):
+      if self.frame + num_frames > self.duration:
+         num_frames = self.duration - self.frame
       end_frame = self.frame + num_frames
       x = np.arange(self.frame, end_frame)
-      y = m * x + 1.0
-      self.frame = end_frame
+      y = 10 ** ((self.m * x + self.b) / 20.0)
 
-      if num_channels == 2:
-         return mono_to_stereo(y)
-      else:
-         return y
+      self.frame = end_frame
+      return y
 
 class SpeedModulator(object):
    def __init__(self, generator, speed = 1.0):
