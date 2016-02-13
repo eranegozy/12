@@ -62,7 +62,7 @@ class WaveBuffer(object):
    def get_frames(self, start_frame, end_frame) :
       start_sample = start_frame * self.num_channels
       end_sample = end_frame * self.num_channels
-      return self.data[start_sample : end_sample]
+      return self.data[start_sample : end_sample].copy()
 
 
 
