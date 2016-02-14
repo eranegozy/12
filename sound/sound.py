@@ -101,7 +101,7 @@ class TempoController(object):
          self.axis_num = params[2]
 
    def control(self, msg):
-      if self.sched and msg[2] == 'xy':
+      if self.sched:
          bpm = np.interp(msg[3+self.axis_num], self.input_range, self.tempo_range)
          now_time = self.sched.get_time()
          self.sched.tempo_map.set_tempo(bpm, now_time)
@@ -116,10 +116,9 @@ class VolumeController(object):
       self.axis_num = params[2]
    
    def control(self, msg):
-      if msg[2] == 'xy':
-         vol = np.interp(msg[3+self.axis_num], self.input_range, self.volume_range)
-         gain = 10.0 ** (vol/20.0)
-         self.synth.set_gain(gain)
+      vol = np.interp(msg[3+self.axis_num], self.input_range, self.volume_range)
+      gain = 10.0 ** (vol/20.0)
+      self.synth.set_gain(gain)
 
 # --------------------------------------------------
 # Players:
@@ -156,10 +155,11 @@ class CyclePlayer(object):
 
 
 class AxisPickerPlayer(object):
-   def __init__(self, axis_num):
+   def __init__(self, params):
       super(AxisPickerPlayer, self).__init__()
       self.players = []
-      self.axis_num = axis_num
+      self.axis_num     = getParam(params, 'axis', 0)
+      self.auto_trigger = getParam(params, 'auto_trigger', False)
       self.cur_player = None
 
       self.play_idx = 0
@@ -169,33 +169,35 @@ class AxisPickerPlayer(object):
 
    # dispatch to correct player. advance index after 'stop' cmd is seend
    def control(self, msg):
+      if self.cur_player:
+         self.cur_player.control(msg)
+
+      # find new play_idx
+      # TODO - hysteresis
+      old_idx = self.play_idx
+      x = msg[3+self.axis_num]
+      num = len(self.players)
+      self.play_idx = min(num-1, int(x * num))
+
       if msg[2] == 'play':
          self._start_player(self.play_idx, msg)
 
       elif msg[2] == 'stop':
          self._stop_player(msg)
 
-      # TODO - hysteresis
-      elif msg[2] == 'xy':
-         x = msg[3+self.axis_num]
-         num = len(self.players)
-         idx = min(num-1, int(x * num))
-         if idx != self.play_idx:
-            self.play_idx = idx
-            self._start_player(self.play_idx, msg)
-         # pass on xy msg to player to possibly handle other stuff
-         self.cur_player.control(msg)
+      elif msg[2] == 'xy' and self.auto_trigger and old_idx != self.play_idx:
+         self._start_player(self.play_idx, msg)
 
    def _start_player(self, p, msg):
       if self.cur_player:
          self._stop_player(msg)
-      new_msg = (msg[0], msg[1], 'play')
+      new_msg = (msg[0], msg[1], 'play', msg[3], msg[4])
       self.cur_player = self.players[p]
       self.cur_player.control(new_msg)
       
    def _stop_player(self, msg):
       if self.cur_player:
-         new_msg = (msg[0], msg[1], 'stop')
+         new_msg = (msg[0], msg[1], 'stop', msg[3], msg[4])
          self.cur_player.control(new_msg)
          self.cur_player = None
 
@@ -218,6 +220,9 @@ class SamplePlayer(object):
       self.playing = False
 
    def control(self, msg):
+      if self.volume_ctrl:
+         self.volume_ctrl.control(msg)
+
       if msg[2] == 'play' and not self.playing:
          self.playing = True
          self.synth.play(self.note, 1.0, self.loop, self.attack_time)
@@ -226,9 +231,6 @@ class SamplePlayer(object):
          self.playing = False
          self.synth.stop(self.note, self.release_time)
 
-      elif msg[2] == 'xy':
-         if self.volume_ctrl:
-            self.volume_ctrl.control(msg)
 
 
 
@@ -276,6 +278,8 @@ class SequencePlayer(object):
       self.cmd = None
 
    def control(self, msg):
+      self.tempo_ctrl.control(msg)
+
       if msg[2] == 'play' and not self.playing:
          self.playing = True
          now = self.sched.get_tick()
@@ -285,8 +289,6 @@ class SequencePlayer(object):
          self.playing = False
          self.sched.remove(self.cmd)
 
-      elif msg[2] == 'xy':
-         self.tempo_ctrl.control(msg)
 
    def _play(self, now, idx):
       # print 'play', now, idx

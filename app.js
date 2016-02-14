@@ -24,19 +24,19 @@ var gSongData = {
       instruments: [
         {name:'glockenspiel', type:'surface', size:2},
         {name:'pecans', type:'surface', size:1},
-        {name:'toy hose', type:'surface', size:1}]},
+        {name:'toy hose', type:'surface', size:1}, ]},
 
-    { name:"ScorpioTest 2",
+    { name:"Leo",
       instruments: [
-        {name:'woodblock', type:'buttons', size:5},
-        {name:'guiro', type:'1d', size:2},
-        {name:'piano', type:'1d', size:2}]},
+        {name:'temple block', type:'surface', size:2},
+        {name:'tambourine', type:'surface', size:2},
+        {name:'bass drum', type:'surface', size:1}, ]},
 
-    { name:"ScorpioTest 3",
+    { name:"Taurus",
       instruments: [
-        {name:'woodblock', type:'2d'},
-        {name:'guiro', type:'1d', size:2},
-        {name:'piano', type:'1d', size:2}]},
+        {name:'scratchy paper', type:'surface', size:1},
+        {name:'maracas', type:'surface', size:1},
+        {name:'log drum', type:'surface', size:1}, ]},
   ]
 };
 

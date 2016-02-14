@@ -6,7 +6,8 @@ from core import *
 from messanger import Messanger
 from sound import Sound
 from kivy.uix.label import Label
-
+from kivy.graphics.instructions import InstructionGroup, CanvasBase
+from kivy.graphics import Color, Ellipse, Rectangle, Line
 
 # -----------------------------------------------------------------
 # Aquarius
@@ -14,7 +15,9 @@ from kivy.uix.label import Label
 
 kAqua1a = { 'allow_stop': False, 'sched': 1, 'tempo': (60, 120, 1) }
 kAqua1b = { 'allow_stop': True,  'sched': 2, 'tempo': (60, 120, 1) }
-kAqua2a = { 'allow_stop': True, 'release': 1.0, 'volume': (-12, 0, 1) }
+kAqua2a = { 'allow_stop': True, 'release': 1.0, 'volume': (-18, 0, 1) }
+
+kAqua3 = { 'axis': 0, 'auto_trigger': True }
 kAqua3a = { 'allow_stop': True, 'loop':True, 'attack': 0.1, 'release': 0.5, 'volume': (-18, 0, 1) }
 
 gAquarius = {
@@ -40,9 +43,46 @@ gAquarius = {
       },
       {  'name': 'toy hose',
          'synth': ('wavedir', 'aqua3'),
-         'player': ('axispicker', 0, ('sample', kAqua3a, 0), ('sample', kAqua3a, 1))
+         'player': ('axispicker', kAqua3, ('sample', kAqua3a, 0), ('sample', kAqua3a, 1))
       },
       )}
+
+# -----------------------------------------------------------------
+# Leo
+#
+
+kLeo1  = { 'axis': 1, 'auto_trigger': False }
+kLeo1a = { 'allow_stop': False, 'sched': 1, 'tempo': 96 }
+kLeo2a = { 'allow_stop': True, 'release': 0.1, 'volume': (-18, 0, 1) }
+
+gLeo = {
+   'name':"Leo",
+   'instruments': (
+      {  'name': 'temple block',
+         'synth': ('wavedir', 'leo1'),
+         'player': ('multi',
+            ('axispicker', kLeo1,
+               ('seq', kLeo1a, ((320,0,.95), (320,2,.65), (320,3,.45))),
+               ('seq', kLeo1a, ((160,0,.95), (160,2,.65), (160,3,.45))),
+               ('seq', kLeo1a, ((80,0,.95), (80,1,.65), (80,2,.45))),
+               ('seq', kLeo1a, ((60,0,.95), (60,1,.65), (60,2,.45), (60,3,.25))), ),
+            ('axispicker', kLeo1,
+               ('seq', kLeo1a, ((320,3,.95), (320,2,.65), (320,0,.45))),
+               ('seq', kLeo1a, ((160,3,.95), (160,2,.65), (160,0,.45))),
+               ('seq', kLeo1a, ((80,2,.95), (80,1,.65), (80,0,.45))),
+               ('seq', kLeo1a, ((60,3,.95), (60,2,.65), (60,1,.45), (60,0,.25))), ))
+      }
+      ,
+      {  'name': 'tambourine',
+         'synth': ('wavedir', 'leo2'),
+         'player': ('multi', ('sample', kLeo2a, 0), ('sample', kLeo2a, 1))
+      }
+      ,
+      {  'name': 'bass drum',
+         'synth': ('wavedir', 'leo2'),
+         'player': ('step_player', (0,1))
+      })}
+
 
 # -----------------------------------------------------------------
 # Taurus
@@ -93,12 +133,9 @@ gScorpio = {
       )}
 
 
-# -----------------------------------------------------------------
-# Leo
-#
 
 gConfig = {
-  'sections': (gAquarius, gTaurus, gScorpio)
+  'sections': (gAquarius, gLeo, gTaurus)
   }
 
 gEnableOSC = True
@@ -118,16 +155,20 @@ class MainWidget(BaseWidget) :
       self.info = Label(text = "text", pos=(200, 300), text_size=(400,400), valign='top')
       self.add_widget(self.info)
 
+      self.cur_region = None
+      self.cur_section = None
       self.cur_inst = 0
-      self.cur_btn = 0
-      self.last_x = 0
-      self.last_y = 0
+
+      self.num_regions = 1
+
+      with self.canvas:
+         self.display = CanvasBase()
+
 
    def on_update(self) :
       if self.messanger:
          self.messanger.on_update()
 
-      self._touch_move()
       self.sound.on_update()
 
       self.info.text = self.sound.get_info_txt()
@@ -137,38 +178,65 @@ class MainWidget(BaseWidget) :
       else:
          self.info.text += 'no server mode'
 
+   def _setup_inst(self):
+      # find number of regions
+      self.num_regions = 1
+
+      if self.cur_section != None and self.cur_inst != None:
+         player_config = gConfig['sections'][self.cur_section]['instruments'][self.cur_inst]['player']
+         if player_config[0] == 'multi':
+            self.num_regions = len(player_config) - 1
+
+      self.display.clear()
+
+      x = 0
+      w = Window.width / self.num_regions
+      for r in range(self.num_regions):
+         line = Line(points=(x,0,x,Window.height), width=2)
+         self.display.add(line)
+         x += w
+
    def on_key_down(self, keycode, modifiers):
       section = lookup(keycode[1], '1234', (0,1,2,3))
       if section != None:
+         self.cur_section = section
          self.sound.set_section(section)
 
       inst = lookup(keycode[1], 'qwe', (0,1,2))
       if inst != None:
          self.cur_inst = inst
 
-      btn = lookup(keycode[1], 'asd', (0,1,2))
-      if btn != None:
-         self.cur_btn = btn
-         args = (self.cur_inst, btn, 'play')
-         self.sound.on_control(args)
+      self._setup_inst()
 
-   def on_key_up(self, keycode):
-      btn = lookup(keycode[1], 'asd', (0,1,2))
-      if btn != None:
-         args = (self.cur_inst, btn, 'stop')
-         self.sound.on_control(args)
 
-   def _touch_move(self):
-      x, y = Window.mouse_pos
-      x = float(x) / Window.width
-      y = float(y) / Window.height
+   def _spos_to_xy(self, spos):
+      x = spos[0] * self.num_regions - self.cur_region
+      x = min(max(x, 0), 1)
+      y = spos[1]
+      return x,y
 
-      if len(self.down_keys) and (self.last_x != x or self.last_y != y):
-         args = (self.cur_inst, self.cur_btn, 'xy', x, y)
-         self.sound.on_control(args)
-         self.last_x = x
-         self.last_y = y
+   def on_touch_down(self, touch):
+      self.cur_region = int(touch.spos[0] * self.num_regions)
+      self.cur_region = min(self.cur_region, self.num_regions-1)
+      x, y = self._spos_to_xy(touch.spos)
+      msg = (self.cur_inst, self.cur_region, 'play', x, y)
+      print msg
+      self.sound.on_control(msg)
 
+   def on_touch_up(self, touch):
+      x, y = self._spos_to_xy(touch.spos)
+      msg = (self.cur_inst, self.cur_region, 'stop', x, y)
+      print msg
+      self.sound.on_control(msg)
+      self.cur_region = None
+
+   def on_touch_move(self, touch):
+      if self.cur_region != None:
+         x, y = self._spos_to_xy(touch.spos)
+         msg = (self.cur_inst, self.cur_region, 'xy', x, y)
+         print msg
+         self.sound.on_control(msg)
+   
    def on_message(self, msg, args) :
       try:
          if msg == '/sectionIdx':

@@ -248,44 +248,70 @@ ui = (function() {
     gWidgets.push(this);
   }
 
+  Surface.prototype.getScreenPos = function() {
+    var posX = constrain(pointerX, this.x + this.rad, this.x + this.w - this.rad);
+    var posY = constrain(pointerY, this.y + this.rad, this.y + this.h - this.rad);
+    return [posX, posY];
+  }
+
+  Surface.prototype.getNormPos = function() {
+    var pos = this.getScreenPos()
+
+    // scale positions to [0,1]
+    return [ (pos[0] - this.x) / this.w, 1 - (pos[1] - this.y) / this.h];
+  }
+
   Surface.prototype.draw = function() {
+    // draw border
     strokeWeight(1);
     stroke(0);
     noFill();
     rect(this.x, this.y, this.w, this.h);
 
+    if (!this.enabled)
+      return;
+
+    // draw circle at finger position
     if (this.pressed) {
-      var newX = constrain(pointerX, this.x + this.rad, this.x + this.w - this.rad);
-      var newY = constrain(pointerY, this.y + this.rad, this.y + this.h - this.rad);
-
-      if (newX != this.lastX || newY != this.lastY) {
-        this.func(this.name, [(newX - this.x) / this.w, 1 - (newY - this.y) / this.h]);
-        this.lastX = newX;
-        this.lastY = newY;
-      }
-
+      var pos = this.getScreenPos();
       strokeWeight(3);
       stroke(this.clr);
-      ellipse(newX, newY, this.rad*2, this.rad*2);
+      ellipse(pos[0], pos[1], this.rad*2, this.rad*2);
     }
+
+    // send msg with cur position
+    var pos = this.getNormPos();
+    if (this.pressed && (pos[0] != this.lastX || pos[1] != this.lastY)) {
+      this.func(this.name, 'xy', pos);
+    }
+    this.lastX = pos[0];
+    this.lastY = pos[1];
   }
 
   Surface.prototype.remove = function() {
   }
 
   Surface.prototype.down = function() {
+    if (!this.enabled)
+      return;
+
     var xHit = this.x < pointerX && pointerX < this.x + this.w;
     var yHit = this.y < pointerY && pointerY < this.y + this.h;
     // console.log('down(' + this.name + '):' + xHit + ' ' + yHit);
     if (!this.pressed && xHit && yHit) {
       this.pressed = true;
-      this.func(this.name, "down");
+      var pos = this.getNormPos();
+      this.func(this.name, "down", pos);
     }
   }
 
   Surface.prototype.up = function() {
+    if (!this.enabled)
+      return;
+
     if (this.pressed) {
-      this.func(this.name, "up");
+      var pos = this.getNormPos();
+      this.func(this.name, "up", pos);
     }
     this.pressed = false;
   }
