@@ -15,10 +15,10 @@ from kivy.graphics import Color, Ellipse, Rectangle, Line
 
 kAqua1a = { 'allow_stop': False, 'sched': 1, 'tempo': (60, 120, 1) }
 kAqua1b = { 'allow_stop': True,  'sched': 2, 'tempo': (60, 120, 1) }
-kAqua2a = { 'allow_stop': True, 'release': 1.0, 'volume': (-18, 0, 1) }
+kAqua2a = { 'release': 1.0, 'volume': (-18, 0, 1) }
 
-kAqua3 = { 'axis': 0, 'auto_trigger': True }
-kAqua3a = { 'allow_stop': True, 'loop':True, 'attack': 0.1, 'release': 0.5, 'volume': (-18, 0, 1) }
+kAqua3 =  { 'axis': 0, 'auto_trigger': True }
+kAqua3a = { 'loop':True, 'attack': 0.1, 'release': 0.5, 'volume': (-18, 0, 1) }
 
 gAquarius = {
    'name': 'Aquarius',
@@ -53,7 +53,8 @@ gAquarius = {
 
 kLeo1  = { 'axis': 1, 'auto_trigger': False }
 kLeo1a = { 'allow_stop': False, 'sched': 1, 'tempo': 96 }
-kLeo2a = { 'allow_stop': True, 'release': 0.1, 'volume': (-18, 0, 1) }
+kLeo2a = { 'release': 10.0, 'volume': (-18, 0, 1) }
+kLeo2b = { 'loop':True, 'release': 0.1, 'volume': (-18, 0, 1) }
 
 gLeo = {
    'name':"Leo",
@@ -75,7 +76,7 @@ gLeo = {
       ,
       {  'name': 'tambourine',
          'synth': ('wavedir', 'leo2'),
-         'player': ('multi', ('sample', kLeo2a, 0), ('sample', kLeo2a, 1))
+         'player': ('multi', ('sample', kLeo2a, 0), ('sample', kLeo2b, 1))
       }
       ,
       {  'name': 'bass drum',

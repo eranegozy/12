@@ -207,7 +207,6 @@ class SamplePlayer(object):
       super(SamplePlayer, self).__init__()
       self.note = note
       self.synth = synth
-      self.allow_stop   = getParam(params, 'allow_stop', False)
       self.release_time = getParam(params, 'release', 0)
       self.attack_time  = getParam(params, 'attack', 0)
       self.loop         = getParam(params, 'loop', False)
@@ -217,20 +216,15 @@ class SamplePlayer(object):
       if vp:
          self.volume_ctrl = VolumeController(vp, synth)
 
-      self.playing = False
-
    def control(self, msg):
       if self.volume_ctrl:
          self.volume_ctrl.control(msg)
 
-      if msg[2] == 'play' and not self.playing:
-         self.playing = True
+      if msg[2] == 'play':
          self.synth.play(self.note, 1.0, self.loop, self.attack_time)
 
-      elif msg[2] == 'stop' and self.allow_stop and self.playing:
-         self.playing = False
+      elif msg[2] == 'stop':
          self.synth.stop(self.note, self.release_time)
-
 
 
 
