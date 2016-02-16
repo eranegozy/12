@@ -268,12 +268,19 @@ class SequencePlayer(object):
 
       self.tempo_ctrl = TempoController(getParam(params, 'tempo', 60), self.sched)
 
+      self.volume_ctrl = None
+      vp = getParam(params, 'volume', None)
+      if vp:
+         self.volume_ctrl = VolumeController(vp, synth)
+
       self.playing = False
       self.cmd = None
 
    def control(self, msg):
       self.tempo_ctrl.control(msg)
-
+      if self.volume_ctrl:
+         self.volume_ctrl.control(msg)
+         
       if msg[2] == 'play' and not self.playing:
          self.playing = True
          now = self.sched.get_tick()
@@ -337,9 +344,6 @@ def make_player(config, synth, sound):
 
    elif config[0] == 'step_player':
       player = StepPlayer(config[1], synth)
-
-   elif config[0] == 'auto_player':
-      player = AutoPlayer(config[1], synth, self.sched)
 
    else:
       raise Exception('unknown player config:' + str(config[0]))

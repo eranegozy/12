@@ -26,20 +26,18 @@ gAquarius = {
       {  'name': 'glockenspiel',
          'synth': ('wavedir', 'aqua1'),
          'player': ('multi', 
-                     ('cycle', ('seq', kAqua1a, ((60, 0), (60, 1), (60, 2))),
-                               ('seq', kAqua1a, ((60, 0), (60, 2), (60, 1))),
-                               ('seq', kAqua1a, ((60, 4), (60, 3), (60, 2))),),
+                     ('cycle', ('seq', kAqua1a, ((60, 3), (60, 2), (60, 5))),
+                               ('seq', kAqua1a, ((60, 1), (60, 4), (60, 3))),
+                               ('seq', kAqua1a, ((60, 1), (60, 0), (60, 3))),),
 
-                     ('cycle', ('seq', kAqua1b, ((360, 10), (420, 10), (240, 10))), 
-                               ('seq', kAqua1b, ((360, 14), (420, 14), (240, 14))),), )
+                     ('cycle', ('seq', kAqua1b, ((360, 6), (420, 6), (240, 6))), 
+                               ('seq', kAqua1b, ((360, 7), (420, 7), (240, 7))),), )
       },
       {  'name': 'rolling pecans and sand',
          'synth': ('wavedir', 'aqua2'),
-         'player': ('multi',
-                     ('cycle', ('sample', kAqua2a, 0),
-                               ('sample', kAqua2a, 1), 
-                               ('sample', kAqua2a, 2),),
-                   ) 
+         'player': ('cycle', ('sample', kAqua2a, 0),
+                             ('sample', kAqua2a, 1), 
+                             ('sample', kAqua2a, 2),),
       },
       {  'name': 'toy hose',
          'synth': ('wavedir', 'aqua3'),
@@ -55,6 +53,7 @@ kLeo1  = { 'axis': 1, 'auto_trigger': False }
 kLeo1a = { 'allow_stop': False, 'sched': 1, 'tempo': 96 }
 kLeo2a = { 'release': 10.0, 'volume': (-18, 0, 1) }
 kLeo2b = { 'loop':True, 'release': 0.1, 'volume': (-18, 0, 1) }
+kLeo3  = { 'loop':False, 'release': 0.01, 'volume': (-18, 0, 1) }
 
 gLeo = {
    'name':"Leo",
@@ -79,9 +78,13 @@ gLeo = {
          'player': ('multi', ('sample', kLeo2a, 0), ('sample', kLeo2b, 1))
       }
       ,
-      {  'name': 'bass drum',
-         'synth': ('wavedir', 'leo2'),
-         'player': ('step_player', (0,1))
+      {  'name': 'guiro',
+         'synth': ('wavedir', 'leo3'),
+         'player': ('multi',
+                     ('sample', kLeo3, 0),
+                     ('cycle', ('sample', kLeo3, 1), 
+                               ('sample', kLeo3, 2),),
+                   )
       })}
 
 
@@ -89,50 +92,42 @@ gLeo = {
 # Taurus
 #
 
-kTaurus1a = { 'allow_stop': True, 'loop': True, 'sched': 1, 'tempo': 130 }
-kPaperSeq = ((720, 0), (480, 0), (240, 0), (720, 0), (480, 0), (240, 0),
+kTaurus1a = { 'allow_stop': True, 'loop': True, 'sched': 1, 'tempo': 130, 'volume': (-18, 0, 1) }
+kTaurus1Seq = ((720, 0), (480, 0), (240, 1), (720, 0), (480, 0), (240, 1),
    (480, 0), (480, 0), (720, 0),  )
 
-kLogDrumSeq = ((240, 2), (240, 3), (480, 1), (120, 2), (120, 2), (240, 3),
-   (480, 1), (120, 2), (360, 3),  )
+kTaurus2 = { 'loop':True, 'release': 0.1, 'volume': (-18, 0, 1) }
+
+
+kTaurus3  = { 'axis': 0, 'auto_trigger': True }
+kTaurus3Seq1 = ((960, 0), (240, 1), )
+kTaurus3Seq2 = ((240, 0), (960, 1), )
+kTaurus3Seq3 = ((240, 0), (240, 1), (480, 2), (120, 3), (120, 3), (240, 1),
+   (480, 2), (120, 3), (360, 1),  )
 
 gTaurus = {
    'name':"Taurus",
    'instruments': (
       {  'name': 'scratchy paper',
          'synth': ('wavedir', 'taurus1'),
-         'player': ('seq', kTaurus1a, kPaperSeq) }
+         'player': ('seq', kTaurus1a, kTaurus1Seq) }
       ,
       {  'name': 'maracs',
-         'synth': ('waveset', 'woodblock_samples.wav', 5),
-         'player': ('step_player', (0,1,4,3,1,2,1,0,0))
+         'synth': ('wavedir', 'taurus2'),
+         'player': ('sample', kTaurus2, 0)
       }
       ,
       {  'name': 'log drum',
-         'synth': ('waveset', 'woodblock_samples.wav', 5),
-         'player': ('seq', kTaurus1a, kLogDrumSeq )
+         'synth': ('wavedir', 'taurus3'),
+         'player': ('axispicker', kTaurus3,
+                     ('seq', kTaurus1a, kTaurus3Seq1 ), 
+                     ('seq', kTaurus1a, kTaurus3Seq2 ), 
+                     ('seq', kTaurus1a, kTaurus3Seq3 ), )
       })}
 
 # -----------------------------------------------------------------
 # Scorpio
 #
-
-gScorpio = {
-   'name':"ScorpioTest 3",
-   'instruments': (
-      {  'name': 'woodblock3',
-         'synth': ('waveset', 'woodblock_samples.wav', 5),
-         'player': ('auto_player', ((0, 1, 200), (1, 1, 200), (4, 1, 200), (3, 1, 200), (1, 1, 200), (2, 1, 200))) }
-      ,
-      {  'name': 'woodblock1',
-         'synth': ('waveset', 'woodblock_samples.wav', 5),
-         'player': ('index_player',) }
-      ,
-      {  'name': 'woodblock2',
-         'synth': ('waveset', 'woodblock_samples.wav', 5),
-         'player': ('step_player', (0,1,4,3,1,2,1,0,0)) }
-      )}
-
 
 
 gConfig = {

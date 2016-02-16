@@ -30,7 +30,7 @@ var gSongData = {
       instruments: [
         {name:'temple block', type:'surface', size:2},
         {name:'tambourine', type:'surface', size:2},
-        {name:'bass drum', type:'surface', size:1}, ]},
+        {name:'guiro', type:'surface', size:2}, ]},
 
     { name:"Taurus",
       instruments: [
