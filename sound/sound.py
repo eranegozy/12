@@ -227,29 +227,6 @@ class SamplePlayer(object):
          self.synth.stop(self.note, self.release_time)
 
 
-
-class IndexPlayer(object):
-   def __init__(self, synth):
-      super(IndexPlayer, self).__init__()
-      self.synth = synth
-
-   def control(self, msg):
-      self.synth.play(msg[2], 1.0)
-
-
-class StepPlayer(object):
-   def __init__(self, sequence, synth):
-      super(StepPlayer, self).__init__()
-      self.sequence = sequence
-      self.synth = synth
-      self.idx = 0
-
-   def control(self, msg):
-      note = self.sequence[self.idx]
-      self.synth.play(note, 1.0)
-      self.idx = (self.idx + 1) % len(self.sequence)
-
-
 class SequencePlayer(object):
    def __init__(self, params, sequence, synth, sound):
       super(SequencePlayer, self).__init__()
@@ -338,12 +315,6 @@ def make_player(config, synth, sound):
 
    elif config[0] == 'sample':
       player = SamplePlayer(config[1], config[2], synth)
-
-   elif config[0] == 'index_player':
-      player = IndexPlayer(synth)
-
-   elif config[0] == 'step_player':
-      player = StepPlayer(config[1], synth)
 
    else:
       raise Exception('unknown player config:' + str(config[0]))
