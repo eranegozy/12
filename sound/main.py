@@ -216,13 +216,13 @@ class MainWidget(BaseWidget) :
       self.cur_region = min(self.cur_region, self.num_regions-1)
       x, y = self._spos_to_xy(touch.spos)
       msg = (self.cur_inst, self.cur_region, 'play', x, y)
-      print msg
+      # print msg
       self.sound.on_control(msg)
 
    def on_touch_up(self, touch):
       x, y = self._spos_to_xy(touch.spos)
       msg = (self.cur_inst, self.cur_region, 'stop', x, y)
-      print msg
+      # print msg
       self.sound.on_control(msg)
       self.cur_region = None
 
@@ -230,7 +230,7 @@ class MainWidget(BaseWidget) :
       if self.cur_region != None:
          x, y = self._spos_to_xy(touch.spos)
          msg = (self.cur_inst, self.cur_region, 'xy', x, y)
-         print msg
+         # print msg
          self.sound.on_control(msg)
    
    def on_message(self, msg, args) :

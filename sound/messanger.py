@@ -99,8 +99,8 @@ class Messanger(threading.Thread):
          path, args = self.queue.get()
          self.cb_func(path, args)
 
-   def send(self, player_idx, note):
-      osc_msg = OSCMessage('/max', ('note', player_idx, note))
+   def send(self, args):
+      osc_msg = OSCMessage('/max', ('note',) + args)
       self.client.send(osc_msg)
 
    def is_connected(self):

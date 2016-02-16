@@ -203,10 +203,12 @@ class AxisPickerPlayer(object):
 
 
 class SamplePlayer(object):
-   def __init__(self, params, note, synth):
+   def __init__(self, params, note, idx, synth, cb_func):
       super(SamplePlayer, self).__init__()
       self.note = note
       self.synth = synth
+      self.inst_id = idx      
+      self.cb_func = cb_func
       self.release_time = getParam(params, 'release', 0)
       self.attack_time  = getParam(params, 'attack', 0)
       self.loop         = getParam(params, 'loop', False)
@@ -222,17 +224,21 @@ class SamplePlayer(object):
 
       if msg[2] == 'play':
          self.synth.play(self.note, 1.0, self.loop, self.attack_time)
+         self.cb_func(self.inst_id, True, 100)
 
       elif msg[2] == 'stop':
          self.synth.stop(self.note, self.release_time)
+         self.cb_func(self.inst_id, False, 0)
 
 
 class SequencePlayer(object):
-   def __init__(self, params, sequence, synth, sound):
+   def __init__(self, params, sequence, idx, synth, sound, cb_func):
       super(SequencePlayer, self).__init__()
       self.sequence = sequence
       self.synth = synth
-      
+      self.cb_func = cb_func
+      self.inst_id = idx
+
       self.loop       = getParam(params, 'loop', False)
       self.allow_stop = getParam(params, 'allow_stop', False)
 
@@ -278,6 +284,7 @@ class SequencePlayer(object):
 
       if note != None:
          self.synth.play(note, gain)
+         self.cb_func(self.inst_id, idx==0, 0.5)
 
       # advance idx and possibly loop back to start
       idx += 1
@@ -293,28 +300,28 @@ class SequencePlayer(object):
 
 
 # player factory
-def make_player(config, synth, sound):
+def make_player(config, idx, synth, sound):
 
    if config[0] == 'multi':
       player = MultiPlayer()
       for c in config[1:]:
-         player.add(make_player(c, synth, sound))
+         player.add(make_player(c, idx, synth, sound))
 
    elif config[0] == 'cycle':
       player = CyclePlayer()
       for c in config[1:]:
-         player.add(make_player(c, synth, sound))
+         player.add(make_player(c, idx, synth, sound))
 
    elif config[0] == 'axispicker':
       player = AxisPickerPlayer(config[1])
       for c in config[2:]:
-         player.add(make_player(c, synth, sound))
+         player.add(make_player(c, idx, synth, sound))
 
    elif config[0] == 'seq':
-      player = SequencePlayer(config[1], config[2], synth, sound)
+      player = SequencePlayer(config[1], config[2], idx, synth, sound, sound.viz_cb)
 
    elif config[0] == 'sample':
-      player = SamplePlayer(config[1], config[2], synth)
+      player = SamplePlayer(config[1], config[2], idx, synth, sound.viz_cb)
 
    else:
       raise Exception('unknown player config:' + str(config[0]))
@@ -344,7 +351,7 @@ class Sound(object):
       self.section_name = 'None'
       self.instruments = None
 
-   def _make_instrument(self, config) :
+   def _make_instrument(self, config, idx) :
       print '\nmake inst'
       print config
 
@@ -357,7 +364,7 @@ class Sound(object):
          raise Exception('unknown synth config:' + str(synth_config[0]))
 
       player_config = config['player']
-      player = make_player(player_config, synth, self)
+      player = make_player(player_config, idx, synth, self)
       return player
 
    def set_section(self, idx) :
@@ -366,7 +373,7 @@ class Sound(object):
          section_config = self.config['sections'][idx]
          self.section_name = section_config['name']
          inst_configs   = section_config['instruments']
-         self.instruments = [self._make_instrument(c) for c in inst_configs]
+         self.instruments = [self._make_instrument(c, idx) for idx, c in enumerate(inst_configs)]
       else:
          self.instruments = None
          self.section_name = 'None'
@@ -378,9 +385,11 @@ class Sound(object):
          return
       player_idx = msg[0]
       self.instruments[player_idx].control(msg)
+
+   def viz_cb(self, inst_id, new_note, dur):
+      print inst_id, new_note, dur
       if self.cb_func:
-         if msg[2] == 'play':
-            self.cb_func(player_idx, 0)
+         self.cb_func((inst_id, 1 if new_note else 0, dur))
 
    def on_update(self):
       self.audio.on_update()

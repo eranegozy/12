@@ -138,8 +138,7 @@ var onMaxMsg = function(msg)
 
   else if (msg[1] == 'note') {
     console.log("note from Max");
-    var noteMsg = {playerIdx: msg[2], note:msg[3]}
-    gVizNS.emit('note', noteMsg);
+    gVizNS.emit('note', msg.slice(2));
   }
 }
 

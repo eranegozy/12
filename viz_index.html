@@ -26,7 +26,13 @@
 
   gSocket.on('note', function(data) {
     utl.print("received note:" + JSON.stringify(data));
-    drawNote(data.playerIdx, data.note);
+    var inst = data[0];
+    var newNote = Boolean(data[1]);
+    var dur = data[2];
+    if (dur != 0)
+      drawNote(inst, newNote, dur);
+    else
+      endNote(inst, newNote);
   });
 
   gSocket.on('condData', function(data) {
@@ -36,13 +42,25 @@
     updateSection();
   });
 
+  gPointsCache = {};
+  getPoint = function(slot, newNote, starField) {
+    if (newNote) {
+      var pt = starField.getRandomPoint();
+      gPointsCache[slot] = pt;
+      return pt;
+    }
+    else {
+      return gPointsCache[slot];
+    }
+  }
 
-  drawNote = function(slot, note) {
+  drawNote = function(slot, newNote, dur) {
     starField = gStarFields[slot];
     if (starField !== undefined) {
+      var pt = getPoint(slot, newNote, starField);
+
       switch(gCondData.sectionIdx) {
         case 0:
-          var pt = starField.getRandomPoint();
           if (slot == 0)
             makeNewRipple(pt[0], pt[1], gRippleA);
           if (slot == 1) 
@@ -52,7 +70,6 @@
           break;
 
         case 1:
-          var pt = starField.getRandomPoint();
           if (slot == 0)
             makeNewThread(pt[0], pt[1], gBurstA, gThreadA, 2);
           if (slot == 1) 
@@ -62,7 +79,6 @@
           break;
 
         case 2:
-          var pt = starField.getRandomPoint();
           if (slot == 0) 
             makeNewConst(pt[0], pt[1], gConstA, starField);
           if (slot == 1) 
@@ -72,6 +88,10 @@
           break;
       }
     }
+  }
+
+  endNote = function(slot) {
+    
   }
 
   // change current section based on gCondData.sectionIdx
