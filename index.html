@@ -114,6 +114,8 @@
     updatePlayerDisplay();
     updateInstrumentDisplay();
     updateInstrumentEnabledDisplay();
+    if (gPlayerData.page)
+      gotoPage(gPlayerData.page);
   });
 
   gSocket.on('playerData', function(data) {
@@ -153,6 +155,7 @@
       document.getElementById('page' + gCurPage).style.display='none';
     gCurPage = p;
     document.getElementById('page' + gCurPage).style.display='';
+    gSocket.emit('set', ['page', gCurPage]);
   }
 
   var pageTransition = function (fromPage, toPage) {
@@ -287,97 +290,23 @@
     };
     gInstWidgets = [];
 
-    // create new UI elements
-    switch(inst.type)
-    {
-      case 'surface':
-      createSurfaceControl(inst);
-      break;
-
-      case 'buttons':
-      createButtonsControl(inst);
-      break;
-
-      case '1d':
-      create1DControl(inst);
-      break;
-
-      case '2d':
-      create2DControl(inst);
-      break;
-    }
+    createSurfaceControl(inst);
   }
 
-  var createButtonsControl = function(inst)
-  {
-    var xLen = width;
-    var buttonsPerRow = 2;
-    var y0 = 100, dy = 150;
-    var butSize = 50;      
-    if (inst.size == 1) {
-      buttonsPerRow = 1;
-      butSize = 100;
-      y0 = 200;
-    }
-
-    for(var i=0; i < inst.size; ++i) {
-      var col = i % buttonsPerRow;
-      var x = (1+col) * xLen / (1+buttonsPerRow);
-      var row = Math.floor(i/buttonsPerRow);
-      var y = y0 + (row * dy);
-      var btn = new ui.Button(i+1, x, y, butSize, [200, 50, 50], buttonControlCB);
-      gInstWidgets.push(btn);
-    }
-  }
-
-  var buttonControlCB = function(id, val) { 
-    if (val == 'down')
-      gSocket.emit('ctrl', [gPlayerData.instIdx, 'btn', id]);
-  }
-
-  var create1DControl = function(inst)
-  {
-    var len = height - 200;
-    var y = 100;
-    for(var i=0; i < inst.size; ++i) {
-      var x = (i+1) * width / (inst.size + 1);
-      var slider = new ui.Slider(i+1, x, y, len, [200, 50, 50], sliderControlCB);
-      gInstWidgets.push(slider);
-    }
-  }
-
-  var sliderControlCB = function(id, val) {
-     if (val == 'down')
-       gSocket.emit('ctrl', [gPlayerData.instIdx, 'play', id]);
-     else if (val == 'up')
-       gSocket.emit('ctrl', [gPlayerData.instIdx, 'play', 0]);
-     else
-       gSocket.emit('ctrl', [gPlayerData.instIdx, 'x', 1.0 - val]);
-  }
-
-  var create2DControl = function(inst) {
-    var grid = new ui.Grid(1, 50, 100, width-100, height-200, [200, 50, 50], gridControlCB);
-    gInstWidgets.push(grid);
-  }
-
-  var gridControlCB = function(id, val) {
-     if (val == 'down')
-       gSocket.emit('ctrl', [gPlayerData.instIdx, 'play', 1]);
-     else if (val == 'up')
-       gSocket.emit('ctrl', [gPlayerData.instIdx, 'play', 0]);
-     else {
-       gSocket.emit('ctrl', [gPlayerData.instIdx, 'xy', val[0], 1.0 - val[1]]);
-     }
-  }
+  var gSurfaceColors = {'red': [200, 50, 50], 
+                        'green': [50, 200, 50], 
+                        'blue': [50, 50, 200] };
 
   var createSurfaceControl = function(inst) {
-    var w = width/inst.size;
-    var x = 0;
-    for (var i = 0; i < inst.size; i++) {
-      var surface = new ui.Surface(i, x, 0, w, height, [200, 50, 50], 
+    var numSurfaces = inst.surfaces.length;
+    var h = (height-gTopMargin)/numSurfaces;
+    var y = h + gTopMargin;
+    for (var i = 0; i < numSurfaces; i++) {
+      var surface = new ui.Surface(i, 0, y, width, h, 
+                                    gSurfaceColors[inst.color], inst.surfaces[i],
                                     surfaceControlCB );
       gInstWidgets.push(surface);
-      x += w;
+      y += h;
     };
   }
 
@@ -417,14 +346,22 @@
     return {width:w, height:h};
   }
 
+  var gTopMargin;
+
   setup = function () {
     var display = checkOrientation();
     
     var cnv = createCanvas(display.width, display.height);
     cnv.parent('page4');
 
+    // top margin area:
+    gTopMargin = height * 0.10;
+
     // create back button
-    var btn2 = new ui.Button('back', width-50, height-50, 40, [50, 100, 250], 
+    var br = gTopMargin/2;
+    var bx = width - br;
+    var by = br;
+    var btn2 = new ui.Button('back', bx, by, br, [0, 100, 100], 
                              function(n, v) { if (v=='up') gotoPage(3); } );
 
   };
@@ -461,22 +398,13 @@
     background(255);
 
     // player name
-    strokeWeight(0);
-    stroke(0);
-    fill(0);
-    textAlign(LEFT);
-    textSize(20);
-    text(gPlayerNameTxt, 10, height - 25);
-    
     // section and instrument names
-    if (!gInstEnabled) {
-      stroke(150);
-      fill(150);
-    }
-    textAlign(CENTER);
-    textSize(32);
-    text(gSectionNameTxt + ': ' + gInstNameTxt, width/2, 30);
-
+    noStroke();
+    fill(gInstEnabled?0:150);
+    textAlign(LEFT, CENTER);
+    textSize(gTopMargin * 0.5);
+    text(gPlayerNameTxt + ': ' + gSectionNameTxt, 0, gTopMargin * 0.5);
+    
     // ui draw
     if (utl.supportsTouch())
       ui.draw(touchX, touchY);

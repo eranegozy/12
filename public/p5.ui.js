@@ -71,6 +71,7 @@ ui = (function() {
     ellipse(this.x, this.y, this.r*2, this.r*2);
 
     textAlign(CENTER, CENTER);
+    textSize(this.r * 0.7);
     clr = this.enabled ? 0 : 150;
     strokeWeight(0);
     stroke(clr);
@@ -229,13 +230,15 @@ ui = (function() {
   //--------------------------------------------------
   // Surface
   //
-  var Surface = function(name, x, y, w, h, clr, func) {
+  var Surface = function(name, x, y, w, h, clr, labels, func) {
     this.name = name;
     this.x = x;
     this.y = y;
     this.w = w;
     this.h = h;
     this.clr = clr;
+
+    this.labels = labels
     this.func = func;
 
     this.lastX = 0;
@@ -262,11 +265,45 @@ ui = (function() {
   }
 
   Surface.prototype.draw = function() {
+    // useful locations in this surface:
+    var cx = this.x + this.w / 2;
+    var lx = this.x;
+    var rx = this.x + this.w;
+    var cy = this.y - this.h / 2;
+    var ty = this.y - this.h;
+    var by = this.y;
+
     // draw border
-    strokeWeight(1);
+    rectMode(CENTER);
+    strokeWeight(3);
     stroke(0);
     noFill();
-    rect(this.x, this.y, this.w, this.h);
+    rect(cx, cy, this.w, this.h);
+
+    // draw labels:
+    noStroke();
+    fill(this.enabled?0:150);
+    textSize(height * 0.05);
+
+    // center label
+    textAlign(LEFT, TOP);
+    text('(' + this.labels[0] + ')', lx, ty);
+
+    // top/bottom labels
+    if (2 < this.labels.length) {
+      textAlign(CENTER, TOP);
+      text(this.labels[1], cx, ty);
+      textAlign(CENTER, BOTTOM);
+      text(this.labels[2], cx, by);
+    }
+
+    // left / right labels
+    if (4 < this.labels.length) {
+      textAlign(LEFT, CENTER);
+      text(this.labels[3], lx, cy);
+      textAlign(RIGHT, CENTER);
+      text(this.labels[4], rx, cy);
+    }
 
     if (!this.enabled)
       return;

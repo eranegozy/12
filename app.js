@@ -22,21 +22,49 @@ var gSongData = {
   sections: [
     { name: "Aquarius",
       instruments: [
-        {name:'glockenspiel', type:'surface', size:2},
-        {name:'pecans', type:'surface', size:1},
-        {name:'toy hose', type:'surface', size:1}, ]},
+        { name:'glockenspiel',
+          color: 'red',
+          surfaces:[['glock1', 'loud', 'soft', 'slow', 'fast'], 
+                    ['glock2', 'loud', 'soft', 'slow', 'fast']]},
+
+        { name:'pecans', 
+          color: 'green',
+          surfaces:[['pecans', 'loud', 'soft']]},
+
+        { name:'toy hose', 
+          color: 'blue',
+          surfaces:[['hose', 'loud', 'soft']]},
+        ]},
 
     { name:"Leo",
       instruments: [
-        {name:'temple block', type:'surface', size:2},
-        {name:'tambourine', type:'surface', size:2},
-        {name:'guiro', type:'surface', size:2}, ]},
+        { name:'temple block', 
+          color: 'red',
+          surfaces:[['block1', 'loud', 'soft'], ['block2', 'loud', 'soft']]},
+
+        { name:'tambourine', 
+          color: 'green',
+          surfaces:[['tam1', 'loud', 'soft'], ['tam2', 'loud', 'soft']]},
+
+        { name:'guiro', 
+          color: 'blue',
+          surfaces:[['gui1', 'loud', 'soft'], ['gui2', 'loud', 'soft']]},
+        ]},
 
     { name:"Taurus",
       instruments: [
-        {name:'scratchy paper', type:'surface', size:1},
-        {name:'maracas', type:'surface', size:1},
-        {name:'log drum', type:'surface', size:1}, ]},
+        { name:'scratchy paper', 
+          color: 'red',
+          surfaces:[['paper', 'loud', 'soft']]},
+
+        { name:'maracas', 
+          color: 'green',
+          surfaces:[['maracas', 'loud', 'soft']]},
+
+        { name:'log drum', 
+          color: 'blue',
+          surfaces:[['log', 'loud', 'soft']]},
+        ]},
   ]
 };
 
@@ -223,7 +251,7 @@ gPlayerNS.on('connection', function(socket) {
     // if cached data does not exist, create it
     if (devID in gPlayerCache == false) {
       console.log('not found');
-      gPlayerCache[devID] = { id: 0, name:"", sectionIdx:null, instIdx:null };
+      gPlayerCache[devID] = { id: 0, name:"", sectionIdx:null, instIdx:null, page:0 };
     }
     else
     {
