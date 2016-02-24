@@ -244,6 +244,98 @@ addConstPolygon = function(star, sides, len, starfield, lines) {
   lines.push([pStar, star]);
 }
 
+/////////////////////////////////////////////////////////
+// SpikeEmitter drawing
+
+Spike = function(x, y, dx, dy, params) {
+  this.x1 = x;
+  this.y1 = y;
+  this.x2 = x + dx + random(-10, 10);
+  this.y2 = y + dy + random(-10, 10);
+  this.vx = dx * 5 + random(-10, 10);
+  this.vy = dy * 5 + random(-10, 10);;
+  this.clr = params.color;
+  if (random() < 0.1) {
+    this.clr = [250, 250, 250, 150];    
+  }
+}
+
+Spike.prototype.update = function(dt) {
+  dx = this.vx * dt;
+  dy = this.vy * dt;
+
+  this.x1 += dx;
+  this.x2 += dx;
+  this.y1 += dy;
+  this.y2 += dy;
+
+  stroke(this.clr);
+  line(this.x1, this.y1, this.x2, this.y2);
+
+  if (this.x1 > width) return false;
+  if (this.x1 < 0) return false;
+  if (this.y1 > height) return false;
+  if (this.y1 < 0) return false;
+  return true;
+}
+
+
+SpikeEmitter = function(x, y, params, dur) {
+  this.x = x;
+  this.y = y;
+  this.params = params;
+  this.time = 0;
+  this.dur = dur
+
+  // choose direction:
+  var axis = floor(random(2));
+  var direction = (floor(random(2)) * 2 - 1) * 100;
+  this.dx = axis? direction: 0;
+  this.dy = axis? 0 : direction;
+
+
+  this.spikes = Array(params.maxSpikes);
+  for (var i=0; i < this.spikes.length; ++i) {
+    this.spikes[i] = null;
+  }
+  this.numSpikes = 0;
+}
+
+SpikeEmitter.prototype.release = function() {
+  this.dur = 0;
+}
+
+SpikeEmitter.prototype.update = function(dt) {
+  var p = this.params;
+
+  // birth new spikes while we are active
+  var newSpikes = 0;
+  var active = this.time < this.dur;
+  
+  if (active)
+    newSpikes = 1;
+
+  strokeWeight(p.weight);
+  for (var i=0; i < this.spikes.length; ++i) {
+    // found a spike:
+    if (this.spikes[i]) {
+      if (this.spikes[i].update(dt) == false) {
+        this.spikes[i] = null;
+        this.numSpikes--;
+      }
+    }
+    else if (newSpikes > 0) {
+      this.spikes[i] = new Spike(this.x, this.y, this.dx, this.dy, this.params);
+      this.numSpikes++;
+      newSpikes--;
+    }
+  }
+
+  this.time += dt;
+
+  // stop when no more spikes are visible
+  return active || this.numSpikes > 0;
+}
 
 /////////////////////////////////////////////////////////
 // factories:
@@ -261,19 +353,26 @@ makeStarFields = function(numSlots, numStars) {
 }
 
 makeNewThread = function(x, y, burstParams, threadParams) {
-  gObjects.push(new Burst(x, y, burstParams));  
+  gObjects.push(new Burst(x, y, burstParams));
   gObjects.push(new Thread(x, y, threadParams, threadParams.initLifespan));
   gObjects.push(new Thread(x, y, threadParams, threadParams.initLifespan));
   gObjects.push(new Thread(x, y, threadParams, threadParams.initLifespan));
 }
 
 makeNewRipple = function(x, y, params) {
-  gObjects.push(new Ripple(x, y, params.numChildren, params));
+  var obj = new Ripple(x, y, params.numChildren, params);
+  gObjects.push(obj);
+  return obj;
 }
 
 makeNewConst = function(x, y, params, starfield) {
-  gObjects.push(new Const(x, y, params, starfield));
+  var obj = new Const(x, y, params, starfield);
+  gObjects.push(obj);
+  return obj;
 }
 
-
-
+makeNewSpike = function(x, y, params, dur) {
+  var obj = new SpikeEmitter(x, y, params, dur);
+  gObjects.push(obj);
+  return obj;
+}

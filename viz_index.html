@@ -21,105 +21,91 @@
   // utl.init('output');
   // utl.print(location.host);
 
-  var gCondData = { sectionIdx:0 };
+  var gCondData = { sectionIdx:null };
   var gSocket = io(location.host + '/viz');
 
   gSocket.on('note', function(data) {
     utl.print("received note:" + JSON.stringify(data));
     var inst = data[0];
-    var newNote = Boolean(data[1]);
-    var dur = data[2];
-    if (dur != 0)
-      drawNote(inst, newNote, dur);
-    else
-      endNote(inst, newNote);
+    // TODO: redo note API from sound/messanger
+    // var newNote = Boolean(data[1]);
+    // var dur = data[2];
+    // if (dur != 0)
+    //   drawNote(inst, newNote, dur);
+    // else
+    //   endNote(inst, newNote);
   });
 
   gSocket.on('condData', function(data) {
     utl.print("received condData:" + JSON.stringify(data));
     gCondData = data;
-
     updateSection();
   });
 
-  gPointsCache = {};
-  getPoint = function(slot, newNote, starField) {
-    if (newNote) {
-      var pt = starField.getRandomPoint();
-      gPointsCache[slot] = pt;
-      return pt;
+
+  var gActiveNotes = Array(3);
+  noteHit = function(slot, dur) {
+    console.log('noteHit ' + slot + ' ' + dur);
+    var starField = gStarFields[slot];
+    var pt = starField.getRandomPoint();
+    var note = null;
+    switch(gCondData.sectionIdx) {
+      case 0:
+        note = makeNewConst(pt[0], pt[1], gConstParams[slot], starField);
+        break;
+
+      case 1:
+        note = makeNewSpike(pt[0], pt[1], gSpikeParams[slot], dur);
+        break;
+
+      case 2:
+        note = makeNewThread(pt[0], pt[1], gBurstParams[slot], gThreadParams[slot]);
+        break;
+
+      case 3:
+        note = makeNewRipple(pt[0], pt[1], gRippleParams[slot]);
+        break;
     }
-    else {
-      return gPointsCache[slot];
-    }
+    gActiveNotes[slot] = note;
   }
 
-  drawNote = function(slot, newNote, dur) {
-    starField = gStarFields[slot];
-    if (starField !== undefined) {
-      var pt = getPoint(slot, newNote, starField);
-
-      switch(gCondData.sectionIdx) {
-        case 0:
-          if (slot == 0)
-            makeNewRipple(pt[0], pt[1], gRippleA);
-          if (slot == 1) 
-            makeNewRipple(pt[0], pt[1], gRippleB);
-          if (slot == 2) 
-            makeNewRipple(pt[0], pt[1], gRippleC);
-          break;
-
-        case 1:
-          if (slot == 0)
-            makeNewThread(pt[0], pt[1], gBurstA, gThreadA, 2);
-          if (slot == 1) 
-            makeNewThread(pt[0], pt[1], gBurstB, gThreadB, 2);
-          if (slot == 2) 
-            makeNewThread(pt[0], pt[1], gBurstC, gThreadC, 2);
-          break;
-
-        case 2:
-          if (slot == 0) 
-            makeNewConst(pt[0], pt[1], gConstA, starField);
-          if (slot == 1) 
-            makeNewConst(pt[0], pt[1], gConstB, starField);
-          if (slot == 2) 
-            makeNewConst(pt[0], pt[1], gConstC, starField);
-          break;
-      }
-    }
+  noteOn = function(slot) {
+    noteHit(slot, 10000.0);    
   }
 
-  endNote = function(slot) {
-    
+  noteOff = function(slot) {
+    console.log('noteOff ' + slot);
+    if (gActiveNotes[slot])
+      gActiveNotes[slot].release();
+    gActiveNotes[slot] = null;
+  }
+
+
+  var gSetupMap = { 
+    null: setNullParams, 
+    0:    setConstParams,
+    1:    setSpikeParams,
+    2:    setThreadParams,
+    3:    setRippleParams, 
   }
 
   // change current section based on gCondData.sectionIdx
   updateSection = function() {
-    switch(gCondData.sectionIdx) {
-      case 0:
-        setRippleParams();
-        gStarFields = makeStarFields(gNumSlots, gNumStars);
-        break;
+    var idx = gCondData.sectionIdx;
+    console.log('Set Section:' + idx);
 
-      case 1:
-        setThreadParams();
-        gStarFields = makeStarFields(gNumSlots, gNumStars);
-        break;
+    clearActiveObjects();
+    gSetupMap[idx]();
 
-      case 2:
-        setConstParams();
-        gStarFields = makeStarFields(gNumSlots, gNumStars);
-        break;
-    }
+    gStarFields = makeStarFields(gNumSlots, gNumStars);
+  }
 
+  clearActiveObjects = function() {
+    gObjects = [];
+    gActiveNotes = Array(3);
   }
 
 /////////////////////////////////////////////////////////
-  preload = function() {
-    // vizutl.loadSounds();
-  }
-
   var gLastMillis = 0;
   var gNumSlots = 3;
   var gStarFields;
@@ -127,7 +113,8 @@
 /////////////////////////////////////////////////////////
   setup = function () {
     window.scrollTo(0, 0);
-    var cnv = createCanvas(windowWidth, windowHeight);
+    var cnv = createCanvas(windowWidth, windowHeight); // TODO - size this properly
+    console.log(windowWidth, windowHeight);
     cnv.parent('viz');
 
     rectMode(CENTER);
@@ -155,13 +142,52 @@
     vizutl.drawFPS();
   }
 
+  var gDownKeys = [];
+
   keyPressed = function() {
-    console.log('key ' + keyCode);
-    // pick a star field (from keys 1, 2, 3)
-    var slot = int(key) - 1;
-    var note = int(random(5));
-    drawNote(slot, note);
-    // vizutl.playSound(note);
+    // prevent key repeat
+    if (gDownKeys.indexOf(keyCode) != -1)
+      return;
+    gDownKeys.push(keyCode);
+
+    // console.log('Down code:' + keyCode + ' key:' + key);
+
+    // set current section: 1,2,3,4. 0 = null / no section
+    var idx = ['1','2','3','4','0'].indexOf(key);
+    if (idx != -1) {
+      if (idx == 4) idx = null;
+      gCondData.sectionIdx = idx;
+      updateSection();
+    }
+
+    // keys q,w,e = hits
+    var idx = ['Q','W','E'].indexOf(key);
+    if (idx != -1) {
+      noteHit(idx, 1.0);
+    }
+
+    // keys a,s,d = noteOn
+    var idx = ['A','S','D'].indexOf(key);
+    if (idx != -1) {
+      noteOn(idx);
+    }
+
+    return false;
+  }
+
+  keyReleased = function() {
+    // prevent key repeat
+    // console.log('Up code:' + keyCode + ' key:' + key);
+    var idx = gDownKeys.indexOf(keyCode)
+    if (idx != -1) 
+      gDownKeys.splice(idx, 1);
+
+    // keys a,s,d = noteOn
+    var idx = ['A','S','D'].indexOf(key);
+    if (idx != -1) {
+      noteOff(idx);
+    }
+
     return false;
   }
 
