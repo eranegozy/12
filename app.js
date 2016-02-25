@@ -20,20 +20,19 @@ var gPlayerCache = {};
 var gSongData = { 
   name: "*12*",
   sections: [
-    { name: "Aquarius",
+    { name:"Taurus",
       instruments: [
-        { name:'glockenspiel',
+        { name:'scratchy paper', 
           color: 'red',
-          surfaces:[['glock1', 'loud', 'soft', 'slow', 'fast'], 
-                    ['glock2', 'loud', 'soft', 'slow', 'fast']]},
+          surfaces:[['paper', 'loud', 'soft']]},
 
-        { name:'pecans', 
+        { name:'maracas', 
           color: 'green',
-          surfaces:[['pecans', 'loud', 'soft']]},
+          surfaces:[['maracas', 'loud', 'soft']]},
 
-        { name:'toy hose', 
+        { name:'log drum', 
           color: 'blue',
-          surfaces:[['hose', 'loud', 'soft']]},
+          surfaces:[['log', 'loud', 'soft']]},
         ]},
 
     { name:"Leo",
@@ -51,20 +50,37 @@ var gSongData = {
           surfaces:[['gui1', 'loud', 'soft'], ['gui2', 'loud', 'soft']]},
         ]},
 
-    { name:"Taurus",
+    { name: "Scorpio",
       instruments: [
-        { name:'scratchy paper', 
+        { name:'maracas1',
           color: 'red',
-          surfaces:[['paper', 'loud', 'soft']]},
+          surfaces:[['maracas', 'loud', 'soft', 'slow', 'fast']]}, 
 
-        { name:'maracas', 
+        { name:'maracas1', 
           color: 'green',
-          surfaces:[['maracas', 'loud', 'soft']]},
+          surfaces:[['maracas', 'loud', 'soft', 'slow', 'fast']]}, 
 
-        { name:'log drum', 
+        { name:'maracas3', 
           color: 'blue',
-          surfaces:[['log', 'loud', 'soft']]},
+          surfaces:[['maracas', 'loud', 'soft', 'slow', 'fast']]}, 
         ]},
+
+    { name: "Aquarius",
+      instruments: [
+        { name:'glockenspiel',
+          color: 'red',
+          surfaces:[['glock1', 'loud', 'soft', 'slow', 'fast'], 
+                    ['glock2', 'loud', 'soft', 'slow', 'fast']]},
+
+        { name:'pecans', 
+          color: 'green',
+          surfaces:[['pecans', 'loud', 'soft']]},
+
+        { name:'toy hose', 
+          color: 'blue',
+          surfaces:[['hose', 'loud', 'soft']]},
+        ]},
+
   ]
 };
 

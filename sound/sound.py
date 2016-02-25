@@ -167,10 +167,7 @@ class AxisPickerPlayer(object):
    def add(self, p):
       self.players.append(p)
 
-   # dispatch to correct player. advance index after 'stop' cmd is seend
    def control(self, msg):
-      if self.cur_player:
-         self.cur_player.control(msg)
 
       # find new play_idx
       # TODO - hysteresis
@@ -185,8 +182,11 @@ class AxisPickerPlayer(object):
       elif msg[2] == 'stop':
          self._stop_player(msg)
 
-      elif msg[2] == 'xy' and self.auto_trigger and old_idx != self.play_idx:
-         self._start_player(self.play_idx, msg)
+      elif msg[2] == 'xy':
+         if self.auto_trigger and old_idx != self.play_idx:
+            self._start_player(self.play_idx, msg)
+         if self.cur_player:
+            self.cur_player.control(msg)
 
    def _start_player(self, p, msg):
       if self.cur_player:
@@ -212,6 +212,7 @@ class SamplePlayer(object):
       self.release_time = getParam(params, 'release', 0)
       self.attack_time  = getParam(params, 'attack', 0)
       self.loop         = getParam(params, 'loop', False)
+      self.viz_sus      = getParam(params, 'viz_sus', self.loop)
 
       self.volume_ctrl = None
       vp = getParam(params, 'volume', None)
@@ -224,11 +225,15 @@ class SamplePlayer(object):
 
       if msg[2] == 'play':
          self.synth.play(self.note, 1.0, self.loop, self.attack_time)
-         self.cb_func(self.inst_id, True, 100)
+         if self.viz_sus:
+            self.cb_func(self.inst_id, 'on')
+         else:
+            self.cb_func(self.inst_id, 'hit')
 
       elif msg[2] == 'stop':
          self.synth.stop(self.note, self.release_time)
-         self.cb_func(self.inst_id, False, 0)
+         if self.viz_sus:
+            self.cb_func(self.inst_id, 'off')
 
 
 class SequencePlayer(object):
@@ -241,6 +246,7 @@ class SequencePlayer(object):
 
       self.loop       = getParam(params, 'loop', False)
       self.allow_stop = getParam(params, 'allow_stop', False)
+      self.viz_type   = getParam(params, 'viz', 'all');
 
       self.sched = None
       schednum = getParam(params, 'sched', None)
@@ -282,9 +288,12 @@ class SequencePlayer(object):
       if 2 < len(self.sequence[idx]):
          gain = self.sequence[idx][2]
 
+      # play the note
       if note != None:
          self.synth.play(note, gain)
-         self.cb_func(self.inst_id, idx==0, 0.5)
+         # viz callback: either first note or all notes:
+         if idx==0 or self.viz_type=='all':
+            self.cb_func(self.inst_id, 'hit')
 
       # advance idx and possibly loop back to start
       idx += 1
@@ -386,10 +395,10 @@ class Sound(object):
       player_idx = msg[0]
       self.instruments[player_idx].control(msg)
 
-   def viz_cb(self, inst_id, new_note, dur):
-      print inst_id, new_note, dur
+   def viz_cb(self, inst_id, msg):
+      print inst_id, msg
       if self.cb_func:
-         self.cb_func((inst_id, 1 if new_note else 0, dur))
+         self.cb_func((inst_id, msg))
 
    def on_update(self):
       self.audio.on_update()

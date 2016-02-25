@@ -2,48 +2,56 @@
 
 import sys
 import traceback
+
+# set kivy window width/height
+from kivy.config import Config 
+Config.set('graphics', 'width', '400') 
+Config.set('graphics', 'height', '600')
+
 from core import *
 from messanger import Messanger
 from sound import Sound
+
 from kivy.uix.label import Label
 from kivy.graphics.instructions import InstructionGroup, CanvasBase
 from kivy.graphics import Color, Ellipse, Rectangle, Line
 
 # -----------------------------------------------------------------
-# Aquarius
+# Taurus
 #
 
-kAqua1a = { 'allow_stop': False, 'sched': 1, 'tempo': (60, 120, 1) }
-kAqua1b = { 'allow_stop': True,  'sched': 2, 'tempo': (60, 120, 1) }
-kAqua2a = { 'release': 1.0, 'volume': (-18, 0, 1) }
+kTaurus1a = { 'allow_stop': True, 'loop': True, 'sched': 1, 'tempo': 130, 'volume': (-18, 0, 1) }
+kTaurus1Seq = ((720, 0), (480, 0), (240, 1), (720, 0), (480, 0), (240, 1),
+   (480, 0), (480, 0), (720, 0),  )
 
-kAqua3 =  { 'axis': 0, 'auto_trigger': True }
-kAqua3a = { 'loop':True, 'attack': 0.1, 'release': 0.5, 'volume': (-18, 0, 1) }
+kTaurus2 = { 'loop':True, 'release': 0.1, 'volume': (-12, 6, 1) }
 
-gAquarius = {
-   'name': 'Aquarius',
+kTaurus3  = { 'axis': 0, 'auto_trigger': True, 'volume': (-6, 12, 1) }
+kTaurus3Seq1 = ((960, 0), (240, 1), )
+kTaurus3Seq2 = ((240, 0), (960, 1), )
+kTaurus3Seq3 = ((240, 0), (240, 1), (480, 2), (120, 3), (120, 3), (240, 1),
+   (480, 2), (120, 3), (360, 1),  )
+
+gTaurus = {
+   'name':"Taurus",
    'instruments': (
-      {  'name': 'glockenspiel',
-         'synth': ('wavedir', 'aqua1'),
-         'player': ('multi', 
-                     ('cycle', ('seq', kAqua1a, ((60, 3, .3), (60, 2, .3), (60, 5, .3),)),
-                               ('seq', kAqua1a, ((60, 1, .3), (60, 4, .3), (60, 3, .3),)),
-                               ('seq', kAqua1a, ((60, 1, .3), (60, 0, .3), (60, 3, .3),)),),
+      {  'name': 'scratchy paper',
+         'synth': ('wavedir', 'taurus1'),
+         'player': ('seq', kTaurus1a, kTaurus1Seq)
+      },
+      {  'name': 'maracs',
+         'synth': ('wavedir', 'taurus2'),
+         'player': ('sample', kTaurus2, 0)
+      },
+      {  'name': 'log drum',
+         'synth': ('wavedir', 'taurus3'),
+         'player': ('axispicker', kTaurus3,
+                     ('seq', kTaurus1a, kTaurus3Seq1 ), 
+                     ('seq', kTaurus1a, kTaurus3Seq2 ), 
+                     ('seq', kTaurus1a, kTaurus3Seq3 ), )
+      },
+   )}
 
-                     ('cycle', ('seq', kAqua1b, ((320, 6, .3), (400, 6, .3), (240, 6, .3),)), 
-                               ('seq', kAqua1b, ((320, 7, .3), (400, 7, .3), (240, 7, .3),)),), )
-      },
-      {  'name': 'rolling pecans and sand',
-         'synth': ('wavedir', 'aqua2'),
-         'player': ('cycle', ('sample', kAqua2a, 0),
-                             ('sample', kAqua2a, 1), 
-                             ('sample', kAqua2a, 2),),
-      },
-      {  'name': 'toy hose',
-         'synth': ('wavedir', 'aqua3'),
-         'player': ('axispicker', kAqua3, ('sample', kAqua3a, 0), ('sample', kAqua3a, 1))
-      },
-      )}
 
 # -----------------------------------------------------------------
 # Leo
@@ -71,13 +79,13 @@ gLeo = {
                ('seq', kLeo1a, ((160,3,.5), (160,2,.3), (160,0,.1))),
                ('seq', kLeo1a, ((80,2,.5), (80,1,.3), (80,0,.1))),
                ('seq', kLeo1a, ((60,3,.5), (60,2,.3), (60,1,.1), (60,0,.1))), ))
-      }
-      ,
+      },
+
       {  'name': 'tambourine',
          'synth': ('wavedir', 'leo2'),
          'player': ('multi', ('sample', kLeo2a, 0), ('sample', kLeo2b, 1))
-      }
-      ,
+      },
+
       {  'name': 'guiro',
          'synth': ('wavedir', 'leo3'),
          'player': ('multi',
@@ -85,54 +93,79 @@ gLeo = {
                      ('cycle', ('sample', kLeo3, 1), 
                                ('sample', kLeo3, 2),),
                    )
-      })}
+      },
+   )}
 
-
-# -----------------------------------------------------------------
-# Taurus
-#
-
-kTaurus1a = { 'allow_stop': True, 'loop': True, 'sched': 1, 'tempo': 130, 'volume': (-18, 0, 1) }
-kTaurus1Seq = ((720, 0), (480, 0), (240, 1), (720, 0), (480, 0), (240, 1),
-   (480, 0), (480, 0), (720, 0),  )
-
-kTaurus2 = { 'loop':True, 'release': 0.1, 'volume': (-12, 6, 1) }
-
-
-kTaurus3  = { 'axis': 0, 'auto_trigger': True, 'volume': (-6, 12, 1) }
-kTaurus3Seq1 = ((960, 0), (240, 1), )
-kTaurus3Seq2 = ((240, 0), (960, 1), )
-kTaurus3Seq3 = ((240, 0), (240, 1), (480, 2), (120, 3), (120, 3), (240, 1),
-   (480, 2), (120, 3), (360, 1),  )
-
-gTaurus = {
-   'name':"Taurus",
-   'instruments': (
-      {  'name': 'scratchy paper',
-         'synth': ('wavedir', 'taurus1'),
-         'player': ('seq', kTaurus1a, kTaurus1Seq) }
-      ,
-      {  'name': 'maracs',
-         'synth': ('wavedir', 'taurus2'),
-         'player': ('sample', kTaurus2, 0)
-      }
-      ,
-      {  'name': 'log drum',
-         'synth': ('wavedir', 'taurus3'),
-         'player': ('axispicker', kTaurus3,
-                     ('seq', kTaurus1a, kTaurus3Seq1 ), 
-                     ('seq', kTaurus1a, kTaurus3Seq2 ), 
-                     ('seq', kTaurus1a, kTaurus3Seq3 ), )
-      })}
 
 # -----------------------------------------------------------------
 # Scorpio
 #
 
+kScorpio1 = { 'loop':True, 'release': 0.1, 'volume': (-12, 6, 1) }
+
+gScorpio = {
+   'name':"Scorpio",
+   'instruments': (
+      {  'name': 'maracs1',
+         'synth': ('wavedir', 'scorpio1'),
+         'player': ('sample', kScorpio1, 0)
+      },
+
+      {  'name': 'maracs2',
+         'synth': ('wavedir', 'scorpio2'),
+         'player': ('sample', kScorpio1, 0)
+      },
+
+      {  'name': 'maracs3',
+         'synth': ('wavedir', 'scorpio3'),
+         'player': ('sample', kScorpio1, 0)
+      },
+   )}
+
+
+# -----------------------------------------------------------------
+# Aquarius
+#
+
+kAqua1a = { 'allow_stop': False, 'sched': 1, 'tempo': (60, 120, 1), 'viz':'first' }
+kAqua1b = { 'allow_stop': True,  'sched': 2, 'tempo': (60, 120, 1) }
+kAqua2a = { 'release': 1.0, 'volume': (-18, 0, 1), 'viz_sus': True }
+
+kAqua3 =  { 'axis': 0, 'auto_trigger': True }
+kAqua3a = { 'loop':True, 'attack': 0.1, 'release': 0.5, 'volume': (-18, 0, 1) }
+
+gAquarius = {
+   'name': 'Aquarius',
+   'instruments': (
+      {  'name': 'glockenspiel',
+         'synth': ('wavedir', 'aqua1'),
+         'player': ('multi', 
+                     ('cycle', ('seq', kAqua1a, ((60, 3, .3), (60, 2, .3), (60, 5, .3),)),
+                               ('seq', kAqua1a, ((60, 1, .3), (60, 4, .3), (60, 3, .3),)),
+                               ('seq', kAqua1a, ((60, 1, .3), (60, 0, .3), (60, 3, .3),)),),
+
+                     ('cycle', ('seq', kAqua1b, ((320, 6, .3), (400, 6, .3), (240, 6, .3),)), 
+                               ('seq', kAqua1b, ((320, 7, .3), (400, 7, .3), (240, 7, .3),)),), )
+      },
+      {  'name': 'rolling pecans and sand',
+         'synth': ('wavedir', 'aqua2'),
+         'player': ('cycle', ('sample', kAqua2a, 0),
+                             ('sample', kAqua2a, 1), 
+                             ('sample', kAqua2a, 2),),
+      },
+      {  'name': 'toy hose',
+         'synth': ('wavedir', 'aqua3'),
+         'player': ('axispicker', kAqua3, ('sample', kAqua3a, 0), ('sample', kAqua3a, 1))
+      },
+   )}
+
+
+
+
 
 gConfig = {
-  'sections': (gAquarius, gLeo, gTaurus)
-  }
+  'sections': (gTaurus, gLeo, gScorpio, gAquarius)
+}
 
 gEnableOSC = True
 
@@ -153,7 +186,7 @@ class MainWidget(BaseWidget) :
 
       self.cur_region = None
       self.cur_section = None
-      self.cur_inst = 0
+      self.cur_inst = None
 
       self.num_regions = 1
 
@@ -174,6 +207,10 @@ class MainWidget(BaseWidget) :
       else:
          self.info.text += 'no server mode'
 
+   def _set_section(self, sec_idx):
+      self.cur_section = sec_idx
+      self.sound.set_section(sec_idx)
+
    def _setup_inst(self):
       # find number of regions
       self.num_regions = 1
@@ -193,10 +230,11 @@ class MainWidget(BaseWidget) :
          x += w
 
    def on_key_down(self, keycode, modifiers):
-      section = lookup(keycode[1], '1234', (0,1,2,3))
-      if section != None:
-         self.cur_section = section
-         self.sound.set_section(section)
+      sec_idx = lookup(keycode[1], '12340', (0,1,2,3, 'none'))
+      if sec_idx != None:
+         if sec_idx == 'none':
+            sec_idx = None
+         self._set_section(section)
 
       inst = lookup(keycode[1], 'qwe', (0,1,2))
       if inst != None:
@@ -212,31 +250,31 @@ class MainWidget(BaseWidget) :
       return x,y
 
    def on_touch_down(self, touch):
-      self.cur_region = int(touch.spos[0] * self.num_regions)
-      self.cur_region = min(self.cur_region, self.num_regions-1)
-      x, y = self._spos_to_xy(touch.spos)
-      msg = (self.cur_inst, self.cur_region, 'play', x, y)
-      # print msg
-      self.sound.on_control(msg)
+      if self.cur_inst != None:
+         self.cur_region = int(touch.spos[0] * self.num_regions)
+         self.cur_region = min(self.cur_region, self.num_regions-1)
+         x, y = self._spos_to_xy(touch.spos)
+         msg = (self.cur_inst, self.cur_region, 'play', x, y)
+         self.sound.on_control(msg)
 
    def on_touch_up(self, touch):
-      x, y = self._spos_to_xy(touch.spos)
-      msg = (self.cur_inst, self.cur_region, 'stop', x, y)
-      # print msg
-      self.sound.on_control(msg)
-      self.cur_region = None
+      if self.cur_inst != None:
+         x, y = self._spos_to_xy(touch.spos)
+         msg = (self.cur_inst, self.cur_region, 'stop', x, y)
+         self.sound.on_control(msg)
+         self.cur_region = None
 
    def on_touch_move(self, touch):
-      if self.cur_region != None:
-         x, y = self._spos_to_xy(touch.spos)
-         msg = (self.cur_inst, self.cur_region, 'xy', x, y)
-         # print msg
-         self.sound.on_control(msg)
+      if self.cur_inst != None:
+         if self.cur_region != None:
+            x, y = self._spos_to_xy(touch.spos)
+            msg = (self.cur_inst, self.cur_region, 'xy', x, y)
+            self.sound.on_control(msg)
    
    def on_message(self, msg, args) :
       try:
          if msg == '/sectionIdx':
-            self.sound.set_section(args[0])
+            self._set_section(args[0])
          elif msg == '/ctrl':
             self.sound.on_control(args)
       except Exception, e:

@@ -25,22 +25,21 @@
   if (!(typeof io === "undefined")) {
     var socket = io(location.host + '/viz');
 
-    socket.on('note', function(data) {
-      console.log("received note:" + JSON.stringify(data));
-      var inst = data[0];
-      // TODO: redo note API from sound/messanger
-      // var newNote = Boolean(data[1]);
-      // var dur = data[2];
-      // if (dur != 0)
-      //   drawNote(inst, newNote, dur);
-      // else
-      //   endNote(inst, newNote);
-    });
-
     socket.on('condData', function(data) {
       console.log("received condData:" + JSON.stringify(data));
       gCondData = data;
       updateSection();
+    });
+
+    socket.on('note', function(data) {
+      console.log("received note:" + JSON.stringify(data));
+      var slot = data[0];
+      if (data[1] == 'hit')
+        noteHit(slot, 0.5);
+      else if (data[1] == 'on')
+        noteOn(slot);
+      else if (data[1] == 'off')
+        noteOff(slot);
     });
   }
 
