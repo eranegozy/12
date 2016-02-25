@@ -166,8 +166,11 @@ ThreadManager.prototype.release = function() {
 ThreadManager.prototype.update = function(dt) {
   var p = this.params;
 
-  if (this.next_birth < this.time) {
-    gObjects.push(new Thread(this.x, this.y, p, p.initLifespan));
+  if (this.next_birth <= this.time) {
+    var numSpawn = this.time == 0 ? p.initSpawn : 1;
+    for (var i = 0; i < numSpawn; i++) {
+      gObjects.push(new Thread(this.x, this.y, p, p.initLifespan));    
+    };
     this.next_birth = this.time + p.birthRate;
   }
 
@@ -186,7 +189,7 @@ Thread = function(x, y, params, lifespan) {
   this.thetaN = random(10);
   this.time = 0;
   this.lifespan = lifespan
-  this.spawnTime = .05 + random(0.2,0.4) * lifespan;
+  this.spawnTime = .05 + random(0.1,0.6) * lifespan;
 }
 
 Thread.prototype.update = function(dt) {

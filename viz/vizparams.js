@@ -41,7 +41,8 @@ BurstParams = function() {
 
 ThreadParams = function() {
   this.birthRate = .25;
-  this.initLifespan = 2;
+  this.initLifespan = 1;
+  this.initSpawn = 3;
   this.curvy = .4;
   this.speed = 2;
   this.weight = 2;
