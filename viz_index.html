@@ -3,7 +3,6 @@
 <head>
   <title>Viz: Graphics Visualization Display</title>
   <script type="text/javascript" src="p5.js">      </script>
-  <script type="text/javascript" src="eeutils.js"> </script>
   <script type="text/javascript" src="vizobjects.js">   </script>
   <script type="text/javascript" src="vizutl.js">   </script>
   <script type="text/javascript" src="vizparams.js">   </script>
@@ -21,16 +20,12 @@
 
 <body>
   <script>
-  // utl.init(null);
-  utl.init('console');
-  // utl.init('output');
-  // utl.print(location.host);
 
   var gCondData = { sectionIdx:null };
   var gSocket = io(location.host + '/viz');
 
   gSocket.on('note', function(data) {
-    utl.print("received note:" + JSON.stringify(data));
+    console.log("received note:" + JSON.stringify(data));
     var inst = data[0];
     // TODO: redo note API from sound/messanger
     // var newNote = Boolean(data[1]);
@@ -42,7 +37,7 @@
   });
 
   gSocket.on('condData', function(data) {
-    utl.print("received condData:" + JSON.stringify(data));
+    console.log("received condData:" + JSON.stringify(data));
     gCondData = data;
     updateSection();
   });
@@ -129,8 +124,7 @@
     console.log('window W/H: ' + windowWidth + ' ' + windowHeight);
     console.log('display W/H: ' +  displayWidth + ' ' + displayHeight);
 
-    var cnv = createCanvas(displayWidth, displayHeight); // TODO - size this properly
-    // cnv.parent('viz');
+    var cnv = createCanvas(windowWidth, windowHeight-5); // -5 to avoid scrollbar appearing
 
     rectMode(CENTER);
     updateSection();
