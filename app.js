@@ -221,7 +221,7 @@ gCondNS.on('connection', function(socket) {
 var gVizNS = io.of('/viz');
 gVizNS.on('connection', function(socket) {
   console.log('Viz connected');
-  socket.emit('allData', [gSongData, gPlayers, gCondData]);
+  socket.emit('condData', gCondData);
 
   socket.on('disconnect', function() {
     console.log('Viz disconnected');
