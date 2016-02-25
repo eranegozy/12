@@ -85,7 +85,7 @@ app.get('/cond', function(req, res) {
 // this serves up a page for the visual display
 app.get('/viz', function(req, res) {
   console.log('requesting visuals');
-  res.sendFile(path.join(__dirname, 'viz_index.html'));
+  res.sendFile(path.join(__dirname, 'viz/viz_index.html'));
 });
 
 

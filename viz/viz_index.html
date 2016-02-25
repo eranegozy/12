@@ -2,7 +2,7 @@
 <html>
 <head>
   <title>Viz: Graphics Visualization Display</title>
-  <script type="text/javascript" src="p5.js">      </script>
+  <script type="text/javascript" src="p5.min.js">      </script>
   <script type="text/javascript" src="vizobjects.js">   </script>
   <script type="text/javascript" src="vizutl.js">   </script>
   <script type="text/javascript" src="vizparams.js">   </script>
@@ -15,33 +15,34 @@
       background-color: black;
     }
   </style>
-
 </head>
 
 <body>
   <script>
 
   var gCondData = { sectionIdx:null };
-  var gSocket = io(location.host + '/viz');
 
-  gSocket.on('note', function(data) {
-    console.log("received note:" + JSON.stringify(data));
-    var inst = data[0];
-    // TODO: redo note API from sound/messanger
-    // var newNote = Boolean(data[1]);
-    // var dur = data[2];
-    // if (dur != 0)
-    //   drawNote(inst, newNote, dur);
-    // else
-    //   endNote(inst, newNote);
-  });
+  if (!(typeof io === "undefined")) {
+    var socket = io(location.host + '/viz');
 
-  gSocket.on('condData', function(data) {
-    console.log("received condData:" + JSON.stringify(data));
-    gCondData = data;
-    updateSection();
-  });
+    socket.on('note', function(data) {
+      console.log("received note:" + JSON.stringify(data));
+      var inst = data[0];
+      // TODO: redo note API from sound/messanger
+      // var newNote = Boolean(data[1]);
+      // var dur = data[2];
+      // if (dur != 0)
+      //   drawNote(inst, newNote, dur);
+      // else
+      //   endNote(inst, newNote);
+    });
 
+    socket.on('condData', function(data) {
+      console.log("received condData:" + JSON.stringify(data));
+      gCondData = data;
+      updateSection();
+    });
+  }
 
   var gActiveNotes = Array(3);
   noteHit = function(slot, dur) {
