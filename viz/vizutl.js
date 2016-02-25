@@ -10,12 +10,14 @@ vizutl = (function() {
   drawFPS = function () {
     fill(0)
     stroke(100);
-    rect(50, 28, 200, 40);
+    rectMode(CENTER);
+    rect(80, 25, 150, 40);
     noStroke();
     fill(200);
     textSize(20);
+    textAlign(CENTER, CENTER);    
     gFPS = 0.9 * gFPS + 0.1 * frameRate();
-    text('fps:'+ round(gFPS) + ' objs:' + gLastObjCount , 20, 35);
+    text('fps:'+ round(gFPS) + ' objs:' + gLastObjCount, 80, 25);
   }
 
   loadSounds = function () {
@@ -30,12 +32,17 @@ vizutl = (function() {
 
   animUpdate = function(animArray, arg) {
     var kill_list = [];
+
     for (var i = 0; i < animArray.length; ++i) {
       if (animArray[i].update(arg) == false)
-        kill_list.push(i);
+        kill_list.push(animArray[i]);
     }
+
+    // remove items that were killed
     for (var i = 0; i < kill_list.length; ++i) {
-      animArray.splice(kill_list[i], 1);
+      var idx = animArray.indexOf(kill_list[i]);
+      if (idx != -1)
+        animArray.splice(idx, 1);
     }
 
     gLastObjCount = animArray.length;

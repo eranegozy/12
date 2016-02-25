@@ -8,13 +8,18 @@
   <script type="text/javascript" src="vizutl.js">   </script>
   <script type="text/javascript" src="vizparams.js">   </script>
   <script src="/socket.io/socket.io.js"></script>
+
+  <style>
+    div, body {
+      padding: 0; 
+      margin: 0;
+      background-color: black;
+    }
+  </style>
+
 </head>
 
 <body>
-  <div id="viz">
-   <!-- style="display:none"> -->
-  </div>
-
   <script>
   // utl.init(null);
   utl.init('console');
@@ -51,7 +56,7 @@
     var note = null;
     switch(gCondData.sectionIdx) {
       case 0:
-        note = makeNewConst(pt[0], pt[1], gConstParams[slot], starField);
+        note = makeNewConst(pt[0], pt[1], gConstParams[slot], starField, dur);
         break;
 
       case 1:
@@ -59,11 +64,11 @@
         break;
 
       case 2:
-        note = makeNewThread(pt[0], pt[1], gBurstParams[slot], gThreadParams[slot]);
+        note = makeNewThread(pt[0], pt[1], gBurstParams[slot], gThreadParams[slot], dur);
         break;
 
       case 3:
-        note = makeNewRipple(pt[0], pt[1], gRippleParams[slot]);
+        note = makeNewRipple(pt[0], pt[1], gRippleParams[slot], dur);
         break;
     }
     gActiveNotes[slot] = note;
@@ -87,7 +92,15 @@
     1:    setSpikeParams,
     2:    setThreadParams,
     3:    setRippleParams, 
-  }
+  };
+
+  var gSectionNameMap = {
+    null: '', 
+    0:    'Taurus',
+    1:    'Leo',
+    2:    'Scorpio',
+    3:    'Aquarius', 
+  };
 
   // change current section based on gCondData.sectionIdx
   updateSection = function() {
@@ -113,9 +126,11 @@
 /////////////////////////////////////////////////////////
   setup = function () {
     window.scrollTo(0, 0);
-    var cnv = createCanvas(windowWidth, windowHeight); // TODO - size this properly
-    console.log(windowWidth, windowHeight);
-    cnv.parent('viz');
+    console.log('window W/H: ' + windowWidth + ' ' + windowHeight);
+    console.log('display W/H: ' +  displayWidth + ' ' + displayHeight);
+
+    var cnv = createCanvas(displayWidth, displayHeight); // TODO - size this properly
+    // cnv.parent('viz');
 
     rectMode(CENTER);
     updateSection();
@@ -140,6 +155,14 @@
 
     vizutl.animUpdate(gObjects, dt);
     vizutl.drawFPS();
+
+    // draw name
+    var name = gSectionNameMap[gCondData.sectionIdx];
+    noStroke();
+    fill(200);
+    textAlign(CENTER, TOP);
+    textSize(20);
+    text(name, width/2, 0);
   }
 
   var gDownKeys = [];

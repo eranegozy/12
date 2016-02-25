@@ -5,12 +5,11 @@
 // Ripple PARAMETERS
 RippleParams = function() {
   this.sizeStart = 10;
-  this.sizeEnd   = 130;
+  this.sizeEnd   = 430;
   this.weightStart = 4;
   this.weightEnd  = 1;
-  this.len = 0.5;
+  this.dur       = 1.5;
   this.birthRate = 0.15;
-  this.numChildren = 2;
   this.startColor = color(255,255,255,255);
   this.endColor   = color(100,200,50, 0);
 }
@@ -41,6 +40,7 @@ BurstParams = function() {
 }
 
 ThreadParams = function() {
+  this.birthRate = .25;
   this.initLifespan = 2;
   this.curvy = .4;
   this.speed = 2;
@@ -77,7 +77,7 @@ setThreadParams = function() {
 //----------------------------------------
 // Constellation PARAMETERS:
 ConstParams = function() {
-  this.len = .2;
+  this.appear_dur = .2;
   this.color = color(200, 255, 200);
 }
 
@@ -106,7 +106,7 @@ SpikeParams = function() {
 
 setSpikeParams = function() {
   gNumStars = 240;
-  gGlobalFade = 200; // how quickly things fade out
+  gGlobalFade = 20; // how quickly things fade out
 
   gSpikeParams = [];
   gSpikeParams[0] = new SpikeParams();

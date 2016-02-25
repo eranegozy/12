@@ -68,18 +68,43 @@ StarField.prototype.getNearest = function(cx, cy) {
 
 /////////////////////////////////////////////////////////
 // Ripple 
-
-Ripple = function(x, y, num, params) {
+RippleManager = function(x, y, params, dur) {
   this.x = x
   this.y = y;
-  this.num = num;
+  this.params = params;
+  this.time = 0;
+  this.next_birth = 0;
+  this.dur = dur;
+}
+
+RippleManager.prototype.release = function() {
+  this.dur = 0;
+}
+
+RippleManager.prototype.update = function(dt) {
+  var p = this.params;
+
+  if (this.next_birth < this.time) {
+    gObjects.push(new Ripple(this.x, this.y, p));    
+    this.next_birth = this.time + p.birthRate;
+  }
+
+  this.time += dt;
+  var active = this.time < this.dur;
+  return active;
+}
+
+
+Ripple = function(x, y, params) {
+  this.x = x
+  this.y = y;
   this.params = params;
   this.time = 0;
 }
 
 Ripple.prototype.update = function(dt) {
   var p = this.params;
-  var amt = this.time / p.len;
+  var amt = this.time / p.dur;
 
   var weight = lerp(p.weightStart, p.weightEnd, amt);
   var color = lerpColor(p.startColor, p.endColor, amt);
@@ -92,12 +117,7 @@ Ripple.prototype.update = function(dt) {
 
   this.time += dt;
 
-  if (this.num > 0 && this.time > p.birthRate) {
-    gObjects.push(new Ripple(this.x, this.y, this.num-1, p));
-    this.num = 0;
-  }
-
-  return (this.time < p.len);
+  return (this.time < p.dur);
 }
 
 
@@ -129,6 +149,33 @@ Burst.prototype.update = function(dt) {
 
 /////////////////////////////////////////////////////////
 // Thread line drawing
+
+ThreadManager = function(x, y, params, dur) {
+  this.x = x
+  this.y = y;
+  this.params = params;
+  this.time = 0;
+  this.next_birth = 0;
+  this.dur = dur;
+}
+
+ThreadManager.prototype.release = function() {
+  this.dur = 0;
+}
+
+ThreadManager.prototype.update = function(dt) {
+  var p = this.params;
+
+  if (this.next_birth < this.time) {
+    gObjects.push(new Thread(this.x, this.y, p, p.initLifespan));
+    this.next_birth = this.time + p.birthRate;
+  }
+
+  this.time += dt;
+  var active = this.time < this.dur;
+  return active;
+}
+
 
 Thread = function(x, y, params, lifespan) {
   this.x = x;
@@ -178,10 +225,11 @@ Thread.prototype.update = function(dt) {
 /////////////////////////////////////////////////////////
 // Const - constellation object
 
-Const = function(x, y, params, starfield) {
+Const = function(x, y, params, starfield, dur) {
   this.x = x
   this.y = y;
   this.params = params;
+  this.dur = dur
   this.time = 0;
   var star = starfield.getNearest(x, y);
   this.lines = [];
@@ -190,9 +238,13 @@ Const = function(x, y, params, starfield) {
   addConstPath(star, 3, 10, 30, starfield, this.lines);
 }
 
+Const.prototype.release = function() {
+  this.dur = 0;
+}
+
 Const.prototype.update = function(dt) {
   var p = this.params;
-  var amt = this.time / p.len;
+  var amt = constrain(this.time / p.appear_dur, 0, 1);
 
   noFill();
   strokeWeight(2);
@@ -211,7 +263,9 @@ Const.prototype.update = function(dt) {
 
   this.time += dt;
 
-  return (this.time < p.len);
+  var active = this.time < this.dur;
+
+  return active;
 }
 
 addConstPath = function(star, segs, dx, dy, starfield, lines) {
@@ -352,21 +406,21 @@ makeStarFields = function(numSlots, numStars) {
   return output;
 }
 
-makeNewThread = function(x, y, burstParams, threadParams) {
+makeNewThread = function(x, y, burstParams, threadParams, dur) {
   gObjects.push(new Burst(x, y, burstParams));
-  gObjects.push(new Thread(x, y, threadParams, threadParams.initLifespan));
-  gObjects.push(new Thread(x, y, threadParams, threadParams.initLifespan));
-  gObjects.push(new Thread(x, y, threadParams, threadParams.initLifespan));
-}
-
-makeNewRipple = function(x, y, params) {
-  var obj = new Ripple(x, y, params.numChildren, params);
+  var obj = new ThreadManager(x, y, threadParams, dur);
   gObjects.push(obj);
   return obj;
 }
 
-makeNewConst = function(x, y, params, starfield) {
-  var obj = new Const(x, y, params, starfield);
+makeNewRipple = function(x, y, params, dur) {
+  var obj = new RippleManager(x, y, params, dur);
+  gObjects.push(obj);
+  return obj;
+}
+
+makeNewConst = function(x, y, params, starfield, dur) {
+  var obj = new Const(x, y, params, starfield, dur);
   gObjects.push(obj);
   return obj;
 }
