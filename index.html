@@ -80,29 +80,42 @@
   // utl.init('output');
   utl.print(location.host);
   var gSocket = io(location.host + '/player');
-  var gPlayerData = {};
+  var gPlayerData;
   var gSongData;
   var gCondData;
 
   var gP5Enabled = false;
   var gInstEnabled = false;
+  var gWasConnected = false;
 
-  var gDevID = utl.getCookie("devID");
-  if (gDevID == '')
-  {
-    gDevID = Math.random();
-    utl.print("no cookie found. Creating:" + gDevID);
-    utl.setCookie("devID", gDevID, 1);
-  }
-  else
-  {
-    utl.print("cookie found:" + gDevID);
-  }
+  //----------------------------------
+  // message handling
 
-  gSocket.emit('hello', gDevID);
+  // server sends this initial message to get things going
+  gSocket.on('start', function() {
+    // if we get a start and we gWasConnected is true, it means we lost
+    // connection to the server and are now re-establishing it. Use this 
+    // to trigger a fresh reload since we might be in a strange half-way state
+    if (gWasConnected) {
+      location.reload();
+      return;
+    }
 
+    var devID = utl.getCookie("devID");
+    if (devID == '')
+    {
+      devID = Math.random();
+      utl.print("no cookie found. Creating:" + devID);
+      utl.setCookie("devID", devID, 1);
+    }
+    else
+    {
+      utl.print("cookie found:" + devID);
+    }
+    gWasConnected = true;
+    gSocket.emit('hello', devID);
+  });
 
-  // message handling:
   gSocket.on('allData', function(data) {
     utl.print("allData:" + JSON.stringify(data));
     gPlayerData = data[0];
@@ -114,8 +127,7 @@
     updatePlayerDisplay();
     updateInstrumentDisplay();
     updateInstrumentEnabledDisplay();
-    if (gPlayerData.page)
-      gotoPage(gPlayerData.page);
+    gotoPage(gPlayerData.page);
   });
 
   gSocket.on('playerData', function(data) {
@@ -208,6 +220,7 @@
 
       element = document.createElement("label");
       element.innerHTML = sections[i].name;
+      element.onclick = buttonFunc(i);
       parent.appendChild(element);
 
       element = document.createElement("br");
@@ -252,6 +265,7 @@
 
       element = document.createElement("label");
       element.innerHTML = instruments[i].name + getInstStatusText(i);
+      element.onclick = buttonFunc(i);
       parent.appendChild(element);
 
       element = document.createElement("br");
@@ -299,14 +313,16 @@
 
   var createSurfaceControl = function(inst) {
     var numSurfaces = inst.surfaces.length;
-    var h = (height-gTopMargin)/numSurfaces;
-    var y = h + gTopMargin;
+    var x = 0;
+    var y = gTopMargin;
+    var w = width / numSurfaces;
+    var h = height-gTopMargin;
     for (var i = 0; i < numSurfaces; i++) {
-      var surface = new ui.Surface(i, 0, y, width, h, 
+      var surface = new ui.Surface(i, x, y, w, h, 
                                     gSurfaceColors[inst.color], inst.surfaces[i],
                                     surfaceControlCB );
       gInstWidgets.push(surface);
-      y += h;
+      x += w;
     };
   }
 
@@ -395,7 +411,7 @@
     if (!gP5Enabled)
       return;
 
-    background(255);
+    background(255, 30);
 
     // player name
     // section and instrument names
@@ -403,7 +419,7 @@
     fill(gInstEnabled?0:150);
     textAlign(LEFT, CENTER);
     textSize(gTopMargin * 0.5);
-    text(gPlayerNameTxt + ': ' + gSectionNameTxt, 0, gTopMargin * 0.5);
+    text(gSectionNameTxt + ': ' + gInstNameTxt, 0, gTopMargin * 0.5);
     
     // ui draw
     if (utl.supportsTouch())
@@ -415,8 +431,6 @@
   function btnCB(name, value) {
     utl.print('button ' + name + ': ' + value);
   }
-
-    gotoPage(1);
 
   </script>
 </body>

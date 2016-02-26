@@ -24,61 +24,61 @@ var gSongData = {
       instruments: [
         { name:'scratchy paper', 
           color: 'red',
-          surfaces:[['paper', 'loud', 'soft']]},
+          surfaces:[['paper', ]]},
 
         { name:'maracas', 
           color: 'green',
-          surfaces:[['maracas', 'loud', 'soft']]},
+          surfaces:[['maracas', ]]},
 
         { name:'log drum', 
           color: 'blue',
-          surfaces:[['log', 'loud', 'soft']]},
+          surfaces:[['log', 'rhythm']]},
         ]},
 
     { name:"Leo",
       instruments: [
         { name:'temple block', 
           color: 'red',
-          surfaces:[['block1', 'loud', 'soft'], ['block2', 'loud', 'soft']]},
+          surfaces:[['rising', 'pattern'], ['falling', 'pattern']]},
 
-        { name:'tambourine', 
+        { name:'tambourine',
           color: 'green',
-          surfaces:[['tam1', 'loud', 'soft'], ['tam2', 'loud', 'soft']]},
+          surfaces:[['hit', ], ['shake', ]]},
 
         { name:'guiro', 
           color: 'blue',
-          surfaces:[['gui1', 'loud', 'soft'], ['gui2', 'loud', 'soft']]},
+          surfaces:[['zip up', ], ['hit', ]]},
         ]},
 
     { name: "Scorpio",
       instruments: [
         { name:'maracas1',
           color: 'red',
-          surfaces:[['maracas', 'loud', 'soft', 'slow', 'fast']]}, 
+          surfaces:[['shake',]]}, 
 
         { name:'maracas1', 
           color: 'green',
-          surfaces:[['maracas', 'loud', 'soft', 'slow', 'fast']]}, 
+          surfaces:[['shake',]]}, 
 
         { name:'maracas3', 
           color: 'blue',
-          surfaces:[['maracas', 'loud', 'soft', 'slow', 'fast']]}, 
+          surfaces:[['shake',]]}, 
         ]},
 
     { name: "Aquarius",
       instruments: [
         { name:'glockenspiel',
           color: 'red',
-          surfaces:[['glock1', 'loud', 'soft', 'slow', 'fast'], 
-                    ['glock2', 'loud', 'soft', 'slow', 'fast']]},
+          surfaces:[['quick', 'speed'], 
+                    ['slow', 'speed']]},
 
         { name:'pecans', 
           color: 'green',
-          surfaces:[['pecans', 'loud', 'soft']]},
+          surfaces:[['pecans',]]},
 
         { name:'toy hose', 
           color: 'blue',
-          surfaces:[['hose', 'loud', 'soft']]},
+          surfaces:[['hose',]]},
         ]},
 
   ]
@@ -255,9 +255,12 @@ gPlayerNS.on('connection', function(socket) {
   console.log('Player connected');
 
   var player = null;
+
+  socket.emit('start');
+
+
   //------------------------------------------
   //      Message handling for players
-
 
   // hello / initial connect
   socket.on('hello', function(devID) {
@@ -267,7 +270,7 @@ gPlayerNS.on('connection', function(socket) {
     // if cached data does not exist, create it
     if (devID in gPlayerCache == false) {
       console.log('not found');
-      gPlayerCache[devID] = { id: 0, name:"", sectionIdx:null, instIdx:null, page:0 };
+      gPlayerCache[devID] = { id: 0, name:"", sectionIdx:null, instIdx:null, page:1 };
     }
     else
     {
