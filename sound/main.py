@@ -57,8 +57,8 @@ gTaurus = {
 # Leo
 #
 
-kLeo1  = { 'axis': 1, 'auto_trigger': False }
-kLeo1a = { 'allow_stop': False, 'sched': 1, 'tempo': 96 }
+kLeo1  = { 'axis': 0, 'auto_trigger': False }
+kLeo1a = { 'allow_stop': False, 'sched': 1, 'tempo': 96, 'volume': (-18, 0, 1) }
 kLeo2a = { 'release': 10.0, 'volume': (-18, 0, 1) }
 kLeo2b = { 'loop':True, 'release': 0.1, 'volume': (-18, 0, 1) }
 kLeo3  = { 'loop':False, 'release': 0.01, 'volume': (-18, 0, 1) }
@@ -127,8 +127,9 @@ gScorpio = {
 # Aquarius
 #
 
-kAqua1a = { 'allow_stop': False, 'sched': 1, 'tempo': (60, 120, 1), 'viz':'first' }
-kAqua1b = { 'allow_stop': True,  'sched': 2, 'tempo': (60, 120, 1) }
+kAqua1a = { 'allow_stop': False, 'sched': 1, 'tempo': (60, 120, 0), 'volume': (-18, 0, 1), 'viz':'first' }
+kAqua1b = { 'allow_stop': True,  'sched': 2, 'tempo': (60, 120, 0), 'volume': (-18, 0, 1) }
+
 kAqua2a = { 'release': 1.0, 'volume': (-18, 0, 1), 'viz_sus': True }
 
 kAqua3 =  { 'axis': 0, 'auto_trigger': True }
@@ -234,7 +235,7 @@ class MainWidget(BaseWidget) :
       if sec_idx != None:
          if sec_idx == 'none':
             sec_idx = None
-         self._set_section(section)
+         self._set_section(sec_idx)
 
       inst = lookup(keycode[1], 'qwe', (0,1,2))
       if inst != None:
