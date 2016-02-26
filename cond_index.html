@@ -106,9 +106,10 @@
          {
             var element = document.createElement("LI");
             var p = gPlayers[i]
-            var playername = p.name == "" ? "[NO NAME]" : p.name;
-            var secname = p.sectionIdx == null ? "[NO Section]" : gSongData.sections[p.sectionIdx].name;
-            element.innerHTML = playername + ' section:' + secname + ' inst:' + p.instIdx;
+            var playername = p.name == "" ? "[No Name]" : p.name;
+            var secname = p.sectionIdx == null ? "[No Section]" : gSongData.sections[p.sectionIdx].name;
+            var instname = p.instIdx == null ? "[No Inst]" : gSongData.sections[p.sectionIdx].instruments[p.instIdx].name;
+            element.innerHTML = playername + ' section:' + secname + ' inst:' + instname;
             parent.appendChild(element);
          }
       }
