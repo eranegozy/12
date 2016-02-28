@@ -133,7 +133,7 @@ Burst = function(x, y, params) {
 
 Burst.prototype.update = function(dt) {
   var p = this.params;
-  var amt = this.time / p.len;
+  var amt = this.time / p.dur;
 
   var color = lerpColor(p.startColor, p.endColor, amt);
   var size = lerp(p.sizeStart, p.sizeEnd, amt);
@@ -144,7 +144,7 @@ Burst.prototype.update = function(dt) {
 
   this.time += dt;
   
-  return (this.time < p.len);
+  return (this.time < p.dur);
 }
 
 /////////////////////////////////////////////////////////
@@ -304,14 +304,22 @@ addConstPolygon = function(star, sides, len, starfield, lines) {
 /////////////////////////////////////////////////////////
 // SpikeEmitter drawing
 
-Spike = function(x, y, dx, dy, params) {
+Spike = function(x, y, dx, dy, params, time) {
   this.x1 = x;
   this.y1 = y;
-  this.x2 = x + dx + random(-10, 10);
-  this.y2 = y + dy + random(-10, 10);
-  this.vx = dx * 5 + random(-10, 10);
-  this.vy = dy * 5 + random(-10, 10);;
-  this.clr = params.color;
+  this.x2 = x + dx * 100 + random(-params.length_var, params.length_var);
+  this.y2 = y + dy * 100 + random(-params.length_var, params.length_var);
+  this.vx = params.speed + random(-this.speed_var, this.speed_var);
+  this.vy = params.speed + random(-this.speed_var, this.speed_var);;
+
+
+  this.x2 = x + dx * params.spike_len + random(-1, 1) * params.length_var;
+  this.y2 = y + dy * params.spike_len + random(-1, 1) * params.length_var;
+  this.vx = dx * params.speed + random(-params.speed_var, params.speed_var);
+  this.vy = dy * params.speed + random(-params.speed_var, params.speed_var);
+
+
+  this.clr = lerpColor(params.color1, params.color2, noise(time * 3));
   if (random() < 0.1) {
     this.clr = [250, 250, 250, 150];    
   }
@@ -345,11 +353,20 @@ SpikeEmitter = function(x, y, params, dur) {
   this.dur = dur
 
   // choose direction:
-  var axis = floor(random(2));
-  var direction = (floor(random(2)) * 2 - 1) * 100;
-  this.dx = axis? direction: 0;
-  this.dy = axis? 0 : direction;
-
+  var dir_options = [];
+  if (x > width * .3)
+    dir_options.push([-1, 0]);
+  if (x < width * .7)
+    dir_options.push([1, 0]);
+  if (y > height * .3)
+    dir_options.push([0, -1]);
+  if (y < height * .7)
+    dir_options.push([0, 1]);
+  
+  var dir_idx = floor(random(dir_options.length));
+  var dir = dir_options[dir_idx]
+  this.dx = dir[0];
+  this.dy = dir[1];
 
   this.spikes = Array(params.maxSpikes);
   for (var i=0; i < this.spikes.length; ++i) {
@@ -382,7 +399,7 @@ SpikeEmitter.prototype.update = function(dt) {
       }
     }
     else if (newSpikes > 0) {
-      this.spikes[i] = new Spike(this.x, this.y, this.dx, this.dy, this.params);
+      this.spikes[i] = new Spike(this.x, this.y, this.dx, this.dy, this.params, this.time);
       this.numSpikes++;
       newSpikes--;
     }

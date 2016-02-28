@@ -34,7 +34,7 @@ setRippleParams = function() {
 BurstParams = function() {
   this.sizeStart  = 20;
   this.sizeEnd    = 50;
-  this.len        = .04;
+  this.dur        = .15;
   this.startColor = color(255, 50, 50, 255);
   this.endColor   = color(255, 50, 50, 0);
 }
@@ -102,7 +102,12 @@ setConstParams = function() {
 SpikeParams = function() {
   this.weight = 1;
   this.maxSpikes = 100;
-  this.color = color(200, 50, 50, 150);
+  this.spike_len = 200;
+  this.length_var = 10;
+  this.speed = 1000;
+  this.speed_var = 10;
+  this.color1 = color(200, 50, 50, 150);
+  this.color2 = color(200, 200, 50, 150);
 }
 
 setSpikeParams = function() {
@@ -115,8 +120,11 @@ setSpikeParams = function() {
   gSpikeParams[2] = new SpikeParams();
 
   // override default values for players 1 and 2
-  gSpikeParams[1].color = color(50, 250, 50, 150);
-  gSpikeParams[2].color = color(50, 50, 250, 150);
+  gSpikeParams[1].color1 = color(50, 250, 50, 150);
+  gSpikeParams[1].color2 = color(50, 200, 200, 150);
+
+  gSpikeParams[2].color1 = color(50, 50, 250, 150);
+  gSpikeParams[2].color2 = color(200, 50, 200, 150);
 }
 
 
