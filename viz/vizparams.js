@@ -10,8 +10,8 @@ RippleParams = function() {
   this.weightEnd  = 1;
   this.dur       = 1.5;
   this.birthRate = 0.15;
-  this.startColor = color(255,255,255,255);
-  this.endColor   = color(100,200,50, 0);
+  this.startColor = color(83,144,144,255);
+  this.endColor   = color(83,144,144, 0);
 }
 
 setRippleParams = function() {
@@ -23,9 +23,14 @@ setRippleParams = function() {
   gRippleParams[1] = new RippleParams();
   gRippleParams[2] = new RippleParams();
 
-  // override default values for players 1 and 2
-  gRippleParams[1].endColor = color(200, 50, 75, 0);
-  gRippleParams[2].endColor = color(0,  50, 205, 0);
+  // override default values for player 1 
+  gRippleParams[1].startColor = color(239, 206, 139, 255);
+  gRippleParams[1].endColor   = color(239, 206, 139, 0);
+
+
+  // override default values for player 2 
+  gRippleParams[2].startColor = color(239,  139, 139, 255);
+  gRippleParams[2].endColor   = color(239,  139, 139, 0);
 }
 
 
