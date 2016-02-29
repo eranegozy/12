@@ -26,7 +26,7 @@ kTaurus1Seq = ((720, 0), (480, 0), (240, 1), (720, 0), (480, 0), (240, 1),
 
 kTaurus2 = { 'loop':True, 'release': 0.1, 'volume': (-12, 6, 1) }
 
-kTaurus3  = { 'axis': 0, 'auto_trigger': True, 'volume': (-6, 12, 1) }
+kTaurus3  = { 'axis': 0, 'auto_trigger': True }
 kTaurus3Seq1 = ((960, 0), (240, 1), )
 kTaurus3Seq2 = ((240, 0), (960, 1), )
 kTaurus3Seq3 = ((240, 0), (240, 1), (480, 2), (120, 3), (120, 3), (240, 1),
@@ -101,24 +101,29 @@ gLeo = {
 # Scorpio
 #
 
-kScorpio1 = { 'loop':True, 'release': 0.1, 'volume': (-12, 6, 1) }
+# crotale:
+kScor1  = { 'axis':0, 'auto_trigger': False,  }
+kScor1a = { 'loop':False, 'release': 0.1, 'volume': (-18, 0, 1)}
+kScor1b = { 'loop':False, 'release': 2.0, 'volume': (-18, 0, 1)}
 
 gScorpio = {
    'name':"Scorpio",
    'instruments': (
-      {  'name': 'maracs1',
+      {  'name': 'crotale',
          'synth': ('wavedir', 'scorpio1'),
-         'player': ('sample', kScorpio1, 0)
+         'player': ('multi',
+            ('axispicker', kScor1, ('sample', kScor1a, 0), ('sample', kScor1a, 2)),
+            ('axispicker', kScor1, ('sample', kScor1b, 1), ('sample', kScor1b, 3)),)
       },
 
       {  'name': 'maracs2',
          'synth': ('wavedir', 'scorpio2'),
-         'player': ('sample', kScorpio1, 0)
+         'player': ('sample', kScor1, 0)
       },
 
       {  'name': 'maracs3',
          'synth': ('wavedir', 'scorpio3'),
-         'player': ('sample', kScorpio1, 0)
+         'player': ('sample', kScor1, 0)
       },
    )}
 
