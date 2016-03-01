@@ -70,32 +70,32 @@ StarField.prototype.getNearest = function(cx, cy) {
 /////////////////////////////////////////////////////////
 // Flare
 
-Flare = function(x, y, params, dur) {
+Flare = function(x, y) {
   this.x = x;
   this.y = y;
-  this.params = params;
   this.time = 0;
-  this.dur = dur
+  this.dur = 0.5;
 }
 
-Flare.prototype.release = function() {
-  this.dur = 0;
-}
 
 Flare.prototype.update = function(dt) {
-  var p = this.params;
-  var amt = this.time / p.dur;
+  var amt = this.time / this.dur;
 
-  // var color = lerpColor(p.startColor, p.endColor, amt);
-  // var size = lerp(p.sizeStart, p.sizeEnd, amt);
+  push();
+  translate(this.x, this.y);
+  rotate(this.time * .4);
 
-  // fill(color);
-  // noStroke();    
-  // ellipse(this.x, this.y, size, size);
+  tint(255, 200 * (1-amt));
+
+  var sz = 20 * (1-amt);
+  image(gStarFieldParams.flareImg, 0, 0, sz, sz);
+
+  pop();
+
 
   this.time += dt;
   
-  return (this.time < p.dur);
+  return (this.time < this.dur);
 }
 
 /////////////////////////////////////////////////////////
@@ -275,6 +275,23 @@ Const = function(x, y, params, starfield, dur) {
   addConstPolygon(star, int(random(3,6)), 60, starfield, this.lines);
   addConstPath(star, 3, -10, -30, starfield, this.lines);
   addConstPath(star, 3, 10, 30, starfield, this.lines);
+
+  // find the unique set of stars
+  this.stars = [];
+  for (var i = 0; i < this.lines.length; i++) {
+    var s = this.lines[i][0];
+    if (this.stars.indexOf(s) == -1)
+      this.stars.push(s);
+    s = this.lines[i][1];
+    if (this.stars.indexOf(s) == -1)
+      this.stars.push(s);
+  };
+
+  // immediate flare on each
+  for (var i = 0; i < this.stars.length; i++) {
+    var s = this.stars[i];
+    gObjects.push(new Flare(s.x, s.y));
+  };
 }
 
 Const.prototype.release = function() {
@@ -305,6 +322,12 @@ Const.prototype.update = function(dt) {
 
     line(x1, y1, x2, y2);
   };
+
+  if (random() < 0.05) {
+    var idx = int(floor(random(this.stars.length)));
+    var s = this.stars[idx];
+    gObjects.push(new Flare(s.x, s.y));
+  }
 
   this.time += dt;
 
@@ -412,6 +435,8 @@ SpikeEmitter = function(x, y, params, dur) {
     this.spikes[i] = null;
   }
   this.numSpikes = 0;
+
+  gObjects.push(new Flare(this.x, this.y));
 }
 
 SpikeEmitter.prototype.release = function() {
@@ -437,6 +462,7 @@ SpikeEmitter.prototype.update = function(dt) {
         this.numSpikes--;
       }
     }
+
     else if (newSpikes > 0) {
       // create a new spike:
       var clr = lerpColor(p.color1, p.color2, noise(this.time * 3));
@@ -451,12 +477,18 @@ SpikeEmitter.prototype.update = function(dt) {
         var b = blue(clr);
         clr = color(r, g, b, a);
       }
+      else {
+        if (random() < 0.1) {
+          gObjects.push(new Flare(this.x, this.y));
+        }
+      }
 
       this.spikes[i] = new Spike(this.x, this.y, this.dx, this.dy, p, clr);
       this.numSpikes++;
       newSpikes--;
     }
   }
+
 
   this.time += dt;
 

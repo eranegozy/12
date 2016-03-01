@@ -128,9 +128,10 @@
     var cnv = createCanvas(windowWidth, windowHeight-5); // -5 to avoid scrollbar appearing
 
     setStarFieldParams();
-    starImg = loadImage('StarSparkle02.png');
 
     rectMode(CENTER);
+    imageMode(CENTER);
+    
     updateSection();
 
     gLastMillis = millis();
@@ -163,15 +164,6 @@
     textSize(20);
     text(name, width/2, 0);
 
-    // star experiments
-    // imageMode(CENTER);
-    // push();
-    // tint(255, 100 * (1+sin(now/100)));
-    // translate(100,100);
-    // rotate(now/1000);
-    // var sz = 50* (1+sin(now/1000));
-    // image(starImg, 0, 0, sz, sz);
-    // pop();
   }
 
   var gDownKeys = [];

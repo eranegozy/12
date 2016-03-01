@@ -7,6 +7,7 @@ StarFieldParams = function() {
   this.color2  = color(83,144,255, 255);
   this.size1   = 2;
   this.size2   = 5;
+  this.flareImg = loadImage('StarSparkle02.png');
 }
 
 setStarFieldParams = function() {
