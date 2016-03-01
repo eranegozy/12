@@ -1,5 +1,17 @@
 // vizparams.js
 
+//----------------------------------------
+// StarField PARAMETERS
+StarFieldParams = function() {
+  this.color1  = color(255,144,144,255);
+  this.color2  = color(83,144,255, 255);
+  this.size1   = 2;
+  this.size2   = 5;
+}
+
+setStarFieldParams = function() {
+  gStarFieldParams = new StarFieldParams();
+}
 
 //----------------------------------------
 // Ripple PARAMETERS
@@ -48,10 +60,11 @@ ThreadParams = function() {
   this.birthRate = .25;
   this.initLifespan = 1;
   this.initSpawn = 3;
-  this.curvy = .4;
+  this.curvy = .5;
   this.speed = 2;
   this.weight = 2;
-  this.color = color(255, 50, 50, 255);
+  this.startColor = color(255, 50, 50, 255);
+  this.endColor   = color(255, 250, 50, 255);
 }
 
 setThreadParams = function() {
@@ -69,14 +82,16 @@ setThreadParams = function() {
   gThreadParams[2] = new ThreadParams();
 
   // override default values for player 1
-  gBurstParams[1].startColor = color(50, 255, 50, 255);
-  gBurstParams[1].endColor   = color(50, 255, 50, 0);
-  gThreadParams[1].color     = color(50, 255, 50, 255);
+  gBurstParams[1].startColor  = color(50, 255, 50, 255);
+  gBurstParams[1].endColor    = color(50, 255, 50, 0);
+  gThreadParams[1].startColor = color(50, 255, 50, 255);
+  gThreadParams[1].endColor   = color(150, 255, 50, 255);
 
   // override default values for player 2
-  gBurstParams[2].startColor = color(100, 100, 255, 255);
-  gBurstParams[2].endColor   = color(100, 100, 255, 0);
-  gThreadParams[2].color     = color(100, 100, 255, 255);
+  gBurstParams[2].startColor  = color(100, 100, 255, 255);
+  gBurstParams[2].endColor    = color(100, 100, 255, 0);
+  gThreadParams[2].startColor = color(100, 100, 255, 255);
+  gThreadParams[2].endColor   = color(100, 200, 255, 255);
 }
 
 

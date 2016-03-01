@@ -127,6 +127,9 @@
 
     var cnv = createCanvas(windowWidth, windowHeight-5); // -5 to avoid scrollbar appearing
 
+    setStarFieldParams();
+    starImg = loadImage('StarSparkle02.png');
+
     rectMode(CENTER);
     updateSection();
 
@@ -134,7 +137,6 @@
 
     background(30);
 
-    starImg = loadImage('StarSparkle02.png');
   };
 
 /////////////////////////////////////////////////////////

@@ -11,14 +11,15 @@ Star = function(x, y, size, color) {
   this.x = int(x);
   this.y = int(y);
   this.size = int(size);
-  this.color = int(color);
+  this.color = color;
 }
 
 StarField = function(x, y, w, h, num) {
-  this.stars = Array(num)
+  var p = gStarFieldParams;
+  this.stars = Array(num);
   for (var i = 0; i < this.stars.length; i++) {
-    clr = random(150, 255);
-    this.stars[i] = new Star(random(x, x+w), random(y, y+h), random(2, 5), clr);
+    var clr = lerpColor(p.color1, p.color2, random());
+    this.stars[i] = new Star(random(x, x+w), random(y, y+h), random(p.size1, p.size2), clr);
   };
 }
 
@@ -39,7 +40,7 @@ StarField.prototype.getRandomPoint = function() {
 }
 
 StarField.prototype.getNeighbors = function(cx, cy, size) {
-  output = [];
+  var output = [];
 
   for (var i = 0; i < this.stars.length; i++) {
     var s = this.stars[i];
@@ -235,7 +236,8 @@ Thread.prototype.update = function(dt) {
   var newY = this.y + sin(this.theta) * step;
 
   // draw line
-  stroke(p.color);
+  var clr = lerpColor(p.startColor, p.endColor, this.time/this.lifespan);
+  stroke(clr);
   strokeWeight(p.weight);    
   noFill();
 
@@ -344,7 +346,7 @@ addConstPolygon = function(star, sides, len, starfield, lines) {
 /////////////////////////////////////////////////////////
 // SpikeEmitter drawing
 
-Spike = function(x, y, dx, dy, params, time) {
+Spike = function(x, y, dx, dy, params, clr) {
   this.x1 = x;
   this.y1 = y;
   this.x2 = x + dx * 100 + random(-params.length_var, params.length_var);
@@ -358,11 +360,7 @@ Spike = function(x, y, dx, dy, params, time) {
   this.vx = dx * params.speed + random(-params.speed_var, params.speed_var);
   this.vy = dy * params.speed + random(-params.speed_var, params.speed_var);
 
-
-  this.clr = lerpColor(params.color1, params.color2, noise(time * 3));
-  if (random() < 0.1) {
-    this.clr = [250, 250, 250, 150];    
-  }
+  this.clr = clr;
 }
 
 Spike.prototype.update = function(dt) {
@@ -391,6 +389,7 @@ SpikeEmitter = function(x, y, params, dur) {
   this.params = params;
   this.time = 0;
   this.dur = dur
+  this.shadow = 1.5;
 
   // choose direction:
   var dir_options = [];
@@ -416,7 +415,7 @@ SpikeEmitter = function(x, y, params, dur) {
 }
 
 SpikeEmitter.prototype.release = function() {
-  this.dur = 0;
+  this.dur = this.time;
 }
 
 SpikeEmitter.prototype.update = function(dt) {
@@ -424,7 +423,7 @@ SpikeEmitter.prototype.update = function(dt) {
 
   // birth new spikes while we are active
   var newSpikes = 0;
-  var active = this.time < this.dur;
+  var active = this.time < this.dur + this.shadow;
   
   if (active)
     newSpikes = 1;
@@ -439,7 +438,21 @@ SpikeEmitter.prototype.update = function(dt) {
       }
     }
     else if (newSpikes > 0) {
-      this.spikes[i] = new Spike(this.x, this.y, this.dx, this.dy, this.params, this.time);
+      // create a new spike:
+      var clr = lerpColor(p.color1, p.color2, noise(this.time * 3));
+      if (random() < 0.1) {
+        clr = color(250, 250, 250, 150);
+      }
+
+      if (this.time > this.dur) {
+        var a = alpha(clr) * .05;
+        var r = red(clr);
+        var g = green(clr);
+        var b = blue(clr);
+        clr = color(r, g, b, a);
+      }
+
+      this.spikes[i] = new Spike(this.x, this.y, this.dx, this.dy, p, clr);
       this.numSpikes++;
       newSpikes--;
     }
