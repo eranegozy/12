@@ -83,8 +83,10 @@ setThreadParams = function() {
 //----------------------------------------
 // Constellation PARAMETERS:
 ConstParams = function() {
+  this.weight = 2;
   this.appear_dur = .2;
-  this.color = color(200, 255, 200);
+  this.color1 = color(255, 0, 0);
+  this.color2 = color(255,  255, 255);
 }
 
 setConstParams = function() {
@@ -97,8 +99,11 @@ setConstParams = function() {
   gConstParams[2] = new ConstParams();
 
   // override default values for players 1 and 2
-  gConstParams[1].color = color(200, 50, 75);
-  gConstParams[2].color = color(0,  50, 215);
+  gConstParams[1].color1 = color(0, 150, 0);
+  gConstParams[1].color2 = color(255,  255, 255);
+
+  gConstParams[2].color1 = color(50, 50, 250);
+  gConstParams[2].color2 = color(255,  255, 255);
 }
 
 
