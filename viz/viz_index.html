@@ -118,6 +118,7 @@
   var gNumSlots = 3;
   var gStarFields;
 
+  var starImg;
 /////////////////////////////////////////////////////////
   setup = function () {
     window.scrollTo(0, 0);
@@ -132,6 +133,8 @@
     gLastMillis = millis();
 
     background(30);
+
+    starImg = loadImage('StarSparkle02.png');
   };
 
 /////////////////////////////////////////////////////////
@@ -157,6 +160,16 @@
     textAlign(CENTER, TOP);
     textSize(20);
     text(name, width/2, 0);
+
+    // star experiments
+    // imageMode(CENTER);
+    // push();
+    // tint(255, 100 * (1+sin(now/100)));
+    // translate(100,100);
+    // rotate(now/1000);
+    // var sz = 50* (1+sin(now/1000));
+    // image(starImg, 0, 0, sz, sz);
+    // pop();
   }
 
   var gDownKeys = [];

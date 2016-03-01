@@ -67,6 +67,37 @@ StarField.prototype.getNearest = function(cx, cy) {
 
 
 /////////////////////////////////////////////////////////
+// Flare
+
+Flare = function(x, y, params, dur) {
+  this.x = x;
+  this.y = y;
+  this.params = params;
+  this.time = 0;
+  this.dur = dur
+}
+
+Flare.prototype.release = function() {
+  this.dur = 0;
+}
+
+Flare.prototype.update = function(dt) {
+  var p = this.params;
+  var amt = this.time / p.dur;
+
+  // var color = lerpColor(p.startColor, p.endColor, amt);
+  // var size = lerp(p.sizeStart, p.sizeEnd, amt);
+
+  // fill(color);
+  // noStroke();    
+  // ellipse(this.x, this.y, size, size);
+
+  this.time += dt;
+  
+  return (this.time < p.dur);
+}
+
+/////////////////////////////////////////////////////////
 // Ripple 
 RippleManager = function(x, y, params, dur) {
   this.x = x
@@ -234,8 +265,11 @@ Const = function(x, y, params, starfield, dur) {
   this.params = params;
   this.dur = dur
   this.time = 0;
+
   var star = starfield.getNearest(x, y);
   this.lines = [];
+  
+  // TODO - tunes these to make larger, espcially if going offscreen
   addConstPolygon(star, int(random(3,6)), 60, starfield, this.lines);
   addConstPath(star, 3, -10, -30, starfield, this.lines);
   addConstPath(star, 3, 10, 30, starfield, this.lines);
@@ -250,8 +284,9 @@ Const.prototype.update = function(dt) {
   var amt = constrain(this.time / p.appear_dur, 0, 1);
 
   noFill();
-  strokeWeight(2);
-  stroke(p.color);
+  strokeWeight(p.weight);
+
+  var noiseX = (10 +this.time) * 5;
 
   lineAmt = 0.5 + 0.5 * amt; // 0.5 -> 1.0 
   for (var i = 0; i < this.lines.length; i++) {
@@ -261,6 +296,11 @@ Const.prototype.update = function(dt) {
     var y1 = lerp(s1.y, s2.y, lineAmt);
     var x2 = lerp(s2.x, s1.x, lineAmt);
     var y2 = lerp(s2.y, s1.y, lineAmt);
+
+    clr = lerpColor(p.color1, p.color2, noise(noiseX));
+    noiseX += 0.1;
+    stroke(clr);
+
     line(x1, y1, x2, y2);
   };
 
