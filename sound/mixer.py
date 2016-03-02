@@ -15,16 +15,23 @@ class Mixer(object):
    def __init__(self):
       super(Mixer, self).__init__()
       self.generators = []
-      self.gain = 0.5;
+      self.gain = 0.5
+      self.pan  = 0.5
 
    def add(self, gen) :
       self.generators.append(gen)
 
    def remove(self, gen) :
       self.generators.remove(gen)
-      
+   
+   def remove_all(self):
+      self.generators = []
+
    def set_gain(self, gain) :
-      self.gain = np.clip(gain, 0, 1)
+      self.gain = gain
+
+   def set_pan(self, pan) :
+      self.pan = pan
 
    def get_gain(self) :
       return self.gain
@@ -53,4 +60,11 @@ class Mixer(object):
          self.generators.remove(g)
 
       output *= self.gain
+
+      if num_channels == 2 and self.pan != 0.5:
+         # use "sine panning":
+         output[0::2] *= np.sin(self.pan * np.pi * 0.5)
+         output[1::2] *= np.cos(self.pan * np.pi * 0.5)
+
+
       return (output, True)
