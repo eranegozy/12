@@ -120,6 +120,24 @@ class VolumeController(object):
       gain = 10.0 ** (vol/20.0)
       self.synth.set_gain(gain)
 
+
+class VelocityController(object):
+   def __init__(self, params):
+      super(VelocityController, self).__init__()
+      self.volume_range = np.array((params[0], params[1]))
+      self.input_range = np.array((0, 1))
+      self.axis_num = params[2]
+      self.gain = 1
+
+   def control(self, msg):
+      vol = np.interp(msg[3+self.axis_num], self.input_range, self.volume_range)
+      gain = 10.0 ** (vol/20.0)
+      self.gain = gain
+
+
+   def get_gain(self):
+      return self.gain
+
 # --------------------------------------------------
 # Players:
 #
@@ -219,12 +237,24 @@ class SamplePlayer(object):
       if vp:
          self.volume_ctrl = VolumeController(vp, synth)
 
+      self.velocity_ctrl = None
+      vp = getParam(params, 'velocity', None)
+      if vp:
+         self.velocity_ctrl = VelocityController(vp)
+
    def control(self, msg):
       if self.volume_ctrl:
          self.volume_ctrl.control(msg)
 
+      if self.velocity_ctrl:
+         self.velocity_ctrl.control(msg)
+
       if msg[2] == 'play':
-         self.synth.play(self.note, 1.0, self.loop, self.attack_time)
+         if self.velocity_ctrl:
+            gain = self.velocity_ctrl.get_gain()
+         else:
+            gain = 1.0
+         self.synth.play(self.note, gain, self.loop, self.attack_time)
          if self.viz_sus:
             self.cb_func(self.inst_id, 'on')
          else:

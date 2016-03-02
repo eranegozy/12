@@ -20,13 +20,14 @@ from kivy.graphics import Color, Ellipse, Rectangle, Line
 # Taurus
 #
 
-kTaurus1a = { 'allow_stop': True, 'loop': True, 'sched': 1, 'tempo': 130, 'volume': (-18, 0, 1) }
+kTaurus1a = { 'allow_stop': True, 'loop': True, 'sched': 1, 'tempo': 130, 'volume': (-18, 0, 0) }
 kTaurus1Seq = ((720, 0), (480, 0), (240, 1), (720, 0), (480, 0), (240, 1),
    (480, 0), (480, 0), (720, 0),  )
 
-kTaurus2 = { 'loop':True, 'release': 0.1, 'volume': (-12, 6, 1) }
+kTaurus2a = { 'loop':False,'release': 0.1, 'volume': (-18, 0, 0) }
+kTaurus2b = { 'loop':True, 'release': 0.1, 'volume': (-18, 0, 0) }
 
-kTaurus3  = { 'axis': 0, 'auto_trigger': True }
+kTaurus3  = { 'axis': 1, 'auto_trigger': True }
 kTaurus3Seq1 = ((960, 0), (240, 1), )
 kTaurus3Seq2 = ((240, 0), (960, 1), )
 kTaurus3Seq3 = ((240, 0), (240, 1), (480, 2), (120, 3), (120, 3), (240, 1),
@@ -41,7 +42,8 @@ gTaurus = {
       },
       {  'name': 'maracs',
          'synth': ('wavedir', 'taurus2'),
-         'player': ('sample', kTaurus2, 0)
+         'player': ('multi', ('cycle', ('sample', kTaurus2a, 0), ('sample', kTaurus2a, 1), ),
+                             ('cycle', ('sample', kTaurus2b, 2), ('sample', kTaurus2b, 3), ), )
       },
       {  'name': 'log drum',
          'synth': ('wavedir', 'taurus3'),
@@ -57,11 +59,14 @@ gTaurus = {
 # Leo
 #
 
-kLeo1  = { 'axis': 0, 'auto_trigger': False }
-kLeo1a = { 'allow_stop': False, 'sched': 1, 'tempo': 96, 'volume': (-18, 0, 1) }
-kLeo2a = { 'release': 10.0, 'volume': (-18, 0, 1) }
-kLeo2b = { 'loop':True, 'release': 0.1, 'volume': (-18, 0, 1) }
-kLeo3  = { 'loop':False, 'release': 0.01, 'volume': (-18, 0, 1) }
+kLeo1  = { 'axis': 1, 'auto_trigger': False }
+kLeo1a = { 'allow_stop': False, 'sched': 1, 'tempo': 96, 'volume': (-18, 0, 0) }
+kLeo2 = {'axis': 1, 'auto_trigger': False}
+kLeo2a = { 'release': 10.0, 'volume': (-18, 0, 0) }
+kLeo2c = { 'loop': True, 'release': 3.0, 'volume': (-18, 0, 0) }
+kLeo2b = { 'loop':False, 'release': 0.1, 'volume': (-18, 0, 0) }
+kLeo3 = { 'axis': 1, 'auto_trigger': True }
+kLeo3a  = { 'loop':True, 'attack': 0.5, 'release': 3.0, 'volume': (-18, 0, 0) }
 
 gLeo = {
    'name':"Leo",
@@ -81,17 +86,27 @@ gLeo = {
                ('seq', kLeo1a, ((60,3,.5), (60,2,.3), (60,1,.1), (60,0,.1))), ))
       },
 
-      {  'name': 'tambourine',
+      {  'name': 'tambourine guiro',
          'synth': ('wavedir', 'leo2'),
-         'player': ('multi', ('sample', kLeo2a, 0), ('sample', kLeo2b, 1))
+         'player': ('multi', 
+            ('axispicker', kLeo2, # Tambourine hits
+               ('sample', kLeo2a, 4), 
+               ('sample', kLeo2a, 6),
+               ('sample', kLeo2a, 5)),
+            ('sample', kLeo2c, 7), # Tambourine roll
+            ('axispicker', kLeo2,
+               ('sample', kLeo2b, 2),             
+               ('sample', kLeo2b, 0), 
+               ('sample', kLeo2b, 3),
+               ('sample', kLeo2b, 1)))
       },
 
-      {  'name': 'guiro',
+      {  'name': 'bass drum',
          'synth': ('wavedir', 'leo3'),
-         'player': ('multi',
-                     ('sample', kLeo3, 0),
-                     ('cycle', ('sample', kLeo3, 1), 
-                               ('sample', kLeo3, 2),),
+         'player': ('axispicker', kLeo3,
+                     ('sample', kLeo3a, 2),
+                     ('sample', kLeo3a, 0),
+                     ('sample', kLeo3a, 1)
                    )
       },
    )}
@@ -102,9 +117,16 @@ gLeo = {
 #
 
 # crotale:
-kScor1  = { 'axis':0, 'auto_trigger': False,  }
-kScor1a = { 'loop':False, 'release': 0.1, 'volume': (-18, 0, 1)}
-kScor1b = { 'loop':False, 'release': 2.0, 'volume': (-18, 0, 1)}
+kScor1  = { 'axis': 1, 'auto_trigger': False,  }
+kScor1a = { 'loop':False, 'release': 2.0, 'velocity': (-18, 0, 0), 'volume':(0, 0, 0) }
+kScor1b = { 'loop':False, 'release': 2.0, 'volume': (-18, 0, 0)}
+
+# temple blocks:
+kScor2 =  { 'axis': 1, 'auto_trigger': False }
+kScor2a = { 'allow_stop': False, 'sched': 1, 'tempo': 100, 'volume': (-18, 0, 0) }
+
+# gong
+kScor3 = { 'loop':False, 'release': 2.0, 'velocity': (-18, 0, 0), 'volume':(0, 0, 0) }
 
 gScorpio = {
    'name':"Scorpio",
@@ -116,14 +138,27 @@ gScorpio = {
             ('axispicker', kScor1, ('sample', kScor1b, 1), ('sample', kScor1b, 3)),)
       },
 
-      {  'name': 'maracs2',
+      {  'name': 'temple blocks',
          'synth': ('wavedir', 'scorpio2'),
-         'player': ('sample', kScor1, 0)
+         'player': ('axispicker', kScor2,
+                     ('seq', kScor2a, ((120, 2, 1.), (120, 1, .5))),
+                     ('seq', kScor2a, ((120, 3, 1.), (120, 1, .7), (120, 2, .5), (120, 0, .3), )),
+                     ('seq', kScor2a, ((120, 3, 1.), (120, 2, .7), (120, 1, .5), (120, 0, .3), )),
+                     ('seq', kScor2a, ((120, 0, 1.), (120, 1, .7), (120, 2, .5), (120, 3, .3), )), )
+
       },
 
-      {  'name': 'maracs3',
+      {  'name': 'gong',
          'synth': ('wavedir', 'scorpio3'),
-         'player': ('sample', kScor1, 0)
+         'player': ('multi', ('cycle', ('sample', kScor3, 0), # tapping gong
+                                       ('sample', kScor3, 1), 
+                                       ('sample', kScor3, 8), ),
+                             ('cycle', ('sample', kScor3, 2),  # single hit 
+                                       ('sample', kScor3, 3), ),
+                             ('cycle', ('sample', kScor3, 4),  # going in water
+                                       ('sample', kScor3, 5), 
+                                       ('sample', kScor3, 6), 
+                                       ('sample', kScor3, 7), ), )
       },
    )}
 
@@ -132,13 +167,15 @@ gScorpio = {
 # Aquarius
 #
 
-kAqua1a = { 'allow_stop': False, 'sched': 1, 'tempo': (60, 120, 0), 'volume': (-18, 0, 1), 'viz':'first' }
-kAqua1b = { 'allow_stop': True,  'sched': 2, 'tempo': (60, 120, 0), 'volume': (-18, 0, 1) }
+kAqua1a = { 'allow_stop': False, 'sched': 1, 'tempo': (60, 120, 1), 'volume': (-18, 0, 0), 'viz':'first' }
+kAqua1b = { 'allow_stop': True,  'sched': 2, 'tempo': (60, 120, 1), 'volume': (-18, 0, 0) }
 
-kAqua2a = { 'release': 1.0, 'volume': (-18, 0, 1), 'viz_sus': True }
+kAqua2 = {'axis': 1, 'auto_trigger': True}
+kAqua2a = { 'release': 3.0, 'volume': (-18, 0, 0), 'loop':True, 'viz_sus': True }
+kAqua2b = { 'release': 3.0, 'volume': (-18, 0, 0), 'loop':True}
 
-kAqua3 =  { 'axis': 0, 'auto_trigger': True }
-kAqua3a = { 'loop':True, 'attack': 0.1, 'release': 0.5, 'volume': (-18, 0, 1) }
+kAqua3 =  { 'axis': 1, 'auto_trigger': True }
+kAqua3a = { 'loop':True, 'attack': 0.25, 'release': 2.0, 'volume': (-18, 0, 0) }
 
 gAquarius = {
    'name': 'Aquarius',
@@ -155,13 +192,13 @@ gAquarius = {
       },
       {  'name': 'rolling pecans and sand',
          'synth': ('wavedir', 'aqua2'),
-         'player': ('cycle', ('sample', kAqua2a, 0),
-                             ('sample', kAqua2a, 1), 
-                             ('sample', kAqua2a, 2),),
+         'player': ('multi',
+                     ('axispicker', kAqua2, ('sample', kAqua2a, 6), ('sample', kAqua2a, 5), ('sample', kAqua2a, 4),),
+                     ('cycle', ('sample', kAqua2b, 0), ('sample', kAqua2b, 1), ('sample', kAqua2b, 2), ('sample', kAqua2b, 3)))
       },
       {  'name': 'toy hose',
          'synth': ('wavedir', 'aqua3'),
-         'player': ('axispicker', kAqua3, ('sample', kAqua3a, 0), ('sample', kAqua3a, 1))
+         'player': ('axispicker', kAqua3, ('sample', kAqua3a, 0), ('sample', kAqua3a, 1), ('sample', kAqua3a, 2))
       },
    )}
 
@@ -228,12 +265,12 @@ class MainWidget(BaseWidget) :
 
       self.display.clear()
 
-      x = 0
-      w = Window.width / self.num_regions
+      y = 0
+      h = Window.height / self.num_regions
       for r in range(self.num_regions):
-         line = Line(points=(x,0,x,Window.height), width=2)
+         line = Line(points=(0,y, Window.width,y), width=2)
          self.display.add(line)
-         x += w
+         y += h
 
    def on_key_down(self, keycode, modifiers):
       sec_idx = lookup(keycode[1], '12340', (0,1,2,3, 'none'))
@@ -250,14 +287,14 @@ class MainWidget(BaseWidget) :
 
 
    def _spos_to_xy(self, spos):
-      x = spos[0] * self.num_regions - self.cur_region
-      x = min(max(x, 0), 1)
-      y = spos[1]
+      y = spos[1] * self.num_regions - self.cur_region
+      y = min(max(y, 0), 1)
+      x = spos[0]
       return x,y
 
    def on_touch_down(self, touch):
       if self.cur_inst != None:
-         self.cur_region = int(touch.spos[0] * self.num_regions)
+         self.cur_region = int(touch.spos[1] * self.num_regions)
          self.cur_region = min(self.cur_region, self.num_regions-1)
          x, y = self._spos_to_xy(touch.spos)
          msg = (self.cur_inst, self.cur_region, 'play', x, y)
