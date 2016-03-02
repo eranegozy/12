@@ -47,7 +47,8 @@ class WaveSetSynth(object):
 class WaveDirSynth(object):
    def __init__(self, dirname, mixer):
       super(WaveDirSynth, self).__init__()
-      self.mixer = mixer
+      self.mixer = Mixer()
+      mixer.add(self.mixer)
 
       self.buffers = []
       dirpath = os.path.join("data", dirname)
@@ -59,6 +60,9 @@ class WaveDirSynth(object):
 
       self.notes_on = []
       self.gain = 1.0
+      self.m_gain = 1.0
+
+
 
    # adjust gain of all currenlty playing notes
    # (not great, because released notes will be non-adjustable...)
@@ -66,12 +70,15 @@ class WaveDirSynth(object):
       self.gain = gain
       for n in self.notes_on:
          ng = n[1]
-         n[2].set_gain(ng * gain)
+         n[2].set_gain(ng * gain * self.m_gain)
+
+   def set_master_volume(self, vol):
+      self.m_gain = 10.0 ** (vol/20.0)
 
    def play(self, idx, gain, loop = False, atime = 0) :
       buf = self.buffers[idx]
       gen = WaveGenerator(buf, loop, atime)
-      gen.set_gain(gain * self.gain)
+      gen.set_gain(gain * self.gain * self.m_gain)
       self.mixer.add(gen)
       self.notes_on.append((idx, gain, gen))
 
@@ -391,8 +398,9 @@ class Sound(object):
       self.instruments = None
 
    def _make_instrument(self, config, idx) :
-      print '\nmake inst'
-      print config
+      # print '\nmake inst'
+      # print config
+
 
       synth_config = config['synth']
       if synth_config[0] == 'waveset':
@@ -404,10 +412,18 @@ class Sound(object):
 
       player_config = config['player']
       player = make_player(player_config, idx, synth, self)
-      return player
+      return player, synth
+
+   def _clear_instruments(self):
+      # clear current mixer:
+      self.mixer.remove_all()
+      self.sched1.remove_all()
+      self.sched2.remove_all()
 
    def set_section(self, idx) :
       print 'setSection:', idx
+      self._clear_instruments()
+
       if isinstance(idx, int):
          section_config = self.config['sections'][idx]
          self.section_name = section_config['name']
@@ -423,7 +439,13 @@ class Sound(object):
       if self.instruments == None:
          return
       player_idx = msg[0]
-      self.instruments[player_idx].control(msg)
+      self.instruments[player_idx][0].control(msg)
+
+   # set the master volume of an instrment for the currently active section
+   def set_master_volume(self, idx, vol):
+      if self.instruments == None:
+         return
+      self.instruments[idx][1].set_master_volume(vol)
 
    def viz_cb(self, inst_id, msg):
       print inst_id, msg
@@ -436,7 +458,7 @@ class Sound(object):
    def get_info_txt(self):
       text = 'load:%.2f\n' % self.audio.get_cpu_load()
       text += 'gain:%.2f\n' % self.mixer.get_gain()
-      text += 'gens:%d\n' % self.mixer.get_num_generators()
+      text += 'gens:%s\n' % [m.get_num_generators() for m in self.mixer.generators]
       text += 'cur_section: %s\n' % self.section_name
       return text
 

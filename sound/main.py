@@ -2,10 +2,11 @@
 
 import sys
 import traceback
+import pickle
 
 # set kivy window width/height
 from kivy.config import Config 
-Config.set('graphics', 'width', '400') 
+Config.set('graphics', 'width', '700') 
 Config.set('graphics', 'height', '600')
 
 from core import *
@@ -13,6 +14,8 @@ from messanger import Messanger
 from sound import Sound
 
 from kivy.uix.label import Label
+from kivy.uix.slider import Slider
+
 from kivy.graphics.instructions import InstructionGroup, CanvasBase
 from kivy.graphics import Color, Ellipse, Rectangle, Line
 
@@ -233,9 +236,29 @@ class MainWidget(BaseWidget) :
 
       self.num_regions = 1
 
+      self.control_loc = 400
+
+      self.volumes = [[0, 0, 0],  [0, 0, 0], [0, 0, 0], [0, 0, 0], ]
+      try:
+         self.volumes = pickle.load(open('volumes.pickle'))
+         print 'found volumes\n', self.volumes
+      except Exception, e:
+         pass
+
       with self.canvas:
          self.display = CanvasBase()
+         Line(points=(self.control_loc,0, self.control_loc, Window.height), width=2)
 
+
+      self.vol_sliders = []
+      self.vol_labels = []
+      for i in range(3):
+         s = Slider(min=-30, max=12, value=0, pos=(self.control_loc + 30, 400 - i*100), size = (200, 50))
+         self.add_widget(s)
+         self.vol_sliders.append(s)
+         l = Label(text="-", pos=(self.control_loc + 30, 375 - i*100), size = (50, 50))
+         self.add_widget(l)
+         self.vol_labels.append(l)
 
    def on_update(self) :
       if self.messanger:
@@ -250,9 +273,28 @@ class MainWidget(BaseWidget) :
       else:
          self.info.text += 'no server mode'
 
+      if self.cur_section != None:
+         for i in range(3):
+            v = self.vol_sliders[i].value
+            self.volumes[self.cur_section][i] = v
+            self.sound.set_master_volume(i, v)
+            self.vol_labels[i].text = "%.1fdB" % v
+
    def _set_section(self, sec_idx):
+      print self.volumes
+
+      if not isinstance(sec_idx, int):
+         sec_idx = None
+         
       self.cur_section = sec_idx
       self.sound.set_section(sec_idx)
+
+      # initialize volume sliders
+      if self.cur_section != None:
+         vols = self.volumes[self.cur_section]         
+         for i in range(3):
+            self.vol_sliders[i].value = vols[i]
+
 
    def _setup_inst(self):
       # find number of regions
@@ -268,7 +310,7 @@ class MainWidget(BaseWidget) :
       y = 0
       h = Window.height / self.num_regions
       for r in range(self.num_regions):
-         line = Line(points=(0,y, Window.width,y), width=2)
+         line = Line(points=(0,y, self.control_loc,y), width=2)
          self.display.add(line)
          y += h
 
@@ -285,6 +327,8 @@ class MainWidget(BaseWidget) :
 
       self._setup_inst()
 
+   def on_close(self):
+      pickle.dump(self.volumes, open('volumes.pickle', 'w'))
 
    def _spos_to_xy(self, spos):
       y = spos[1] * self.num_regions - self.cur_region
@@ -294,18 +338,24 @@ class MainWidget(BaseWidget) :
 
    def on_touch_down(self, touch):
       if self.cur_inst != None:
-         self.cur_region = int(touch.spos[1] * self.num_regions)
-         self.cur_region = min(self.cur_region, self.num_regions-1)
-         x, y = self._spos_to_xy(touch.spos)
-         msg = (self.cur_inst, self.cur_region, 'play', x, y)
-         self.sound.on_control(msg)
+         if touch.pos[0] >= self.control_loc:
+            self.cur_region = None
+         else:
+            self.cur_region = int(touch.spos[1] * self.num_regions)
+            self.cur_region = min(self.cur_region, self.num_regions-1)
+            x, y = self._spos_to_xy(touch.spos)
+            msg = (self.cur_inst, self.cur_region, 'play', x, y)
+            self.sound.on_control(msg)
+      super(MainWidget, self).on_touch_down(touch)
 
    def on_touch_up(self, touch):
       if self.cur_inst != None:
-         x, y = self._spos_to_xy(touch.spos)
-         msg = (self.cur_inst, self.cur_region, 'stop', x, y)
-         self.sound.on_control(msg)
-         self.cur_region = None
+         if self.cur_region != None:
+            x, y = self._spos_to_xy(touch.spos)
+            msg = (self.cur_inst, self.cur_region, 'stop', x, y)
+            self.sound.on_control(msg)
+            self.cur_region = None
+      super(MainWidget, self).on_touch_up(touch)
 
    def on_touch_move(self, touch):
       if self.cur_inst != None:
@@ -313,6 +363,7 @@ class MainWidget(BaseWidget) :
             x, y = self._spos_to_xy(touch.spos)
             msg = (self.cur_inst, self.cur_region, 'xy', x, y)
             self.sound.on_control(msg)
+      super(MainWidget, self).on_touch_move(touch)
    
    def on_message(self, msg, args) :
       try:
