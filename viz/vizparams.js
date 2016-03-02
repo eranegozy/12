@@ -24,7 +24,7 @@ RippleParams = function() {
   this.dur       = 1.5;
   this.birthRate = 0.15;
   this.startColor = color(83,144,144,255);
-  this.endColor   = color(83,144,144, 0);
+  this.endColor   = color(81,123,171, 0);
 }
 
 setRippleParams = function() {
@@ -38,12 +38,12 @@ setRippleParams = function() {
 
   // override default values for player 1 
   gRippleParams[1].startColor = color(239, 206, 139, 255);
-  gRippleParams[1].endColor   = color(239, 206, 139, 0);
+  gRippleParams[1].endColor   = color(253, 223, 121, 0);
 
 
   // override default values for player 2 
   gRippleParams[2].startColor = color(239,  139, 139, 255);
-  gRippleParams[2].endColor   = color(239,  139, 139, 0);
+  gRippleParams[2].endColor   = color(253,  171, 129, 0);
 }
 
 
@@ -53,8 +53,8 @@ BurstParams = function() {
   this.sizeStart  = 20;
   this.sizeEnd    = 50;
   this.dur        = .15;
-  this.startColor = color(255, 50, 50, 255);
-  this.endColor   = color(255, 50, 50, 0);
+  this.startColor = color(83, 144, 144, 255);
+  this.endColor   = color(81, 123, 171, 0);
 }
 
 ThreadParams = function() {
@@ -64,8 +64,8 @@ ThreadParams = function() {
   this.curvy = .5;
   this.speed = 2;
   this.weight = 2;
-  this.startColor = color(255, 50, 50, 255);
-  this.endColor   = color(255, 250, 50, 255);
+  this.startColor = color(81, 123, 171, 255);
+  this.endColor   = color(83, 144, 144, 255);
 }
 
 setThreadParams = function() {
@@ -83,16 +83,16 @@ setThreadParams = function() {
   gThreadParams[2] = new ThreadParams();
 
   // override default values for player 1
-  gBurstParams[1].startColor  = color(50, 255, 50, 255);
-  gBurstParams[1].endColor    = color(50, 255, 50, 0);
-  gThreadParams[1].startColor = color(50, 255, 50, 255);
-  gThreadParams[1].endColor   = color(150, 255, 50, 255);
+  gBurstParams[1].startColor  = color(239, 206, 139, 255);
+  gBurstParams[1].endColor    = color(253, 223, 121, 0);
+  gThreadParams[1].startColor = color(253, 223, 121, 255);
+  gThreadParams[1].endColor   = color(239, 206, 139, 255);
 
   // override default values for player 2
-  gBurstParams[2].startColor  = color(100, 100, 255, 255);
-  gBurstParams[2].endColor    = color(100, 100, 255, 0);
-  gThreadParams[2].startColor = color(100, 100, 255, 255);
-  gThreadParams[2].endColor   = color(100, 200, 255, 255);
+  gBurstParams[2].startColor  = color(239, 139, 139, 255);
+  gBurstParams[2].endColor    = color(253, 172, 129, 0);
+  gThreadParams[2].startColor = color(253, 172, 129, 255);
+  gThreadParams[2].endColor   = color(239, 139, 139, 255);
 }
 
 
@@ -101,8 +101,8 @@ setThreadParams = function() {
 ConstParams = function() {
   this.weight = 2;
   this.appear_dur = .2;
-  this.color1 = color(255, 0, 0);
-  this.color2 = color(255,  255, 255);
+  this.color1 = color(83, 144, 144);
+  this.color2 = color(81, 123, 171);
 }
 
 setConstParams = function() {
@@ -115,11 +115,11 @@ setConstParams = function() {
   gConstParams[2] = new ConstParams();
 
   // override default values for players 1 and 2
-  gConstParams[1].color1 = color(0, 150, 0);
-  gConstParams[1].color2 = color(255,  255, 255);
+  gConstParams[1].color1 = color(239, 206, 139);
+  gConstParams[1].color2 = color(253, 223, 121);
 
-  gConstParams[2].color1 = color(50, 50, 250);
-  gConstParams[2].color2 = color(255,  255, 255);
+  gConstParams[2].color1 = color(239, 139, 139);
+  gConstParams[2].color2 = color(253, 172, 129);
 }
 
 
@@ -132,8 +132,8 @@ SpikeParams = function() {
   this.length_var = 10;
   this.speed = 1000;
   this.speed_var = 10;
-  this.color1 = color(200, 50, 50, 150);
-  this.color2 = color(200, 200, 50, 150);
+  this.color1 = color(83, 144, 144, 150);
+  this.color2 = color(81, 123, 171, 150);
 }
 
 setSpikeParams = function() {
@@ -146,11 +146,11 @@ setSpikeParams = function() {
   gSpikeParams[2] = new SpikeParams();
 
   // override default values for players 1 and 2
-  gSpikeParams[1].color1 = color(50, 250, 50, 150);
-  gSpikeParams[1].color2 = color(50, 200, 200, 150);
+  gSpikeParams[1].color1 = color(239, 206, 139, 150);
+  gSpikeParams[1].color2 = color(253, 223, 121, 150);
 
-  gSpikeParams[2].color1 = color(50, 50, 250, 150);
-  gSpikeParams[2].color2 = color(200, 50, 200, 150);
+  gSpikeParams[2].color1 = color(239, 139, 139, 150);
+  gSpikeParams[2].color2 = color(253, 172, 129, 150);
 }
 
 
