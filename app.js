@@ -143,7 +143,7 @@ var server = http.listen(3000, function() {
 
   // receive messages from max, tagged as /max
   gOscServer.on('message', function(msg, rinfo) {
-    console.log('osc:', msg, rinfo);
+    // console.log('osc:', msg, rinfo);
     if (msg[0] == '/max')
       onMaxMsg(msg);
   });
@@ -181,7 +181,7 @@ var onMaxMsg = function(msg)
   }
 
   else if (msg[1] == 'note') {
-    console.log("note from Max");
+    // console.log("note from Max");
     gVizNS.emit('note', msg.slice(2));
   }
 }
@@ -196,7 +196,7 @@ var sendMaxCondData = function() {
 }
 
 var sendToMax = function(tag, msg) {
-  console.log('toMax', tag, msg);
+  // console.log('toMax', tag, msg);
   if (gMaxSender)
     gMaxSender.send(tag, msg)
 }
