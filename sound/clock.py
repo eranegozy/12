@@ -261,6 +261,10 @@ class AudioScheduler(object):
          idx = self.commands.index(cmd)
          del self.commands[idx]
 
+   def remove_all(self):
+      self.commands = []
+
+
    def now_str(self):
       time = self.get_time()
       tick = self.tempo_map.time_to_tick(time)
