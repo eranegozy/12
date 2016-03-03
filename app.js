@@ -8,7 +8,7 @@ var http = require('http').Server(app);
 var io = require('socket.io')(http);
 var path = require('path');
 var osc = require('node-osc');
-
+var fs = require('fs');
 
 var gMaxSender;
 var gOscListenPort = 12346;
@@ -24,15 +24,15 @@ var gSongData = {
       instruments: [
         { name:'scratchy paper', 
           color: 'red',
-          surfaces:[['paper', ]]},
+          surfaces:[['paper', ], ['paper', ], ['paper', ], ]},
 
         { name:'maracas', 
           color: 'green',
-          surfaces:[['maracas', ]]},
+          surfaces:[['maracas', ], ['maracas', ]]},
 
         { name:'log drum', 
           color: 'blue',
-          surfaces:[['log', 'rhythm']]},
+          surfaces:[['log', 'rhythm'], ['log', 'rhythm'], ['log', 'rhythm']]},
         ]},
 
     { name:"Leo",
@@ -117,11 +117,13 @@ var startup = function ()
 {
   console.log("Node.js version is:", process.version);
   setInterval(onIntervalCB, 1000);
+  loadData();
 }
 
 
 var onIntervalCB = function () 
 {
+  saveData();
   // console.log("onIntervalCB");
   if (gMaxSender)
   {
@@ -131,6 +133,24 @@ var onIntervalCB = function ()
 }
 
 
+var saveData = function() {
+  var data = [gPlayerCache, gCondData];
+  fs.writeFile('server_data.txt', JSON.stringify(data, null, 2));
+}
+
+var loadData = function() {
+  try {
+    var f = fs.readFileSync('server_data.txt');
+    var data = JSON.parse(f);
+    console.log(data);
+    gPlayerCache = data[0];
+    gCondData = data[1];
+    console.log('loaded data');
+  }
+  catch (e) {
+    console.log('data file not found')
+  }
+}
 // what port to listen on for this http server:
 var server = http.listen(3000, function() {
   var host = server.address().address;
@@ -153,11 +173,6 @@ var server = http.listen(3000, function() {
 //------------------------------------
 // Connection to Max
 //
-
-// TODO - must retain all max state so that if it crashes and gets restarted,
-// all current state can be sent to it right away. To make it general, maybe
-// all msgs sent to max with slashes are all hashed. So the most recent /inst/1
-// is remembered...
 
 var onMaxMsg = function(msg)
 {
