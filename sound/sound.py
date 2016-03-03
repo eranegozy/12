@@ -62,23 +62,21 @@ class WaveDirSynth(object):
       self.gain = 1.0
       self.m_gain = 1.0
 
-
-
    # adjust gain of all currenlty playing notes
-   # (not great, because released notes will be non-adjustable...)
-   def set_gain(self, gain):
-      self.gain = gain
-      for n in self.notes_on:
-         ng = n[1]
-         n[2].set_gain(ng * gain * self.m_gain)
+   def set_volume(self, vol):
+      self.gain = 10.0 ** (vol/20.0)
+      self.mixer.set_gain(self.gain * self.m_gain)
+      print 'set_volume'
 
    def set_master_volume(self, vol):
       self.m_gain = 10.0 ** (vol/20.0)
-
+      self.mixer.set_gain(self.gain * self.m_gain)
+      print 'set_master'
+      
    def play(self, idx, gain, loop = False, atime = 0) :
       buf = self.buffers[idx]
       gen = WaveGenerator(buf, loop, atime)
-      gen.set_gain(gain * self.gain * self.m_gain)
+      gen.set_gain(gain)
       self.mixer.add(gen)
       self.notes_on.append((idx, gain, gen))
 
@@ -124,8 +122,7 @@ class VolumeController(object):
    
    def control(self, msg):
       vol = np.interp(msg[3+self.axis_num], self.input_range, self.volume_range)
-      gain = 10.0 ** (vol/20.0)
-      self.synth.set_gain(gain)
+      self.synth.set_volume(vol)
 
 
 class VelocityController(object):
