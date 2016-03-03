@@ -83,15 +83,15 @@ Flare.prototype.update = function(dt) {
 
   push();
   translate(this.x, this.y);
-  rotate(this.time * .4);
+  rotate(this.time * 2);
 
-  tint(255, 200 * (1-amt));
+  // yikes. this takes a long time...
+  // tint(255, 200 * (1-amt));
 
   var sz = 20 * (1-amt);
   image(gStarFieldParams.flareImg, 0, 0, sz, sz);
 
   pop();
-
 
   this.time += dt;
   
