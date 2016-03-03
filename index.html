@@ -315,14 +315,14 @@
     var numSurfaces = inst.surfaces.length;
     var x = 0;
     var y = gTopMargin;
-    var w = width / numSurfaces;
-    var h = height-gTopMargin;
+    var w = width;
+    var h = (height-gTopMargin) / numSurfaces;
     for (var i = 0; i < numSurfaces; i++) {
       var surface = new ui.Surface(i, x, y, w, h, 
                                     gSurfaceColors[inst.color], inst.surfaces[i],
                                     surfaceControlCB );
       gInstWidgets.push(surface);
-      x += w;
+      y += h;
     };
   }
 
