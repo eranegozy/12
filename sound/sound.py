@@ -79,11 +79,15 @@ class WaveDirSynth(object):
       self.notes_on.append((idx, gain, gen))
 
    def stop(self, idx, rtime = 0) :
+      kill_list = []
+      
       for n in self.notes_on:
          if n[0] == idx:
             n[2].release(rtime)
-            self.notes_on.remove(n)
-            return
+            kill_list.append(n)
+      
+      for n in kill_list:
+         self.notes_on.remove(n)
 
 # -----------------------------------------------
 # Controllers
@@ -445,6 +449,7 @@ class Sound(object):
    def on_control(self, msg):
       if self.instruments == None:
          return
+      print msg
       player_idx = msg[0]
       self.instruments[player_idx][0].control(msg)
 
@@ -455,7 +460,7 @@ class Sound(object):
       self.instruments[idx][1].set_master_volume(vol)
 
    def viz_cb(self, inst_id, msg):
-      print inst_id, msg
+      # print inst_id, msg
       if self.cb_func:
          self.cb_func((inst_id, msg))
 

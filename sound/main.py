@@ -23,25 +23,29 @@ from kivy.graphics import Color, Ellipse, Rectangle, Line
 # Taurus
 #
 
-kTaurus1a = { 'allow_stop': True, 'loop': True, 'sched': 1, 'tempo': 130, 'volume': (-18, 0, 0) }
-kTaurus1Seq = ((720, 0), (480, 0), (240, 1), (720, 0), (480, 0), (240, 1),
-   (480, 0), (480, 0), (720, 0),  )
+kTaurus1a = { 'allow_stop': True, 'loop': True, 'sched': 1, 'tempo': 105, 'volume': (-18, 0, 0) }
+kTaurus1Seq1 = ((480, 0), (720, 1), (240, 2), (240, 3), (120, 4), (240, 5), (360, 3), )
+kTaurus1Seq2 = ((240, 2), (480, 3), (480, 0), )
+kTaurus1Seq3 = ((720, 0), (480, 1), (240, 2), (720, 0), (480, 1), (240, 2),
+   (480, 1), (480, 1), (720, 0), (240, 2), )
 
 kTaurus2a = { 'loop':False, 'release': 10., 'volume': (-18, 0, 0) }
 kTaurus2b = { 'loop':True, 'attack': 0.2, 'release': 0.7, 'volume': (-18, 0, 0) }
 
-kTaurus3  = { 'axis': 1, 'auto_trigger': True }
+kTaurus3a = { 'allow_stop': True, 'loop': True, 'sched': 1, 'tempo': 105, 'volume': (-18, 0, 0) }
 kTaurus3Seq1 = ((960, 0), (240, 1), )
-kTaurus3Seq2 = ((240, 0), (960, 1), )
-kTaurus3Seq3 = ((240, 0), (240, 1), (480, 2), (120, 3), (120, 3), (240, 1),
-   (480, 2), (120, 3), (360, 1),  )
+kTaurus3Seq2 = ((240, 2), (960, 3), )
+kTaurus3Seq3 = ((240, 0), (240, 1), (480, 2), (120, 2), (120, 0), (240, 1),
+   (480, 2), (120, 2), (360, 3),  )
 
 gTaurus = {
    'name':"Taurus",
    'instruments': (
       {  'name': 'scratchy paper',
          'synth': ('wavedir', 'taurus1'),
-         'player': ('seq', kTaurus1a, kTaurus1Seq)
+         'player': ('multi', ('seq', kTaurus1a, kTaurus1Seq1),
+                             ('seq', kTaurus1a, kTaurus1Seq2),
+                             ('seq', kTaurus1a, kTaurus1Seq3), )         
       },
       {  'name': 'maracs',
          'synth': ('wavedir', 'taurus2'),
@@ -50,10 +54,10 @@ gTaurus = {
       },
       {  'name': 'log drum',
          'synth': ('wavedir', 'taurus3'),
-         'player': ('axispicker', kTaurus3,
-                     ('seq', kTaurus1a, kTaurus3Seq1 ), 
-                     ('seq', kTaurus1a, kTaurus3Seq2 ), 
-                     ('seq', kTaurus1a, kTaurus3Seq3 ), )
+         'player': ('multi',
+                     ('seq', kTaurus3a, kTaurus3Seq1 ), 
+                     ('seq', kTaurus3a, kTaurus3Seq2 ), 
+                     ('seq', kTaurus3a, kTaurus3Seq3 ), )
       },
    )}
 
@@ -64,12 +68,15 @@ gTaurus = {
 
 kLeo1  = { 'axis': 1, 'auto_trigger': False }
 kLeo1a = { 'allow_stop': False, 'sched': 1, 'tempo': 96, 'volume': (-18, 0, 0) }
-kLeo2 = {'axis': 1, 'auto_trigger': False}
-kLeo2a = { 'release': 5.0, 'volume': (-18, 0, 0) }
-kLeo2c = { 'loop': True, 'release': 3.0, 'volume': (-18, 0, 0) }
-kLeo2b = { 'loop': False, 'release': 2.0, 'volume': (-18, 0, 0) }
+kLeo1b = { 'allow_stop': True, 'sched': 1, 'tempo': 96, 'volume': (-18, 0, 0) }
+
+kLeo2 =  {'axis': 1, 'auto_trigger': False}
+kLeo2a = { 'release': 5.0, 'volume': (-24, 0, 0) }
+kLeo2c = { 'loop': True, 'release': 0.8, 'volume': (-24, 0, 0) }
+kLeo2b = { 'loop': False, 'release': 2.0, 'volume': (-24, 0, 0) }
+
 kLeo3 = { 'axis': 1, 'auto_trigger': True }
-kLeo3a  = { 'loop':True, 'attack': 0.35, 'release': 5.0, 'volume': (-18, 0, 0) }
+kLeo3a  = { 'loop':True, 'attack': 0.25, 'release': 2.5, 'volume': (-22, 0, 0) }
 
 gLeo = {
    'name':"Leo",
@@ -78,12 +85,12 @@ gLeo = {
          'synth': ('wavedir', 'leo1'),
          'player': ('multi',
             ('axispicker', kLeo1,
-               ('seq', kLeo1a, ((320,0,1.0), (320,2,0.7), (320,3,0.5))),
+               ('seq', kLeo1b, ((320,0,1.0), (320,2,0.7), (320,3,0.5))),
                ('seq', kLeo1a, ((160,0,1.0), (160,2,0.7), (160,3,0.5))),
                ('seq', kLeo1a, ((80,0,1.0), (80,1,0.7), (80,2,0.5))),
                ('seq', kLeo1a, ((60,0,1.0), (60,1,0.7), (60,2,0.5), (60,3,0.5))), ),
             ('axispicker', kLeo1,
-               ('seq', kLeo1a, ((320,3,1.0), (320,2,0.7), (320,0,0.5))),
+               ('seq', kLeo1b, ((320,3,1.0), (320,2,0.7), (320,0,0.5))),
                ('seq', kLeo1a, ((160,3,1.0), (160,2,0.7), (160,0,0.5))),
                ('seq', kLeo1a, ((80,2,1.0), (80,1,0.7), (80,0,0.5))),
                ('seq', kLeo1a, ((60,3,1.0), (60,2,0.7), (60,1,0.5), (60,0,0.5))), ))
@@ -92,7 +99,7 @@ gLeo = {
       {  'name': 'tambourine guiro',
          'synth': ('wavedir', 'leo2'),
          'player': ('multi', 
-            ('axispicker', kLeo2, # Tambourine hits
+            ('cycle', # Tambourine hits
                ('sample', kLeo2a, 4), 
                ('sample', kLeo2a, 6),
                ('sample', kLeo2a, 5)),
@@ -122,7 +129,7 @@ gLeo = {
 # crotale:
 kScor1  = { 'axis': 1, 'auto_trigger': False,  }
 kScor1a = { 'loop':False, 'release': 2.0, 'velocity': (-30, 0, 0), 'volume':(0, 0, 0) }
-kScor1b = { 'loop':False, 'release': 2.0, 'volume': (-30, 0, 0)}
+kScor1b = { 'loop':False, 'release': 2.0, 'volume': (-24, -12, 0)}
 
 # temple blocks:
 kScor2 =  { 'axis': 1, 'auto_trigger': False }
@@ -170,16 +177,16 @@ gScorpio = {
 # Aquarius
 #
 
-kAqua1a = { 'allow_stop': False, 'sched': 1, 'tempo': (60, 120, 1), 'volume': (-18, 0, 0), 'viz':'first' }
-kAqua1b = { 'allow_stop': True,  'sched': 2, 'tempo': (60, 120, 1), 'volume': (-18, 0, 0) }
+kAqua1a = { 'allow_stop': False, 'sched': 1, 'tempo': (60, 120, 1), 'velocity': (-30, 0, 0), 'viz':'first' }
+kAqua1b = { 'allow_stop': True,  'sched': 2, 'tempo': (60, 120, 1), 'velocity': (-30, 0, 0) }
 
 kAqua2 = {'axis': 1, 'auto_trigger': True}
 kAqua2c = {'axis': 1, 'auto_trigger': False}
 kAqua2a = { 'release': 3.0, 'volume': (-18, 0, 0), 'loop':False, 'viz_sus': True }
-kAqua2b = { 'release': 4.5, 'attack': 0.19, 'volume': (-18, 0, 0), 'loop':True}
+kAqua2b = { 'release': 1.25, 'attack': 0.1, 'volume': (-18, 0, 0), 'loop':True}
 
 kAqua3 =  { 'axis': 1, 'auto_trigger': True }
-kAqua3a = { 'loop':True, 'attack': 0.25, 'release': 1.6, 'volume': (-18, 0, 0) }
+kAqua3a = { 'loop':True, 'attack': 0.25, 'release': 1.6, 'volume': (-22, 0, 0) }
 
 gAquarius = {
    'name': 'Aquarius',
@@ -197,8 +204,8 @@ gAquarius = {
       {  'name': 'rolling pecans and sand',
          'synth': ('wavedir', 'aqua2'),
          'player': ('multi',
-                     ('axispicker', kAqua2c, ('sample', kAqua2a, 6), ('sample', kAqua2a, 5), ('sample', kAqua2a, 4),),
-                     ('axispicker', kAqua2, ('sample', kAqua2b, 0), ('sample', kAqua2b, 1), ('sample', kAqua2b, 2)))
+                     ('cycle', ('sample', kAqua2a, 6), ('sample', kAqua2a, 5), ('sample', kAqua2a, 4),),
+                     ('cycle', ('sample', kAqua2b, 0), ('sample', kAqua2b, 1), ('sample', kAqua2b, 2)))
       },
       {  'name': 'toy hose',
          'synth': ('wavedir', 'aqua3'),
@@ -253,8 +260,9 @@ class MainWidget(BaseWidget) :
 
       self.vol_sliders = []
       self.vol_labels = []
+      sz = Window.width / 4
       for i in range(3):
-         s = Slider(min=-30, max=12, value=0, pos=(self.control_loc + 30, 400 - i*100), size = (200, 50))
+         s = Slider(min=-30, max=12, value=0, pos=(self.control_loc + 30, 400 - i*100), size = (sz, 50))
          s.bind(value=self.on_slider_value)
          self.add_widget(s)
          self.vol_sliders.append(s)
@@ -337,7 +345,8 @@ class MainWidget(BaseWidget) :
    def _spos_to_xy(self, spos):
       y = spos[1] * self.num_regions - self.cur_region
       y = min(max(y, 0), 1)
-      x = spos[0]
+      x = (spos[0] * Window.width) / self.control_loc
+      x = min(max(x, 0), 1)
       return x,y
 
    def on_touch_down(self, touch):
