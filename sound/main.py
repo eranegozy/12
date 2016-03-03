@@ -27,8 +27,8 @@ kTaurus1a = { 'allow_stop': True, 'loop': True, 'sched': 1, 'tempo': 130, 'volum
 kTaurus1Seq = ((720, 0), (480, 0), (240, 1), (720, 0), (480, 0), (240, 1),
    (480, 0), (480, 0), (720, 0),  )
 
-kTaurus2a = { 'loop':False,'release': 0.1, 'volume': (-18, 0, 0) }
-kTaurus2b = { 'loop':True, 'release': 0.1, 'volume': (-18, 0, 0) }
+kTaurus2a = { 'loop':False, 'release': 10., 'volume': (-18, 0, 0) }
+kTaurus2b = { 'loop':True, 'attack': 0.2, 'release': 0.7, 'volume': (-18, 0, 0) }
 
 kTaurus3  = { 'axis': 1, 'auto_trigger': True }
 kTaurus3Seq1 = ((960, 0), (240, 1), )
@@ -65,11 +65,11 @@ gTaurus = {
 kLeo1  = { 'axis': 1, 'auto_trigger': False }
 kLeo1a = { 'allow_stop': False, 'sched': 1, 'tempo': 96, 'volume': (-18, 0, 0) }
 kLeo2 = {'axis': 1, 'auto_trigger': False}
-kLeo2a = { 'release': 10.0, 'volume': (-18, 0, 0) }
+kLeo2a = { 'release': 5.0, 'volume': (-18, 0, 0) }
 kLeo2c = { 'loop': True, 'release': 3.0, 'volume': (-18, 0, 0) }
-kLeo2b = { 'loop':False, 'release': 0.1, 'volume': (-18, 0, 0) }
+kLeo2b = { 'loop': False, 'release': 2.0, 'volume': (-18, 0, 0) }
 kLeo3 = { 'axis': 1, 'auto_trigger': True }
-kLeo3a  = { 'loop':True, 'attack': 0.5, 'release': 3.0, 'volume': (-18, 0, 0) }
+kLeo3a  = { 'loop':True, 'attack': 0.35, 'release': 5.0, 'volume': (-18, 0, 0) }
 
 gLeo = {
    'name':"Leo",
@@ -78,15 +78,15 @@ gLeo = {
          'synth': ('wavedir', 'leo1'),
          'player': ('multi',
             ('axispicker', kLeo1,
-               ('seq', kLeo1a, ((320,0,.5), (320,2,.3), (320,3,.1))),
-               ('seq', kLeo1a, ((160,0,.5), (160,2,.3), (160,3,.1))),
-               ('seq', kLeo1a, ((80,0,.5), (80,1,.3), (80,2,.1))),
-               ('seq', kLeo1a, ((60,0,.5), (60,1,.3), (60,2,.1), (60,3,.1))), ),
+               ('seq', kLeo1a, ((320,0,1.0), (320,2,0.7), (320,3,0.5))),
+               ('seq', kLeo1a, ((160,0,1.0), (160,2,0.7), (160,3,0.5))),
+               ('seq', kLeo1a, ((80,0,1.0), (80,1,0.7), (80,2,0.5))),
+               ('seq', kLeo1a, ((60,0,1.0), (60,1,0.7), (60,2,0.5), (60,3,0.5))), ),
             ('axispicker', kLeo1,
-               ('seq', kLeo1a, ((320,3,.5), (320,2,.3), (320,0,.1))),
-               ('seq', kLeo1a, ((160,3,.5), (160,2,.3), (160,0,.1))),
-               ('seq', kLeo1a, ((80,2,.5), (80,1,.3), (80,0,.1))),
-               ('seq', kLeo1a, ((60,3,.5), (60,2,.3), (60,1,.1), (60,0,.1))), ))
+               ('seq', kLeo1a, ((320,3,1.0), (320,2,0.7), (320,0,0.5))),
+               ('seq', kLeo1a, ((160,3,1.0), (160,2,0.7), (160,0,0.5))),
+               ('seq', kLeo1a, ((80,2,1.0), (80,1,0.7), (80,0,0.5))),
+               ('seq', kLeo1a, ((60,3,1.0), (60,2,0.7), (60,1,0.5), (60,0,0.5))), ))
       },
 
       {  'name': 'tambourine guiro',
@@ -97,7 +97,7 @@ gLeo = {
                ('sample', kLeo2a, 6),
                ('sample', kLeo2a, 5)),
             ('sample', kLeo2c, 7), # Tambourine roll
-            ('axispicker', kLeo2,
+            ('axispicker', kLeo2, #Guiro 
                ('sample', kLeo2b, 2),             
                ('sample', kLeo2b, 0), 
                ('sample', kLeo2b, 3),
@@ -121,15 +121,15 @@ gLeo = {
 
 # crotale:
 kScor1  = { 'axis': 1, 'auto_trigger': False,  }
-kScor1a = { 'loop':False, 'release': 2.0, 'velocity': (-18, 0, 0), 'volume':(0, 0, 0) }
-kScor1b = { 'loop':False, 'release': 2.0, 'volume': (-18, 0, 0)}
+kScor1a = { 'loop':False, 'release': 2.0, 'velocity': (-30, 0, 0), 'volume':(0, 0, 0) }
+kScor1b = { 'loop':False, 'release': 2.0, 'volume': (-30, 0, 0)}
 
 # temple blocks:
 kScor2 =  { 'axis': 1, 'auto_trigger': False }
 kScor2a = { 'allow_stop': False, 'sched': 1, 'tempo': 100, 'volume': (-18, 0, 0) }
 
 # gong
-kScor3 = { 'loop':False, 'release': 2.0, 'velocity': (-18, 0, 0), 'volume':(0, 0, 0) }
+kScor3 = { 'loop':False, 'release': 3.0, 'velocity': (-18, 0, 0), 'volume':(0, 0, 0) }
 
 gScorpio = {
    'name':"Scorpio",
@@ -174,11 +174,12 @@ kAqua1a = { 'allow_stop': False, 'sched': 1, 'tempo': (60, 120, 1), 'volume': (-
 kAqua1b = { 'allow_stop': True,  'sched': 2, 'tempo': (60, 120, 1), 'volume': (-18, 0, 0) }
 
 kAqua2 = {'axis': 1, 'auto_trigger': True}
-kAqua2a = { 'release': 3.0, 'volume': (-18, 0, 0), 'loop':True, 'viz_sus': True }
-kAqua2b = { 'release': 3.0, 'volume': (-18, 0, 0), 'loop':True}
+kAqua2c = {'axis': 1, 'auto_trigger': False}
+kAqua2a = { 'release': 3.0, 'volume': (-18, 0, 0), 'loop':False, 'viz_sus': True }
+kAqua2b = { 'release': 4.5, 'attack': 0.19, 'volume': (-18, 0, 0), 'loop':True}
 
 kAqua3 =  { 'axis': 1, 'auto_trigger': True }
-kAqua3a = { 'loop':True, 'attack': 0.25, 'release': 2.0, 'volume': (-18, 0, 0) }
+kAqua3a = { 'loop':True, 'attack': 0.25, 'release': 1.6, 'volume': (-18, 0, 0) }
 
 gAquarius = {
    'name': 'Aquarius',
@@ -196,8 +197,8 @@ gAquarius = {
       {  'name': 'rolling pecans and sand',
          'synth': ('wavedir', 'aqua2'),
          'player': ('multi',
-                     ('axispicker', kAqua2, ('sample', kAqua2a, 6), ('sample', kAqua2a, 5), ('sample', kAqua2a, 4),),
-                     ('cycle', ('sample', kAqua2b, 0), ('sample', kAqua2b, 1), ('sample', kAqua2b, 2), ('sample', kAqua2b, 3)))
+                     ('axispicker', kAqua2c, ('sample', kAqua2a, 6), ('sample', kAqua2a, 5), ('sample', kAqua2a, 4),),
+                     ('axispicker', kAqua2, ('sample', kAqua2b, 0), ('sample', kAqua2b, 1), ('sample', kAqua2b, 2)))
       },
       {  'name': 'toy hose',
          'synth': ('wavedir', 'aqua3'),
