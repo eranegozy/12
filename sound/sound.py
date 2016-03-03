@@ -294,6 +294,11 @@ class SequencePlayer(object):
       if vp:
          self.volume_ctrl = VolumeController(vp, synth)
 
+      self.velocity_ctrl = None
+      vp = getParam(params, 'velocity', None)
+      if vp:
+         self.velocity_ctrl = VelocityController(vp)
+
       self.playing = False
       self.cmd = None
 
@@ -301,6 +306,9 @@ class SequencePlayer(object):
       self.tempo_ctrl.control(msg)
       if self.volume_ctrl:
          self.volume_ctrl.control(msg)
+
+      if self.velocity_ctrl:
+         self.velocity_ctrl.control(msg)
          
       if msg[2] == 'play' and not self.playing:
          self.playing = True
@@ -319,6 +327,10 @@ class SequencePlayer(object):
       gain = 1.0
       if 2 < len(self.sequence[idx]):
          gain = self.sequence[idx][2]
+
+      # Add velocity support
+      if self.velocity_ctrl:
+         gain = gain * self.velocity_ctrl.get_gain()
 
       # play the note
       if note != None:
