@@ -3,11 +3,11 @@
 //----------------------------------------
 // StarField PARAMETERS
 StarFieldParams = function() {
-  this.color1  = color(255,144,144,255);
-  this.color2  = color(83,144,255, 255);
+  this.color1  = color(251, 237, 209, 200);
+  this.color2  = color(163, 186, 248, 255);
   this.size1   = 2;
   this.size2   = 5;
-  this.flareImg = loadImage('StarSparkle02.png');
+  this.flareImg = loadImage('StarSparkle05.png');
 }
 
 setStarFieldParams = function() {
@@ -59,7 +59,7 @@ BurstParams = function() {
 
 ThreadParams = function() {
   this.birthRate = .25;
-  this.initLifespan = 1;
+  this.initLifespan = 2;
   this.initSpawn = 3;
   this.curvy = .5;
   this.speed = 2;
@@ -158,5 +158,5 @@ setSpikeParams = function() {
 // Null PARAMETERS
 setNullParams = function() {
   gNumStars = 240;
-  gGlobalFade = 100; // how quickly things fade out
+  gGlobalFade = 200; // how quickly things fade out
 }
