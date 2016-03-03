@@ -102,7 +102,8 @@ ConstParams = function() {
   this.weight = 2;
   this.appear_dur = .2;
   this.color1 = color(83, 144, 144);
-  this.color2 = color(81, 123, 171);
+  // this.color2 = color(81, 123, 171);
+  this.color2 = color(255);
 }
 
 setConstParams = function() {
@@ -116,10 +117,10 @@ setConstParams = function() {
 
   // override default values for players 1 and 2
   gConstParams[1].color1 = color(239, 206, 139);
-  gConstParams[1].color2 = color(253, 223, 121);
+  // gConstParams[1].color2 = color(253, 223, 121);
 
   gConstParams[2].color1 = color(239, 139, 139);
-  gConstParams[2].color2 = color(253, 172, 129);
+  // gConstParams[2].color2 = color(253, 172, 129);
 }
 
 
