@@ -254,11 +254,19 @@ class MainWidget(BaseWidget) :
       self.vol_labels = []
       for i in range(3):
          s = Slider(min=-30, max=12, value=0, pos=(self.control_loc + 30, 400 - i*100), size = (200, 50))
+         s.bind(value=self.on_slider_value)
          self.add_widget(s)
          self.vol_sliders.append(s)
          l = Label(text="-", pos=(self.control_loc + 30, 375 - i*100), size = (50, 50))
          self.add_widget(l)
          self.vol_labels.append(l)
+
+   def on_slider_value(self, slider, vol):
+      if self.cur_section != None:
+         inst = self.vol_sliders.index(slider)
+         self.volumes[self.cur_section][inst] = vol
+         self.sound.set_master_volume(inst, vol)
+         self.vol_labels[inst].text = "%.1fdB" % vol
 
    def on_update(self) :
       if self.messanger:
@@ -273,19 +281,13 @@ class MainWidget(BaseWidget) :
       else:
          self.info.text += 'no server mode'
 
-      if self.cur_section != None:
-         for i in range(3):
-            v = self.vol_sliders[i].value
-            self.volumes[self.cur_section][i] = v
-            self.sound.set_master_volume(i, v)
-            self.vol_labels[i].text = "%.1fdB" % v
 
    def _set_section(self, sec_idx):
       print self.volumes
 
       if not isinstance(sec_idx, int):
          sec_idx = None
-         
+
       self.cur_section = sec_idx
       self.sound.set_section(sec_idx)
 
@@ -294,6 +296,7 @@ class MainWidget(BaseWidget) :
          vols = self.volumes[self.cur_section]         
          for i in range(3):
             self.vol_sliders[i].value = vols[i]
+            self.vol_labels[i].text = "%.1fdB" % vols[i]
 
 
    def _setup_inst(self):

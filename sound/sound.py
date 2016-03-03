@@ -66,13 +66,11 @@ class WaveDirSynth(object):
    def set_volume(self, vol):
       self.gain = 10.0 ** (vol/20.0)
       self.mixer.set_gain(self.gain * self.m_gain)
-      print 'set_volume'
 
    def set_master_volume(self, vol):
       self.m_gain = 10.0 ** (vol/20.0)
       self.mixer.set_gain(self.gain * self.m_gain)
-      print 'set_master'
-      
+
    def play(self, idx, gain, loop = False, atime = 0) :
       buf = self.buffers[idx]
       gen = WaveGenerator(buf, loop, atime)
