@@ -34,27 +34,25 @@
     socket.on('note', function(data) {
       console.log("received note:" + JSON.stringify(data));
       var slot = data[0];
-      if (data[1] == 'hit')
-        noteHit(slot, 0.5);
-      else if (data[1] == 'on')
-        noteOn(slot);
+      if (data[1] == 'on')
+        noteOn(slot, data[2]);
       else if (data[1] == 'off')
         noteOff(slot);
     });
   }
 
   var gActiveNotes = Array(3);
-  noteHit = function(slot, dur) {
-    console.log('noteHit ' + slot + ' ' + dur);
+  noteOn = function(slot, dur) {
+    console.log('noteon ' + slot + ' ' + dur);
     var starField = gStarFields[slot];
     var pt = starField.getRandomPoint();
     var note = null;
     switch(gCondData.sectionIdx) {
-      case 0:
+      case 1:
         note = makeNewConst(pt[0], pt[1], gConstParams[slot], starField, dur);
         break;
 
-      case 1:
+      case 0:
         note = makeNewSpike(pt[0], pt[1], gSpikeParams[slot], dur);
         break;
 
@@ -69,10 +67,6 @@
     gActiveNotes[slot] = note;
   }
 
-  noteOn = function(slot) {
-    noteHit(slot, 10000.0);    
-  }
-
   noteOff = function(slot) {
     console.log('noteOff ' + slot);
     if (gActiveNotes[slot])
@@ -83,8 +77,8 @@
 
   var gSetupMap = { 
     null: setNullParams, 
-    0:    setConstParams,
-    1:    setSpikeParams,
+    1:    setConstParams,
+    0:    setSpikeParams,
     2:    setThreadParams,
     3:    setRippleParams, 
   };
@@ -187,13 +181,13 @@
     // keys q,w,e = hits
     var idx = ['Q','W','E'].indexOf(key);
     if (idx != -1) {
-      noteHit(idx, 0.5);
+      noteOn(idx, 0.5);
     }
 
     // keys a,s,d = noteOn
     var idx = ['A','S','D'].indexOf(key);
     if (idx != -1) {
-      noteOn(idx);
+      noteOn(idx, 10000.);
     }
 
     return false;

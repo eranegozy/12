@@ -226,6 +226,9 @@ class AxisPickerPlayer(object):
          self.cur_player = None
 
 
+kDurLong = 1000.0
+kDurHit  = 0.5
+
 class SamplePlayer(object):
    def __init__(self, params, note, idx, synth, cb_func):
       super(SamplePlayer, self).__init__()
@@ -236,7 +239,7 @@ class SamplePlayer(object):
       self.release_time = getParam(params, 'release', 0)
       self.attack_time  = getParam(params, 'attack', 0)
       self.loop         = getParam(params, 'loop', False)
-      self.viz_sus      = getParam(params, 'viz_sus', self.loop)
+      self.viz_dur      = getParam(params, 'viz_dur', kDurLong if self.loop else kDurHit)
 
       self.volume_ctrl = None
       vp = getParam(params, 'volume', None)
@@ -261,15 +264,11 @@ class SamplePlayer(object):
          else:
             gain = 1.0
          self.synth.play(self.note, gain, self.loop, self.attack_time)
-         if self.viz_sus:
-            self.cb_func(self.inst_id, 'on')
-         else:
-            self.cb_func(self.inst_id, 'hit')
+         self.cb_func(self.inst_id, 'on', self.viz_dur)
 
       elif msg[2] == 'stop':
          self.synth.stop(self.note, self.release_time)
-         if self.viz_sus:
-            self.cb_func(self.inst_id, 'off')
+         self.cb_func(self.inst_id, 'off')
 
 
 class SequencePlayer(object):
@@ -341,7 +340,7 @@ class SequencePlayer(object):
          self.synth.play(note, gain)
          # viz callback: either first note or all notes:
          if idx==0 or self.viz_type=='all':
-            self.cb_func(self.inst_id, 'hit')
+            self.cb_func(self.inst_id, 'on', kDurHit)
 
       # advance idx and possibly loop back to start
       idx += 1
@@ -449,7 +448,7 @@ class Sound(object):
    def on_control(self, msg):
       if self.instruments == None:
          return
-      print msg
+      # print msg
       player_idx = msg[0]
       self.instruments[player_idx][0].control(msg)
 
@@ -459,10 +458,10 @@ class Sound(object):
          return
       self.instruments[idx][1].set_master_volume(vol)
 
-   def viz_cb(self, inst_id, msg):
+   def viz_cb(self, inst_id, msg, dur = 0.5):
       # print inst_id, msg
       if self.cb_func:
-         self.cb_func((inst_id, msg))
+         self.cb_func((inst_id, msg, dur))
 
    def on_update(self):
       self.audio.on_update()

@@ -25,9 +25,9 @@ from kivy.graphics import Color, Ellipse, Rectangle, Line
 
 kTaurus1a = { 'allow_stop': True, 'loop': True, 'sched': 1, 'tempo': 105, 'volume': (-18, 0, 0) }
 kTaurus1Seq1 = ((480, 0), (720, 1), (240, 2), (240, 3), (120, 4), (240, 5), (360, 3), )
-kTaurus1Seq2 = ((240, 2), (480, 3), (480, 0), )
-kTaurus1Seq3 = ((720, 0), (480, 1), (240, 2), (720, 0), (480, 1), (240, 2),
+kTaurus1Seq2 = ((720, 0), (480, 1), (240, 2), (720, 0), (480, 1), (240, 2),
    (480, 1), (480, 1), (720, 0), (240, 2), )
+kTaurus1Seq3 = ((240, 2), (480, 3), (480, 0), )
 
 kTaurus2a = { 'loop':False, 'release': 10., 'volume': (-18, 0, 0) }
 kTaurus2b = { 'loop':True, 'attack': 0.2, 'release': 0.7, 'volume': (-18, 0, 0) }
@@ -73,7 +73,8 @@ kLeo1b = { 'allow_stop': True, 'sched': 1, 'tempo': 96, 'volume': (-18, 0, 0) }
 kLeo2 =  {'axis': 1, 'auto_trigger': False}
 kLeo2a = { 'release': 5.0, 'volume': (-24, 0, 0) }
 kLeo2c = { 'loop': True, 'release': 0.8, 'volume': (-24, 0, 0) }
-kLeo2b = { 'loop': False, 'release': 2.0, 'volume': (-24, 0, 0) }
+kLeo2b1 = { 'loop': False, 'release': 2.0, 'volume': (-24, 0, 0), 'viz_dur': 1.0 }
+kLeo2b2 = { 'loop': False, 'release': 2.0, 'volume': (-24, 0, 0), 'viz_dur': 0.5 }
 
 kLeo3 = { 'axis': 1, 'auto_trigger': True }
 kLeo3a  = { 'loop':True, 'attack': 0.25, 'release': 2.5, 'volume': (-22, 0, 0) }
@@ -105,10 +106,10 @@ gLeo = {
                ('sample', kLeo2a, 5)),
             ('sample', kLeo2c, 7), # Tambourine roll
             ('axispicker', kLeo2, #Guiro 
-               ('sample', kLeo2b, 2),             
-               ('sample', kLeo2b, 0), 
-               ('sample', kLeo2b, 3),
-               ('sample', kLeo2b, 1)))
+               ('sample', kLeo2b1, 2),
+               ('sample', kLeo2b1, 0), 
+               ('sample', kLeo2b1, 3),
+               ('sample', kLeo2b2, 1)))
       },
 
       {  'name': 'bass drum',
@@ -177,12 +178,12 @@ gScorpio = {
 # Aquarius
 #
 
-kAqua1a = { 'allow_stop': False, 'sched': 1, 'tempo': (60, 120, 1), 'velocity': (-30, 0, 0), 'viz':'first' }
+kAqua1a = { 'allow_stop': False, 'sched': 1, 'tempo': (60, 120, 1), 'velocity': (-30, 0, 0) }
 kAqua1b = { 'allow_stop': True,  'sched': 2, 'tempo': (60, 120, 1), 'velocity': (-30, 0, 0) }
 
 kAqua2 = {'axis': 1, 'auto_trigger': True}
 kAqua2c = {'axis': 1, 'auto_trigger': False}
-kAqua2a = { 'release': 3.0, 'volume': (-18, 0, 0), 'loop':False, 'viz_sus': True }
+kAqua2a = { 'release': 3.0, 'volume': (-18, 0, 0), 'loop':False, 'viz_dur': 6 }
 kAqua2b = { 'release': 1.25, 'attack': 0.1, 'volume': (-18, 0, 0), 'loop':True}
 
 kAqua3 =  { 'axis': 1, 'auto_trigger': True }
