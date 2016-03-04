@@ -58,14 +58,14 @@ BurstParams = function() {
 }
 
 ThreadParams = function() {
-  this.birthRate = .25;
-  this.initLifespan = 2;
+  this.birthRate = .15;
+  this.initLifespan = 1.2;
   this.initSpawn = 3;
   this.curvy = .5;
-  this.speed = 2;
+  this.speed = 2.5;
   this.weight = 2;
-  this.startColor = color(81, 123, 171, 255);
-  this.endColor   = color(83, 144, 144, 255);
+  this.startColor = color(81+80, 123+80, 171+80, 255);
+  this.endColor   = color(83+20, 144+20, 144+20, 255);
 }
 
 setThreadParams = function() {
