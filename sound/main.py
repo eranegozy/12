@@ -129,15 +129,15 @@ gLeo = {
 
 # crotale:
 kScor1  = { 'axis': 1, 'auto_trigger': False,  }
-kScor1a = { 'loop':False, 'release': 2.0, 'velocity': (-30, 0, 0), 'volume':(0, 0, 0) }
-kScor1b = { 'loop':False, 'release': 2.0, 'volume': (-24, -12, 0)}
+kScor1a = { 'loop':False, 'release': 2.0, 'velocity': (-30, 0, 0), 'volume':(0, 0, 0), 'viz_dur':4 }
+kScor1b = { 'loop':False, 'release': 2.0, 'volume': (-24, -12, 0), 'viz_dur':4}
 
 # temple blocks:
 kScor2 =  { 'axis': 1, 'auto_trigger': False }
 kScor2a = { 'allow_stop': False, 'sched': 1, 'tempo': 100, 'volume': (-18, 0, 0) }
 
 # gong
-kScor3 = { 'loop':False, 'release': 3.0, 'velocity': (-18, 0, 0), 'volume':(0, 0, 0) }
+kScor3 = { 'loop':False, 'release': 3.0, 'velocity': (-18, 0, 0), 'volume':(0, 0, 0), 'viz_dur':4 }
 
 gScorpio = {
    'name':"Scorpio",
