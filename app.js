@@ -24,61 +24,60 @@ var gSongData = {
       instruments: [
         { name:'scratchy paper', 
           color: 'red',
-          surfaces:[['paper', ], ['paper', ], ['paper', ], ]},
+          surfaces:[['long pattern', ], ['medium pattern', ], ['short pattern', ], ]},
 
         { name:'maracas', 
           color: 'green',
-          surfaces:[['maracas', ], ['maracas', ]]},
+          surfaces:[['hit', ], ['long shake', ]]},
 
         { name:'log drum', 
           color: 'blue',
-          surfaces:[['log', 'rhythm'], ['log', 'rhythm'], ['log', 'rhythm']]},
+          surfaces:[['long pattern', ], ['pattern 1', ], ['pattern 2', ], ]},
         ]},
 
     { name:"Leo",
       instruments: [
         { name:'temple block', 
           color: 'red',
-          surfaces:[['rising', 'pattern'], ['falling', 'pattern']]},
+          surfaces:[['rising', 'speed'], ['falling', 'speed']]},
 
         { name:'tambourine',
           color: 'green',
           surfaces:[['hit', ], ['shake', ]]},
 
-        { name:'guiro', 
+        { name:'bass drum', 
           color: 'blue',
-          surfaces:[['zip up', ], ['hit', ]]},
+          surfaces:[['rumble', 'pitch']]},
         ]},
 
     { name: "Scorpio",
       instruments: [
-        { name:'maracas1',
+        { name:'crotale',
           color: 'red',
-          surfaces:[['shake',]]}, 
+          surfaces:[['hit', 'pitch'], ['bowed', 'pitch']]},
 
-        { name:'maracas1', 
+        { name:'temple blocks', 
           color: 'green',
-          surfaces:[['shake',]]}, 
+          surfaces:[['', 'pattern']]}, 
 
-        { name:'maracas3', 
+        { name:'gong', 
           color: 'blue',
-          surfaces:[['shake',]]}, 
+          surfaces:[['multi hit', ], ['one hit', ], ['bendy', ], ]},
         ]},
 
     { name: "Aquarius",
       instruments: [
         { name:'glockenspiel',
           color: 'red',
-          surfaces:[['quick', 'speed'], 
-                    ['slow', 'speed']]},
+          surfaces:[['quick', 'speed'], ['pattern', 'pitch']]},
 
-        { name:'pecans', 
+        { name:'rain sounds', 
           color: 'green',
-          surfaces:[['pecans',]]},
+          surfaces:[['rain stick', ], ['drum rumble', ]]},
 
         { name:'toy hose', 
           color: 'blue',
-          surfaces:[['hose',]]},
+          surfaces:[['', 'spin speed']]},
         ]},
 
   ]
