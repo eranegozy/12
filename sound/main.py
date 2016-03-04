@@ -24,19 +24,19 @@ from kivy.graphics import Color, Ellipse, Rectangle, Line
 #
 
 kTaurus1a = { 'allow_stop': True, 'loop': True, 'sched': 1, 'tempo': 105, 'volume': (-18, 0, 0) }
-kTaurus1Seq1 = ((480, 0), (720, 1), (240, 2), (240, 3), (120, 4), (240, 5), (360, 3), )
-kTaurus1Seq2 = ((720, 0), (480, 1), (240, 2), (720, 0), (480, 1), (240, 2),
+kTaurus1Seq1 = ((720, 0), (480, 1), (240, 2), (720, 0), (480, 1), (240, 2),
    (480, 1), (480, 1), (720, 0), (240, 2), )
+kTaurus1Seq2 = ((480, 0), (720, 1), (240, 2), (240, 3), (120, 4), (240, 5), (360, 3), )
 kTaurus1Seq3 = ((240, 2), (480, 3), (480, 0), )
 
 kTaurus2a = { 'loop':False, 'release': 10., 'volume': (-18, 0, 0) }
 kTaurus2b = { 'loop':True, 'attack': 0.2, 'release': 0.7, 'volume': (-18, 0, 0) }
 
 kTaurus3a = { 'allow_stop': True, 'loop': True, 'sched': 1, 'tempo': 105, 'volume': (-18, 0, 0) }
-kTaurus3Seq1 = ((960, 0), (240, 1), )
-kTaurus3Seq2 = ((240, 2), (960, 3), )
-kTaurus3Seq3 = ((240, 0), (240, 1), (480, 2), (120, 2), (120, 0), (240, 1),
+kTaurus3Seq1 = ((240, 0), (240, 1), (480, 2), (120, 2), (120, 0), (240, 1),
    (480, 2), (120, 2), (360, 3),  )
+kTaurus3Seq2 = ((960, 0), (240, 1), )
+kTaurus3Seq3 = ((240, 2), (960, 3), )
 
 gTaurus = {
    'name':"Taurus",
@@ -179,7 +179,10 @@ gScorpio = {
 #
 
 kAqua1a = { 'allow_stop': False, 'sched': 1, 'tempo': (60, 120, 1), 'velocity': (-30, 0, 0) }
-kAqua1b = { 'allow_stop': True,  'sched': 2, 'tempo': (60, 120, 1), 'velocity': (-30, 0, 0) }
+
+kAqua1ap = {'axis': 1, 'auto_trigger': False}
+kAqua1b = { 'allow_stop': True,  'sched': 2, 'tempo': 90, 'velocity': (-30, 0, 0) }
+
 
 kAqua2 = {'axis': 1, 'auto_trigger': True}
 kAqua2c = {'axis': 1, 'auto_trigger': False}
@@ -199,8 +202,9 @@ gAquarius = {
                                ('seq', kAqua1a, ((60, 1, .3), (60, 4, .3), (60, 3, .3),)),
                                ('seq', kAqua1a, ((60, 1, .3), (60, 0, .3), (60, 3, .3),)),),
 
-                     ('cycle', ('seq', kAqua1b, ((320, 6, .3), (400, 6, .3), (240, 6, .3),)), 
-                               ('seq', kAqua1b, ((320, 7, .3), (400, 7, .3), (240, 7, .3),)),), )
+                     ('axispicker', kAqua1ap, 
+                         ('seq', kAqua1b, ((320, 6, .3), (400, 6, .3), (240, 6, .3),)), 
+                         ('seq', kAqua1b, ((320, 7, .3), (400, 7, .3), (240, 7, .3),)),), )
       },
       {  'name': 'rolling pecans and sand',
          'synth': ('wavedir', 'aqua2'),
