@@ -295,7 +295,7 @@ Const = function(x, y, params, starfield, dur) {
 }
 
 Const.prototype.release = function() {
-  this.dur = 0;
+  this.dur = this.params.appear_dur;
 }
 
 Const.prototype.update = function(dt) {
