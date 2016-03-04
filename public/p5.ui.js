@@ -289,33 +289,40 @@ ui = (function() {
 
     // top label
     if (this.labels[0]) {
-      textAlign(CENTER, TOP);
-      text(this.labels[0], cx, ty);
+      textAlign(LEFT, TOP);
+      text(this.labels[0], lx + 10, ty);
     }
 
     // center label
     if (1 < this.labels.length) {
+      push();
+      translate(cx, cy)
+      rotate(PI/2);
       textAlign(CENTER, TOP);
-      text(this.labels[1], cx, cy);
+      text(this.labels[1], 0, 0);
+      pop();
 
       noFill();
       stroke(this.enabled?0:150);
       strokeWeight(5);
-      var mar = this.w * .1;
+      var mar = height * .05;
       var sideLen = width * 0.05;
-      var lp = lx + mar;
-      var rp = rx - mar;
-      var lp2 = lp + sideLen;
-      var rp2 = rp - sideLen;
-      var tp = cy - sideLen;
-      var bp = cy + sideLen;
+      var tp = ty + mar;
+      var bp = by - mar;
+
+      var lp = cx - sideLen;
+      var rp = cx + sideLen;
+      var tp2 = tp + sideLen;
+      var bp2 = bp - sideLen;
 
       // draw arrow      
-      line(lp, cy, rp, cy);
-      line(lp, cy, lp2, tp);
-      line(lp, cy, lp2, bp);
-      line(rp, cy, rp2, tp);
-      line(rp, cy, rp2, bp);
+      line(cx, tp, cx, bp);
+
+      line(cx, tp, lp, tp2);
+      line(cx, tp, rp, tp2);
+
+      line(cx, bp, lp, bp2);
+      line(cx, bp, rp, bp2);
 
     }
 
