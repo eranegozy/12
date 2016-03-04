@@ -23,60 +23,60 @@ var gSongData = {
     { name:"Taurus",
       instruments: [
         { name:'scratchy paper', 
-          color: 'red',
+          color: 'blue',
           surfaces:[['long pattern', ], ['medium pattern', ], ['short pattern', ], ]},
 
         { name:'maracas', 
-          color: 'green',
+          color: 'yellow',
           surfaces:[['hit', ], ['long shake', ]]},
 
         { name:'log drum', 
-          color: 'blue',
+          color: 'red',
           surfaces:[['long pattern', ], ['pattern 1', ], ['pattern 2', ], ]},
         ]},
 
     { name:"Leo",
       instruments: [
         { name:'temple block', 
-          color: 'red',
+          color: 'blue',
           surfaces:[['rising', 'speed'], ['falling', 'speed']]},
 
         { name:'tambourine',
-          color: 'green',
+          color: 'yellow',
           surfaces:[['hit', ], ['shake', ]]},
 
         { name:'bass drum', 
-          color: 'blue',
+          color: 'red',
           surfaces:[['rumble', 'pitch']]},
         ]},
 
     { name: "Scorpio",
       instruments: [
         { name:'crotale',
-          color: 'red',
+          color: 'blue',
           surfaces:[['hit', 'pitch'], ['bowed', 'pitch']]},
 
         { name:'temple blocks', 
-          color: 'green',
+          color: 'yellow',
           surfaces:[['', 'pattern']]}, 
 
         { name:'gong', 
-          color: 'blue',
+          color: 'red',
           surfaces:[['multi hit', ], ['one hit', ], ['bendy', ], ]},
         ]},
 
     { name: "Aquarius",
       instruments: [
         { name:'glockenspiel',
-          color: 'red',
+          color: 'blue',
           surfaces:[['quick', 'speed'], ['pattern', 'pitch']]},
 
         { name:'rain sounds', 
-          color: 'green',
+          color: 'yellow',
           surfaces:[['rain stick', ], ['drum rumble', ]]},
 
         { name:'toy hose', 
-          color: 'blue',
+          color: 'red',
           surfaces:[['', 'spin speed']]},
         ]},
 

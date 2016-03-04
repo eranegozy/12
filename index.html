@@ -308,9 +308,9 @@
     background(255);    
   }
 
-  var gSurfaceColors = {'red': [200, 50, 50], 
-                        'green': [50, 200, 50], 
-                        'blue': [50, 50, 200] };
+  var gSurfaceColors = {'blue':    [83, 144, 144], 
+                        'yellow': [239, 206, 139], 
+                        'red':   [239, 139, 139] };
 
   var createSurfaceControl = function(inst) {
     var numSurfaces = inst.surfaces.length;
@@ -319,6 +319,7 @@
     var w = width;
     var h = (height-gTopMargin) / numSurfaces;
     for (var i = 0; i < numSurfaces; i++) {
+      console.log(inst.color, gSurfaceColors[inst.color]);
       var surface = new ui.Surface(i, x, y, w, h, 
                                     gSurfaceColors[inst.color], inst.surfaces[i],
                                     surfaceControlCB );
