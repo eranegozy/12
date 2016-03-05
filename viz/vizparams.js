@@ -107,7 +107,7 @@ ConstParams = function() {
 }
 
 setConstParams = function() {
-  gNumStars = 360;
+  gNumStars = 400;
   gGlobalFade = 10; // how quickly things fade out
 
   gConstParams = [];

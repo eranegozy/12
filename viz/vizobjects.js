@@ -67,6 +67,21 @@ StarField.prototype.getNearest = function(cx, cy) {
 }
 
 
+StarField.prototype.getNearestButNot = function(cx, cy, notStar) {
+  var best_idx = 0;
+  var best_dist = 1000000;
+  for (var i = 0; i < this.stars.length; i++) {
+    var s = this.stars[i];
+    var d = dist(cx, cy, s.x, s.y);
+    if (d < best_dist && s != notStar) {
+      best_dist = d;
+      best_idx = i;
+    }
+  }
+  return this.stars[best_idx];
+}
+
+
 /////////////////////////////////////////////////////////
 // Flare
 
@@ -349,7 +364,7 @@ Const.prototype.update = function(dt) {
 addConstPath = function(star, segs, dx, dy, starfield, lines) {
   var pStar = star;
   for (var i = 0; i < segs; i++) {
-    var nStar = starfield.getNearest(pStar.x + dx, pStar.y + dy);
+    var nStar = starfield.getNearestButNot(pStar.x + dx, pStar.y + dy, pStar);
     lines.push([pStar, nStar]);
     pStar = nStar;
   }
@@ -364,7 +379,7 @@ addConstPolygon = function(star, sides, len, starfield, lines) {
   var sinTheta = sin(theta);
 
   for (var i = 0; i < sides-1; i++) {
-    var nStar = starfield.getNearest(pStar.x + dx, pStar.y + dy);
+    var nStar = starfield.getNearestButNot(pStar.x + dx, pStar.y + dy, pStar);
     lines.push([pStar, nStar]);
 
     pStar = nStar;
