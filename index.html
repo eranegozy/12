@@ -319,7 +319,6 @@
     var w = width;
     var h = (height-gTopMargin) / numSurfaces;
     for (var i = 0; i < numSurfaces; i++) {
-      console.log(inst.color, gSurfaceColors[inst.color]);
       var surface = new ui.Surface(i, x, y, w, h, 
                                     gSurfaceColors[inst.color], inst.surfaces[i],
                                     surfaceControlCB );
@@ -365,12 +364,16 @@
   }
 
   var gTopMargin;
+  var gSpeakerIcons;
+
 
   setup = function () {
     var display = checkOrientation();
     
     var cnv = createCanvas(display.width, display.height);
     cnv.parent('page4');
+
+    gSpeakerIcons = [loadImage('soft.png'), loadImage('loud.png')];
 
     // top margin area:
     gTopMargin = height * 0.10;

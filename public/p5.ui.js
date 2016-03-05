@@ -275,11 +275,19 @@ ui = (function() {
 
     // draw border
     rectMode(CENTER);
+    imageMode(CENTER);
+
     strokeWeight(3);
     stroke(0);
     // var bgclr = lerpColor(color(this.clr), color(255, 255, 255, 100), .66);
     // fill(bgclr);
-    noFill();
+    if (this.enabled) {
+      noFill();
+    } else
+    {
+      fill(200);
+    }
+
     rect(cx, cy, this.w, this.h);
 
     // draw labels:
@@ -323,7 +331,18 @@ ui = (function() {
 
       line(cx, bp, lp, bp2);
       line(cx, bp, rp, bp2);
+    }
 
+    // draw volume icons:
+    var sz = width/10;
+    image(gSpeakerIcons[0], lx + sz, cy, sz, sz);
+    image(gSpeakerIcons[1], rx - sz, cy, sz, sz);
+
+    if (!this.enabled) {
+      noStroke();
+      fill(200, 200);
+      rect(lx + sz, cy, sz, sz);
+      rect(rx - sz, cy, sz, sz);      
     }
 
     if (!this.enabled)
