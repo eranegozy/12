@@ -303,7 +303,6 @@ Const.prototype.update = function(dt) {
   var amt = constrain(this.time / p.appear_dur, 0, 1);
 
   noFill();
-  strokeWeight(p.weight);
 
   var noiseX = (10 +this.time) * 5;
 
@@ -318,9 +317,20 @@ Const.prototype.update = function(dt) {
 
     clr = lerpColor(p.color1, p.color2, noise(noiseX));
     noiseX += 0.1;
-    stroke(clr);
 
+    // do some fake anti-aliasing of the line
+    strokeWeight(p.weight + 2);
+    var r = red(clr);
+    var g = green(clr);
+    var b = blue(clr);
+
+    stroke(r,g,b,30);
     line(x1, y1, x2, y2);
+
+    strokeWeight(p.weight);
+    stroke(clr);
+    line(x1, y1, x2, y2);
+
   };
 
   if (random() < 0.05) {
