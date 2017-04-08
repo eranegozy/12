@@ -104,14 +104,6 @@ app.get('/viz', function(req, res) {
 });
 
 
-// this serves up a page of html for the conductor page.
-app.get('/m', function(req, res) {
-  console.log('requesting mobile');
-  res.sendFile(path.join(__dirname, 'mobile_index.html'));
-});
-
-
-
 var startup = function () 
 {
   console.log("Node.js version is:", process.version);
