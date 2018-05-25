@@ -111,6 +111,7 @@
   var gLastMillis = 0;
   var gNumSlots = 3;
   var gStarFields;
+  var gPaused = false;
 
   var starImg;
 /////////////////////////////////////////////////////////
@@ -140,6 +141,9 @@
     var now = millis(); 
     var dt =  (now - gLastMillis) / 1000.;
     gLastMillis = now;
+
+    if (gPaused)
+      return;
 
     background(30, gGlobalFade);
 
@@ -188,6 +192,10 @@
     var idx = ['A','S','D'].indexOf(key);
     if (idx != -1) {
       noteOn(idx, 10000.);
+    }
+
+    if (key == 'P') {
+      gPaused = !gPaused;
     }
 
     return false;
