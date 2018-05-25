@@ -52,7 +52,7 @@ class WaveDirSynth(object):
 
       self.buffers = []
       dirpath = os.path.join("data", dirname)
-      for f in os.listdir(dirpath):
+      for f in sorted(os.listdir(dirpath)):
          filepath = os.path.join(dirpath, f)
          if os.path.splitext(filepath)[1] == '.wav':
             b = WaveBuffer(filepath)
