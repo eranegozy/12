@@ -126,7 +126,7 @@ var onIntervalCB = function ()
 
 var saveData = function() {
   var data = [gPlayerCache, gCondData];
-  fs.writeFile('server_data.txt', JSON.stringify(data, null, 2));
+  fs.writeFile('server_data.txt', JSON.stringify(data, null, 2), function(err) { } );
 }
 
 var loadData = function() {
