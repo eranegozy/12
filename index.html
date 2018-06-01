@@ -393,10 +393,7 @@
 
     utl.print('touchStarted2 ' + mouseX + ' ' + mouseY);
 
-    if (utl.supportsTouch())
-      ui.down(mouseX, mouseY);
-    else
-      ui.down(mouseX, mouseY);
+    ui.down(mouseX, mouseY);
     return false;
   }
 
@@ -404,10 +401,7 @@
     if (!gP5Enabled)
       return true;
 
-    if (utl.supportsTouch())
-      ui.up(mouseX, mouseY);
-    else
-      ui.up(mouseX, mouseY);
+    ui.up(mouseX, mouseY);
     return false;
   }
 
