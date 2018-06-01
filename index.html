@@ -4,8 +4,7 @@
   <title>Mobile Instrument</title>
   <meta name="viewport" content="initial-scale=1.0,minimum-scale=1.0,maximum-scale=1.0,user-scalable=0">
   <meta name="apple-mobile-web-app-capable" content="yes">
-  <script type="text/javascript" src="p5.js">      </script>
-  <script type="text/javascript" src="p5.dom.js">  </script>
+  <script type="text/javascript" src="p5.min.js">      </script>
   <script type="text/javascript" src="eeutils.js"> </script>
   <script type="text/javascript" src="p5.ui.js">   </script>
   <script src="/socket.io/socket.io.js"></script>
@@ -388,14 +387,14 @@
   };
 
   touchStarted = function() {
-    utl.print('touchStarted1 ' + touchX + ' ' + touchY);
+    utl.print('touchStarted1 ' + mouseX + ' ' + mouseY);
     if (!gP5Enabled)
       return true;
 
-    utl.print('touchStarted2 ' + touchX + ' ' + touchY);
+    utl.print('touchStarted2 ' + mouseX + ' ' + mouseY);
 
     if (utl.supportsTouch())
-      ui.down(touchX, touchY);
+      ui.down(mouseX, mouseY);
     else
       ui.down(mouseX, mouseY);
     return false;
@@ -406,7 +405,7 @@
       return true;
 
     if (utl.supportsTouch())
-      ui.up(touchX, touchY);
+      ui.up(mouseX, mouseY);
     else
       ui.up(mouseX, mouseY);
     return false;
@@ -428,7 +427,7 @@
     
     // ui draw
     if (utl.supportsTouch())
-      ui.draw(touchX, touchY);
+      ui.draw(mouseX, mouseY);
     else
       ui.draw(mouseX, mouseY);
   }
