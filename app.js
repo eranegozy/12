@@ -145,7 +145,6 @@ var AutoPlayer = function(playerID) {
 AutoPlayer.prototype.poll = function() {
 
   if (this.counter == this.onCnt) {
-    console.log("on");
     sendToMax('/ctrl', [this.playerID, 0, 'play', randFloat(.6, .95), randFloat(.1, .9)]);
   }
 
@@ -160,7 +159,6 @@ AutoPlayer.prototype.poll = function() {
 }
 
 AutoPlayer.prototype.stop = function() {
-  console.log("off");
   sendToMax('/ctrl', [this.playerID, 0, 'stop', 0, 0]);
 }
 
