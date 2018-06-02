@@ -108,6 +108,7 @@ var startup = function ()
 {
   console.log("Node.js version is:", process.version);
   setInterval(onIntervalCB, 1000);
+  setInterval(autoPlayPoll, 100);
   loadData();
 }
 
@@ -123,6 +124,71 @@ var onIntervalCB = function ()
   }
 }
 
+function randFloat(min, max) {
+  return Math.random() * (max - min) + min;
+}
+
+function randInt(min, max) {
+  min = Math.ceil(min);
+  max = Math.floor(max);
+  return Math.floor(Math.random() * (max - min)) + min; //The maximum is exclusive and the minimum is inclusive
+}
+
+
+var AutoPlayer = function(playerID) {
+  this.playerID = playerID;
+  this.counter = 0;
+  this.onCnt = randInt(1, 15);
+  this.offCnt = this.onCnt + randInt(5, 15);
+}
+
+AutoPlayer.prototype.poll = function() {
+
+  if (this.counter == this.onCnt) {
+    console.log("on");
+    sendToMax('/ctrl', [this.playerID, 0, 'play', randFloat(.6, .95), randFloat(.1, .9)]);
+  }
+
+  if (this.counter == this.offCnt) {
+    this.stop();
+    this.counter = 0;
+    this.onCnt = randInt(1, 15);
+    this.offCnt = this.onCnt + randInt(10, 20);
+  }
+
+  this.counter += 1;
+}
+
+AutoPlayer.prototype.stop = function() {
+  console.log("off");
+  sendToMax('/ctrl', [this.playerID, 0, 'stop', 0, 0]);
+}
+
+
+var gAutoPlayers = null;
+
+var autoPlayPoll = function () {
+  if (!gCondData.autoPlay && gAutoPlayers != null) {
+    for (var i = 0; i < gAutoPlayers.length; i++) {
+      gAutoPlayers[i].stop();
+    }
+
+    gAutoPlayers = null;
+    console.log('AP stopping');
+  }
+
+  if (gCondData.autoPlay) {
+    if (gAutoPlayers == null) {
+      gAutoPlayers = [new AutoPlayer(0), new AutoPlayer(1), new AutoPlayer(2)];
+      console.log('AP starting');
+    }
+
+    // console.log('AP poll');
+    for (var i = 0; i < gAutoPlayers.length; i++) {
+      gAutoPlayers[i].poll();
+    }
+  }
+}
 
 var saveData = function() {
   var data = [gPlayerCache, gCondData];
@@ -214,6 +280,7 @@ var sendToMax = function(tag, msg) {
 var gCondData =
 {
   'sectionIdx': null,
+  'autoPlay': false
 }
 
 var gCondNS = io.of('/cond');

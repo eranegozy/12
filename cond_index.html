@@ -17,6 +17,7 @@
    </div>
 
    <p id="section"></p>
+   <p> <button onclick = toggleAutoPlay() >AutoPlay</button> : <span id="autoPlay"></span></p>
 
    <h2>Players</h2>
       <ul id="displayPlayers">
@@ -64,6 +65,11 @@
          updateCondDisplay();
       });
 
+      var toggleAutoPlay = function()
+      {
+         var value = ! gCondData.autoPlay;
+         gSocket.emit('set', ['autoPlay', value]);
+      }
 
       var updateSongDisplay = function() 
       {
@@ -118,6 +124,9 @@
       {
          var txt = gCondData.sectionIdx == null ? "None" : gSongData.sections[gCondData.sectionIdx].name;
          document.getElementById("section").innerHTML = "Current Section: " + txt;
+
+         var txt = gCondData.autoPlay ? "ON" : "OFF";
+         document.getElementById("autoPlay").innerHTML = txt;
       }
 
 
