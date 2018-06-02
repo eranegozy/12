@@ -31,7 +31,7 @@ class Messanger(threading.Thread):
          self.listen_port = 12345
 
          send_ip = remote_ip
-         send_port = 12321
+         send_port = 12346
 
       # 12-Server is running locally on this machine, using localhost
       else:
