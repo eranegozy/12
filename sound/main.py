@@ -227,6 +227,7 @@ gConfig = {
 }
 
 gEnableOSC = True
+gRemoteIP = None
 
 class MainWidget(BaseWidget) :
    def __init__(self):
@@ -235,7 +236,7 @@ class MainWidget(BaseWidget) :
       self.messanger = None
       callback = None
       if gEnableOSC:
-         self.messanger = Messanger(self.on_message)
+         self.messanger = Messanger(self.on_message, remote_ip = gRemoteIP)
          callback = self.messanger.send
 
       self.sound = Sound(gConfig, callback)
@@ -397,5 +398,10 @@ if 1 < len(sys.argv):
    if sys.argv[1] == 'test':
       global gEnableOSC
       gEnableOSC = False
+
+   # hack to detect if this is an IP address
+   if sys.argv[1].count('.') >= 2:
+      global gRemoteIP
+      gRemoteIP = sys.argv[1]
 
 run(MainWidget)
