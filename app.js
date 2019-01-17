@@ -10,7 +10,7 @@ var path = require('path');
 var osc = require('node-osc');
 var fs = require('fs');
 
-var gHttpListenPort = 3000;
+var gHttpListenPort = 80;
 var gOscListenPort = 12346;
 
 var gOscSender = null;
