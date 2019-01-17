@@ -10,9 +10,11 @@ var path = require('path');
 var osc = require('node-osc');
 var fs = require('fs');
 
-var gMaxSender;
+var gHttpListenPort = 3000;
 var gOscListenPort = 12346;
-var gOscServer;
+
+var gOscSender = null;
+var gOscListener = null;
 
 var gPlayers = [];
 var gPlayerCache = {};
@@ -117,10 +119,10 @@ var onIntervalCB = function ()
 {
   saveData();
   // console.log("onIntervalCB");
-  if (gMaxSender)
+  if (gOscSender)
   {
     // send hearbeat to max so we know connection is alive.
-    gMaxSender.send('/heart')
+    gOscSender.send('/heart')
   }
 }
 
@@ -207,17 +209,17 @@ var loadData = function() {
   }
 }
 // what port to listen on for this http server:
-var server = http.listen(3000, function() {
+var server = http.listen(gHttpListenPort, function() {
   var host = server.address().address;
   var port = server.address().port;
   console.log('Http: listening at', host, port);
 
   // listen to OSC messages (which come from Max/Msp)
-  gOscServer = new osc.Server(gOscListenPort, '0.0.0.0');
+  gOscListener = new osc.Server(gOscListenPort, '0.0.0.0');
   console.log('OSC: listening at', gOscListenPort);
 
   // receive messages from max, tagged as /max
-  gOscServer.on('message', function(msg, rinfo) {
+  gOscListener.on('message', function(msg, rinfo) {
     // console.log('osc:', msg, rinfo);
     if (msg[0] == '/max')
       onMaxMsg(msg);
@@ -234,19 +236,19 @@ var onMaxMsg = function(msg)
   if (msg[1] == 'hello') {
     var ip = msg[2]
     var port = msg[3]
-    console.log("creating gMaxSender to", ip, port);
-    if (gMaxSender)
-      gMaxSender.kill();
-    gMaxSender = new osc.Client(ip, port);
+    console.log("creating gOscSender to", ip, port);
+    if (gOscSender)
+      gOscSender.kill();
+    gOscSender = new osc.Client(ip, port);
     sendMaxCondData();
   }
 
   else if (msg[1] == 'bye') {
-    if (gMaxSender)
+    if (gOscSender)
     {
-      console.log("removing gMaxSender");
-      gMaxSender.kill();
-      gMaxSender = null;
+      console.log("removing gOscSender");
+      gOscSender.kill();
+      gOscSender = null;
     }
   }
 
@@ -258,17 +260,17 @@ var onMaxMsg = function(msg)
 
 
 var sendMaxCondData = function() {
-  if (gMaxSender) 
+  if (gOscSender) 
   {
     idx = gCondData.sectionIdx == null ? 'null' : gCondData.sectionIdx;
-    gMaxSender.send('/sectionIdx', [idx]);
+    gOscSender.send('/sectionIdx', [idx]);
   }
 }
 
 var sendToMax = function(tag, msg) {
   // console.log('toMax', tag, msg);
-  if (gMaxSender)
-    gMaxSender.send(tag, msg)
+  if (gOscSender)
+    gOscSender.send(tag, msg)
 }
 
 
