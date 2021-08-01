@@ -16,13 +16,13 @@ PC1 will produce the sound for the show and should be connected to stage speaker
 ## Requirements
 
 - [node](https://nodejs.org/en/)
-- python 2.7. I recommend installing from [miniconda](https://conda.io/miniconda.html) since it will create an isolated environment. Make sure the correct version is in your PATH after installation
+- python 3. I recommend installing from [miniconda](https://conda.io/miniconda.html) since it will create an isolated environment. Make sure the correct version is in your PATH after installation.
 
 ## Setup
 
 For python:
-- `python --version`. Make sure this prints `Python 2.7.x`. You probably want the latest (2.7.15 as of this writing)
-- `pip install -r requirements.txt`
+- `python --version`. Make sure this prints `Python 3.x.x`.
+- `pip install -r requirements.txt`, or use `conda install` to install numpy, kivy, pyaudio.
 
 For node:
 - `npm --version`. Probably good to have version >= `6.x.x`
