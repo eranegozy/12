@@ -68,7 +68,7 @@ class WaveGenerator(object):
          source_num_channels = 1
 
       # check for end-of-buffer condition:
-      actual_num_frames = len(output) / source_num_channels
+      actual_num_frames = len(output) // source_num_channels
       continue_flag = actual_num_frames == num_frames
 
       # advance current-frame

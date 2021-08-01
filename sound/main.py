@@ -254,9 +254,10 @@ class MainWidget(BaseWidget) :
 
       self.volumes = [[0, 0, 0],  [0, 0, 0], [0, 0, 0], [0, 0, 0], ]
       try:
-         self.volumes = pickle.load(open('volumes.pickle'))
-         print 'found volumes\n', self.volumes
-      except Exception, e:
+         with open('volumes.pickle', 'rb') as f:
+            self.volumes = pickle.load(f)
+         print('found volumes\n', self.volumes)
+      except Exception as e:
          pass
 
       with self.canvas:
@@ -298,7 +299,7 @@ class MainWidget(BaseWidget) :
 
 
    def _set_section(self, sec_idx):
-      print self.volumes
+      print(self.volumes)
 
       if not isinstance(sec_idx, int):
          sec_idx = None
@@ -346,7 +347,9 @@ class MainWidget(BaseWidget) :
       self._setup_inst()
 
    def on_close(self):
-      pickle.dump(self.volumes, open('volumes.pickle', 'w'))
+      print('writing', self.volumes)
+      with open('volumes.pickle', 'wb') as f:
+         pickle.dump(self.volumes, f)
 
    def _spos_to_xy(self, spos):
       y = spos[1] * self.num_regions - self.cur_region
@@ -387,21 +390,21 @@ class MainWidget(BaseWidget) :
    def on_message(self, msg, args) :
       try:
          if msg == '/sectionIdx':
-            self._set_section(args[0])
+            self._set_section(args)
+
          elif msg == '/ctrl':
             self.sound.on_control(args)
-      except Exception, e:
+
+      except Exception as e:
          traceback.print_exc()
 
 
 if 1 < len(sys.argv):
    if sys.argv[1] == 'test':
-      global gEnableOSC
       gEnableOSC = False
 
    # hack to detect if this is an IP address
    if sys.argv[1].count('.') >= 2:
-      global gRemoteIP
       gRemoteIP = sys.argv[1]
 
 run(MainWidget)

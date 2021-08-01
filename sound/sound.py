@@ -15,7 +15,7 @@ from writer import *
 
 
 def getParam(params, key, default):
-   if not params.has_key(key):
+   if key not in params:
       return default
    return params[key]
 
@@ -97,7 +97,7 @@ class TempoController(object):
       super(TempoController, self).__init__()
 
       # if params is just a fixed tempo, set it now and we're done
-      if isinstance(params, (int, float, long)):
+      if isinstance(params, (int, float)):
          self.sched = None
          now_time = sched.get_time()
          sched.tempo_map.set_tempo(params, now_time)
@@ -431,7 +431,7 @@ class Sound(object):
       self.sched2.remove_all()
 
    def set_section(self, idx) :
-      print 'setSection:', idx
+      print('setSection:', idx)
       self._clear_instruments()
 
       if isinstance(idx, int):

@@ -12,7 +12,7 @@ import pyaudio
 import numpy as np
 import core
 import time
-from ConfigParser import ConfigParser
+from configparser import ConfigParser
 
 kSampleRate = 44100
 
@@ -82,8 +82,8 @@ class Audio(object):
             data_str = self.stream.read(num_frames)
             data_np = np.fromstring(data_str, dtype=np.float32)
             self.input_func(data_np, self.num_channels)
-         except IOError, e:
-            print e
+         except IOError as e:
+            print(e)
 
       dt = time.time() - t_start
       a = 0.9
@@ -104,14 +104,14 @@ class Audio(object):
          config = ConfigParser()
          config.read(('../common/config.cfg', 'config.cfg'))
          out_dev = config.getint('audio', 'outputdevice')
-         print 'using config file output device:', out_dev
+         print('using config file output device:', out_dev)
          in_dev = config.getint('audio', 'inputdevice')
-         print 'using config file input device:', in_dev
+         print('using config file input device:', in_dev)
          buf_size = config.getint('audio', 'buffersize')
-         print 'using config file buffer size:', buf_size
+         print('using config file buffer size:', buf_size)
          sample_rate = config.getint('audio', 'samplerate')
-         print 'using config file buffer size:', sample_rate
-      except Exception, e:
+         print('using config file buffer size:', sample_rate)
+      except Exception as e:
          pass
 
       # for Windows, we want to find the ASIO host API and associated devices
@@ -123,24 +123,24 @@ class Audio(object):
                host_api_idx = i
                out_dev = api['defaultOutputDevice']
                in_dev = api['defaultInputDevice']
-               print 'Found ASIO host', host_api_idx
-               print '  using output device', out_dev
-               print '  using input device', in_dev
+               print('Found ASIO host', host_api_idx)
+               print('  using output device', out_dev)
+               print('  using input device', in_dev)
 
       return out_dev, in_dev, buf_size, sample_rate
 
 def print_audio_devices():
    audio = pyaudio.PyAudio()
    cnt = audio.get_host_api_count()
-   print 'Audio APIs available.'
-   print 'idx outDev inDev name'
+   print('Audio APIs available.')
+   print('idx outDev inDev name')
    for i in range(cnt):
       api = audio.get_host_api_info_by_index(i)
       params = (i, api['defaultOutputDevice'], api['defaultInputDevice'], api['name'])
-      print "%2d: %2d      %2d   %s" % params
+      print("%2d: %2d      %2d   %s" % params)
 
-   print '\nAudio Devices available.'
-   print 'idx SRate outCh outLat inCh inLat name'
+   print('\nAudio Devices available.')
+   print('idx SRate outCh outLat inCh inLat name')
    cnt = audio.get_device_count()
    for i in range(cnt):
       dev = audio.get_device_info_by_index(i)
@@ -148,7 +148,7 @@ def print_audio_devices():
                    dev['maxOutputChannels'], dev['defaultHighOutputLatency'], 
                    dev['maxInputChannels'], dev['defaultHighInputLatency'],
                    dev['name'])
-      print "%2d: %d %d     %.3f  %d    %.3f %s" % params
+      print("%2d: %d %d     %.3f  %d    %.3f %s" % params)
    audio.terminate()
 
 if __name__ == "__main__":

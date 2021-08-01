@@ -9,12 +9,14 @@
 #####################################################################
 
 
-from OSC import OSCServer, ThreadingOSCServer, OSCClient, OSCMessage
+# from OSC import OSCServer, ThreadingOSCServer, OSCClient, OSCMessage
+from pythonosc import osc_server, dispatcher, udp_client
+
 import time
 import threading
 import core
 import socket
-import Queue
+import queue
 
 
 # This class assumes that Synapse is running.
@@ -35,29 +37,28 @@ class Messanger(threading.Thread):
 
       # 12-Server is running locally on this machine, using localhost
       else:
-         self.listen_ip = 'localhost'
+         self.listen_ip = '0.0.0.0'
          self.listen_port = 12345
 
-         send_ip = 'localhost'
+         send_ip = '0.0.0.0'
          send_port = 12346
 
-      self.server = OSCServer( (self.listen_ip, self.listen_port) )
-
-      self.server.addMsgHandler( '/heart', self.cb_heartbeat )
-      self.server.addMsgHandler( '/sectionIdx', self.cb_section_idx )
-      self.server.addMsgHandler( '/ctrl', self.cb_ctrl )
-      self.server.addMsgHandler( 'default', self.cb_ignore )
+      # create a dispatcher and server, which handles incoming messages from Synapse
+      self.dispatcher = dispatcher.Dispatcher()
+      self.dispatcher.map( '/heart', self.cb_heartbeat )
+      self.dispatcher.map( '/sectionIdx', self.cb_section_idx )
+      self.dispatcher.map( '/ctrl', self.cb_ctrl )
+      self.server = osc_server.ThreadingOSCUDPServer( (self.listen_ip, self.listen_port), self.dispatcher)
 
       # create the client, which sends control messages to 12-Server
-      self.client = OSCClient()
-      self.client.connect( (send_ip, send_port) )
+      print('creating client with', send_ip, send_port)
+      self.client = udp_client.SimpleUDPClient(send_ip, send_port)
 
       # member vars
       self.heartbeat_time = 0
       self.server_retry = 0
-      self.done_running = False
 
-      self.queue = Queue.Queue()
+      self.queue = queue.Queue()
 
       # start the server listening for messages
       self.start()
@@ -66,57 +67,51 @@ class Messanger(threading.Thread):
 
    # close must be called before app termination or the app might hang
    def close(self):
-      msg = OSCMessage('/max', ('bye'))
-      print 'sending', msg
-      self.client.send(msg)
+      msg = ('/max', ('bye'))
+      print('sending', msg)
+      self.client.send_message(*msg)
 
-      # this is a workaround of a bug in the OSC server
-      # we have to stop the thread first, make sure it is done,
-      # and only then class server.close()
-      self.server.running = False
-      while not self.done_running:
-         time.sleep(.01)
-      self.server.close()
+      self.server.shutdown()
+      self.server.server_close()
 
    def run(self):
-      print "Worker thread entry point"
+      print("Worker thread entry point")
       self.server.serve_forever()
-      self.done_running = True
 
    def on_update(self):
       now = time.time()
       if not self.is_connected() and self.server_retry < now:
          # try to connect to condcutor
          try:
-            msg = OSCMessage('/max', ('hello', self.listen_ip, self.listen_port))
-            print 'sending', msg
-            self.client.send(msg)
+            msg = ('/max', ('hello', self.listen_ip, self.listen_port))
+            print('sending', msg)
+            self.client.send_message(*msg)
          except Exception:
             pass
          self.server_retry = now + 1.0
 
       while not self.queue.empty():
-         path, args = self.queue.get()
-         self.cb_func(path, args)
+         addr, args = self.queue.get()
+         self.cb_func(addr, args)
 
    def send(self, args):
-      osc_msg = OSCMessage('/max', ('note',) + args)
-      self.client.send(osc_msg)
+      msg = ('/max', ('note',) + args)
+      # print('sending', msg);
+      self.client.send_message(*msg)
 
    def is_connected(self):
       now = time.time()      
       return self.heartbeat_time + 2.0 > now
 
-   def cb_heartbeat(self, path, tags, args, source):
-      # print 'got ', path, tags, args
+   def cb_heartbeat(self, addr):
+      # print('cb_heartbeat', addr)
       self.heartbeat_time = time.time()
 
-   def cb_section_idx(self, path, tags, args, source):
-      self.queue.put((path, args))
+   def cb_section_idx(self, addr, args):
+      # print('cb_section_idx', addr, args)
+      self.queue.put((addr, args))
 
-   def cb_ctrl(self, path, tags, args, source):
-      self.queue.put((path, args))
-
-   def cb_ignore(self, path, tags, args, source):
-      print 'ignoring ', path, tags, args 
+   def cb_ctrl(self, addr, *args):
+      # print('cb_ctrl', addr, args)
+      self.queue.put((addr, args))
 

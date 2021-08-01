@@ -98,7 +98,7 @@ class TempoMap(object):
 
       #self.times = np.array([x[0] for x in data])
       #self.ticks = np.array([x[1] for x in data])
-      self.times, self.ticks = zip(*data)
+      self.times, self.ticks = list(zip(*data))
       
    def time_to_tick(self, time) :
       tick = np.interp(time, self.times, self.ticks)

@@ -10,8 +10,10 @@ var path = require('path');
 var osc = require('node-osc');
 var fs = require('fs');
 
+
 var gHttpListenPort = 80;
 var gOscListenPort = 12346;
+var gOscListenHost = '0.0.0.0';
 
 var gOscSender = null;
 var gOscListener = null;
@@ -214,13 +216,14 @@ var server = http.listen(gHttpListenPort, function() {
   var port = server.address().port;
   console.log('Http: listening at', host, port);
 
+
   // listen to OSC messages (which come from Max/Msp)
-  gOscListener = new osc.Server(gOscListenPort, '0.0.0.0');
-  console.log('OSC: listening at', gOscListenPort);
+  gOscListener = new osc.Server(gOscListenPort, gOscListenHost);
+  console.log('OSC: listening at', gOscListenHost, gOscListenPort);
 
   // receive messages from max, tagged as /max
   gOscListener.on('message', function(msg, rinfo) {
-    // console.log('osc:', msg, rinfo);
+    // console.log('osc received:', msg, rinfo);
     if (msg[0] == '/max')
       onMaxMsg(msg);
   });
@@ -237,8 +240,9 @@ var onMaxMsg = function(msg)
     var ip = msg[2]
     var port = msg[3]
     console.log("creating gOscSender to", ip, port);
-    if (gOscSender)
+    if (gOscSender) {
       gOscSender.kill();
+    }
     gOscSender = new osc.Client(ip, port);
     sendMaxCondData();
   }
@@ -269,8 +273,9 @@ var sendMaxCondData = function() {
 
 var sendToMax = function(tag, msg) {
   // console.log('toMax', tag, msg);
-  if (gOscSender)
-    gOscSender.send(tag, msg)
+  if (gOscSender) {
+    gOscSender.send(tag, msg);
+  }
 }
 
 
